@@ -1,0 +1,58 @@
+# cuixingxing 定义的.gitgnore文件,参考：在.gitignore中如何写可以忽略掉无扩展名的Unix可执行文件？ https://www.zhihu.com/question/26247816/answer/71915337 ，以后项目依据此文件适当修改，2021.9.26
+# 文件夹前面必须要用"/"才奏效，2022.3.8 
+# 2022.10.14 根据最新参考修改模板
+
+#忽略所有文件和目录(当前目录不能忽略)
+* 
+
+# 根据自己项目工程修改,增加指定目录和下面所有目录
+!/src/
+!/src/**/
+
+!/c_cpp_utils/
+!/c_cpp_utils/**
+
+
+# 增加指定扩展名文件#忽略特殊文件，一般是当前目录下的文件(当前目录不能忽略)
+!.gitignore
+!.gitattributes
+!*.json
+!*.md
+
+# license
+!LICENSE
+
+# python
+!*.py
+!*.ipynb
+
+# matlab
+!*.m
+!*.mlx
+!*.slx
+!*.p
+
+# c/c++
+!*.cpp
+!*.hpp
+!*.h
+!*.c
+
+# cmake
+!CMakeLists.txt
+!Makefile
+
+# 根据自己项目工程修改
+!*.prj
+!*.txt
+!*.cgt
+
+#忽略特殊文件，一般是当前目录下的文件(当前目录不能忽略)
+/codegen_custom_cpp/codegen/
+/yourSpecify.cpp
+/yourSpecify.h
+
+
+
+
+
