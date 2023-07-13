@@ -8,7 +8,7 @@
 
 // #include "spdlog/spdlog.h"
 
-#define DEBUG_SHOW_IMAGE 0
+#define DEBUG_SHOW_IMAGE 1
 namespace buildMapping {
 class HDMapping {
    public:

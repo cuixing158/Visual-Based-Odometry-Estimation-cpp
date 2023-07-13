@@ -4,6 +4,99 @@ namespace buildMapping {
 class HDMapping;
 }
 
+void ssc(std::vector<cv::KeyPoint> keyPoints, int numRetPoints,
+         float tolerance, int cols, int rows, std::vector<cv::KeyPoint>& outputPts, std::vector<int>& indexs) {
+    // several temp expression variables to simplify solution equation
+    int exp1 = rows + cols + 2 * numRetPoints;
+    long long exp2 =
+        ((long long)4 * cols + (long long)4 * numRetPoints +
+         (long long)4 * rows * numRetPoints + (long long)rows * rows +
+         (long long)cols * cols - (long long)2 * rows * cols +
+         (long long)4 * rows * cols * numRetPoints);
+    double exp3 = sqrt(exp2);
+    double exp4 = numRetPoints - 1;
+
+    double sol1 = -round((exp1 + exp3) / exp4);  // first solution
+    double sol2 = -round((exp1 - exp3) / exp4);  // second solution
+
+    // binary search range initialization with positive solution
+    int high = (sol1 > sol2) ? sol1 : sol2;
+    int low = floor(sqrt((double)keyPoints.size() / numRetPoints));
+    low = std::max(1, low);
+
+    int width;
+    int prevWidth = -1;
+
+    std::vector<int> ResultVec;
+    bool complete = false;
+    unsigned int K = numRetPoints;
+    unsigned int Kmin = round(K - (K * tolerance));
+    unsigned int Kmax = round(K + (K * tolerance));
+
+    std::vector<int> result;
+    result.reserve(keyPoints.size());
+    while (!complete) {
+        width = low + (high - low) / 2;
+        if (width == prevWidth ||
+            low >
+                high) {          // needed to reassure the same radius is not repeated again
+            ResultVec = result;  // return the keypoints from the previous iteration
+            break;
+        }
+        result.clear();
+        double c = (double)width / 2.0;  // initializing Grid
+        int numCellCols = floor(cols / c);
+        int numCellRows = floor(rows / c);
+        std::vector<std::vector<bool>> coveredVec(numCellRows + 1,
+                                                  std::vector<bool>(numCellCols + 1, false));
+
+        for (unsigned int i = 0; i < keyPoints.size(); ++i) {
+            int row =
+                floor(keyPoints[i].pt.y /
+                      c);  // get position of the cell current point is located at
+            int col = floor(keyPoints[i].pt.x / c);
+            if (coveredVec[row][col] == false) {  // if the cell is not covered
+                result.push_back(i);
+                int rowMin = ((row - floor(width / c)) >= 0)
+                                 ? (row - floor(width / c))
+                                 : 0;  // get range which current radius is covering
+                int rowMax = ((row + floor(width / c)) <= numCellRows)
+                                 ? (row + floor(width / c))
+                                 : numCellRows;
+                int colMin =
+                    ((col - floor(width / c)) >= 0) ? (col - floor(width / c)) : 0;
+                int colMax = ((col + floor(width / c)) <= numCellCols)
+                                 ? (col + floor(width / c))
+                                 : numCellCols;
+                for (int rowToCov = rowMin; rowToCov <= rowMax; ++rowToCov) {
+                    for (int colToCov = colMin; colToCov <= colMax; ++colToCov) {
+                        if (!coveredVec[rowToCov][colToCov])
+                            coveredVec[rowToCov][colToCov] =
+                                true;  // cover cells within the square bounding box with width
+                                       // w
+                    }
+                }
+            }
+        }
+
+        if (result.size() >= Kmin && result.size() <= Kmax) {  // solution found
+            ResultVec = result;
+            complete = true;
+        } else if (result.size() < Kmin)
+            high = width - 1;  // update binary search range
+        else
+            low = width + 1;
+        prevWidth = width;
+    }
+    // retrieve final keypoints
+    outputPts.clear();
+    indexs.clear();
+    for (unsigned int i = 0; i < ResultVec.size(); i++)
+        outputPts.push_back(keyPoints[ResultVec[i]]);
+
+    indexs = ResultVec;
+}
+
 buildMapping::HDMapping::HDMapping() {
     double cumDist = 0.0;
     double pixelExtentInWorldXY = 0.0;
@@ -18,11 +111,6 @@ buildMapping::HDMapping::HDMapping() {
     BW = 255 * cv::Mat::ones(480, 640, CV_8UC1);
     BW.rowRange(480 / 2, 480) = 0;
     BW = BW &= orbDetectMask;
-
-    HDmapOutput.ref.XWorldLimits[0] = 0;
-    HDmapOutput.ref.XWorldLimits[1] = 0.5;
-    HDmapOutput.ref.YWorldLimits[0] = 0;
-    HDmapOutput.ref.YWorldLimits[1] = 0.5;
 
     //第一副图像的像素坐标系为世界坐标系
     preRelTform = (cv::Mat_<double>(2, 3) << 1, 0, 0,
@@ -48,15 +136,29 @@ void buildMapping::HDMapping::constructWorldMap(const cv::Mat& srcImage) {
     std::vector<cv::KeyPoint> keyPts;
     cv::Mat Descriptions;
     orbDetector->detectAndCompute(currImg, orbDetectMask, keyPts, Descriptions);
-    selectUniform(keyPts, Descriptions, 2000, currKeypts, currDescriptors);
+    // selectUniform(keyPts, Descriptions, 2000, currKeypts, currDescriptors);
+    std::vector<int> indexs;
+    currKeypts.clear();
+    currDescriptors = cv::Mat();
+    ssc(keyPts, 2000, 0.1, currImg.cols, currImg.rows, currKeypts, indexs);
+    for (size_t i = 0; i < indexs.size(); i++) {
+        currDescriptors.push_back(Descriptions.row(indexs[i]));
+    }
+
     if (preKeypts.empty()) {
         prevImg = currImg;
         preKeypts = currKeypts;
         preDescriptors = currDescriptors;
+
+        HDmapOutput.bigImg = currImg;
+        HDmapOutput.ref.XWorldLimits[0] = 0;
+        HDmapOutput.ref.XWorldLimits[1] = currImg.cols - 1;
+        HDmapOutput.ref.YWorldLimits[0] = 0;
+        HDmapOutput.ref.YWorldLimits[1] = currImg.rows - 1;
     }
     //match features
     std::vector<cv::DMatch> matches, good_matches;
-    cv::Ptr<cv::DescriptorMatcher> matcher = cv::DescriptorMatcher::create("FlannBased");
+    cv::Ptr<cv::DescriptorMatcher> matcher = cv::DescriptorMatcher::create("BruteForce-Hamming");
     matcher->match(preDescriptors, currDescriptors, matches);
     std::vector<cv::Point2f> points1, points2;
     for (size_t i = 0; i < matches.size(); i++) {
@@ -121,16 +223,11 @@ void buildMapping::HDMapping::constructWorldMap(const cv::Mat& srcImage) {
     cv::warpAffine(currImg, topImg, tform, cv::Size(HDmapOutput.ref.ImageSize[1], HDmapOutput.ref.ImageSize[0]));
     cv::warpAffine(BW, bwMask, tform, cv::Size(HDmapOutput.ref.ImageSize[1], HDmapOutput.ref.ImageSize[0]));
 
+    cv::imwrite("bigImgCopy1.jpg", HDmapOutput.bigImg);
     cv::copyMakeBorder(HDmapOutput.bigImg, HDmapOutput.bigImg, std::round(pad_top), std::round(pad_down), std::round(pad_left), std::round(pad_right), cv::BORDER_CONSTANT, cv::Scalar::all(0));
-    cv::resize(HDmapOutput.bigImg, HDmapOutput.bigImg, cv::Size(topImg.cols, topImg.rows));
-    // if (num > 52) {
-    //     std::cout << std::round(pad_top) << "," << std::round(pad_down) << "," << std::round(pad_left) << "," << std::round(pad_right) << std::endl;
-    //     std::cout << "HDmapOutput.bigImg.size:" << HDmapOutput.bigImg.size << ",topImg.size:" << topImg.size << ",BW.size:" << BW.size << std::endl;
-    //     cv::imwrite("bigImg" + std::to_string(num) + ".jpg", HDmapOutput.bigImg);
-    //     cv::imwrite("BW" + std::to_string(num) + ".jpg", BW);
-    //     cv::imwrite("topImg" + std::to_string(num) + ".jpg", topImg);
-    // }
+    cv::imwrite("bigImgCopy2.jpg", HDmapOutput.bigImg);
 
+    cv::resize(HDmapOutput.bigImg, HDmapOutput.bigImg, cv::Size(topImg.cols, topImg.rows));
     topImg.copyTo(HDmapOutput.bigImg, bwMask);
     for (size_t i = 0; i < matches.size(); i++) {
         if (inliers.at<uchar>(i, 0)) {
@@ -145,7 +242,7 @@ void buildMapping::HDMapping::constructWorldMap(const cv::Mat& srcImage) {
     cv::imwrite("matches.jpg", imMatches);
     // cv::Mat dstMat;
     // srcImage.copyTo(dstMat, orbDetectMask);
-    cv::imwrite("bigImgCopy" + std::to_string(num) + ".jpg", HDmapOutput.bigImg);
+    cv::imwrite("bigImgCopy.jpg", HDmapOutput.bigImg);
     //
 #endif
 
