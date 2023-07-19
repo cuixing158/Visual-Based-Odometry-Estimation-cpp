@@ -101,8 +101,17 @@ void ssc(std::vector<cv::KeyPoint> keyPoints, int numRetPoints,
     indexs = ResultVec;
 }
 
-void selectUniformPoints(std::vector<cv::KeyPoint> keyPoints, int numRetPoints,
+void selectUniformPoints(std::vector<cv::KeyPoint>& keyPoints, int numRetPoints,
                          cv::Size size, std::vector<cv::KeyPoint>& outputPts, std::vector<int>& indexs) {
+    outputPts.clear();
+    indexs.clear();
+    if (numRetPoints >= keyPoints.size()) {
+        outputPts = keyPoints;
+        indexs.reserve(keyPoints.size());
+        std::iota(indexs.begin(), indexs.end(), 0);
+        return;
+    }
+
     coder::array<double, 2U> points;
     coder::array<double, 2U> pointsOut;
     coder::array<double, 1U> b_index;
@@ -121,8 +130,7 @@ void selectUniformPoints(std::vector<cv::KeyPoint> keyPoints, int numRetPoints,
     dv[0] = size.height;
     dv[1] = size.width;
     selectUniform2::selectUniform2(points, responses, (double)numRetPoints, dv, pointsOut, b_index);
-    outputPts.clear();
-    indexs.clear();
+
     for (size_t i = 0; i < pointsOut.size(0); i++) {
         indexs.push_back(b_index[i] - 1);
         outputPts.push_back(keyPoints[(int)(b_index[i]) - 1]);
