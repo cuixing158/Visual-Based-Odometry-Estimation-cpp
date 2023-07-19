@@ -2,7 +2,8 @@
 
 #include "selectUniform2.h"
 #include "coder_array.h"
-
+#include "estimateAffineRigid2D.h"
+#include "rt_nonfinite.h"
 namespace buildMapping {
 class HDMapping;
 }
@@ -108,7 +109,6 @@ void selectUniformPoints(std::vector<cv::KeyPoint> keyPoints, int numRetPoints,
     coder::array<double, 1U> responses;
     double dv[2];
 
-    // points = argInit_Unboundedx2_real_T();
     points.set_size(keyPoints.size(), 2);
     responses.set_size(keyPoints.size());
     for (size_t i = 0; i < points.size(0); i++) {
@@ -118,9 +118,6 @@ void selectUniformPoints(std::vector<cv::KeyPoint> keyPoints, int numRetPoints,
         responses[i] = keyPoints[i].response;
     }
 
-    // std::cout << __LINE__ << "points->size:" << points->size[0U] << "," << points->size[1U] << std::endl;
-    // std::cout << __LINE__ << "responses->size:" << responses->size[0U] << std::endl;
-
     dv[0] = size.height;
     dv[1] = size.width;
     selectUniform2::selectUniform2(points, responses, (double)numRetPoints, dv, pointsOut, b_index);
@@ -129,14 +126,7 @@ void selectUniformPoints(std::vector<cv::KeyPoint> keyPoints, int numRetPoints,
     for (size_t i = 0; i < pointsOut.size(0); i++) {
         indexs.push_back(b_index[i] - 1);
         outputPts.push_back(keyPoints[(int)(b_index[i]) - 1]);
-        // if (i == 1904) {
-        //     std::cout << "outputPts :" << i << "," << outputPts[i].octave << "," << outputPts[i].pt << std::endl;
-
-        //     cv::KeyPoint oriPt = keyPoints[(int)(b_index->data[i])];
-        //     std::cout << "origin  keyPoints octave :" << oriPt.octave << ",pt:" << oriPt.pt << ",keyPoints.size:" << keyPoints.size() << std::endl;
-        // }
     }
-    // std::cout << "pointsOut->size:" << pointsOut->size[0U] << ",outputPts->size:" << outputPts.size() << std::endl;
 }
 
 buildMapping::HDMapping::HDMapping() {
@@ -176,21 +166,17 @@ void buildMapping::HDMapping::constructWorldMap(const cv::Mat& srcImage) {
     if (currImg.empty()) throw std::runtime_error("currImg is empty!");
 
     std::vector<cv::KeyPoint> keyPts;
-    // cv::Mat Descriptions;
     orbDetector->detect(currImg, keyPts, orbDetectMask);
-    // selectUniform(keyPts, Descriptions, 2000, currKeypts, currDescriptors);
     std::vector<int> indexs;
-    // currKeypts.clear();
-    // currDescriptors = cv::Mat();
-    // ssc(keyPts, 2000, 0.1, currImg.cols, currImg.rows, currKeypts, indexs);
-    // for (size_t i = 0; i < indexs.size(); i++) {
-    //     currDescriptors.push_back(Descriptions.row(indexs[i]));
-    // }
+#ifdef USE_SSC_UNIFORM
+    // selectUniform(keyPts, Descriptions, 2000, currKeypts, currDescriptors);
+    currKeypts.clear();
+    ssc(keyPts, 2000, 0.1, currImg.cols, currImg.rows, currKeypts, indexs);
 
+#else
     selectUniformPoints(keyPts, 2000, cv::Size(currImg.cols, currImg.rows), currKeypts, indexs);
+#endif
     orbDetector->compute(currImg, currKeypts, currDescriptors);
-
-    // std::cout << currKeypts.size() << "," << currDescriptors.rows << std::endl;
     if (preKeypts.empty()) {
         prevImg = currImg;
         preKeypts = currKeypts;
@@ -219,23 +205,43 @@ void buildMapping::HDMapping::constructWorldMap(const cv::Mat& srcImage) {
         points1.push_back(preKeypts[matches[i].queryIdx].pt);
         points2.push_back(currKeypts[matches[i].trainIdx].pt);
     }
+// cv::Mat tempShowImg;
+// // cv::drawKeypoints(currImg, currKeypts, tempShowImg);
+// tempShowImg = currImg;
+// cv::RNG rng(time(0));
+// for (size_t i = 0; i < points2.size(); i++) {
+//     cv::circle(tempShowImg, points2[i], 2, cv::Scalar::all(255));
+// }
+// cv::imwrite("tempShow.jpg", tempShowImg);
 
-    // cv::Mat tempShowImg;
-    // // cv::drawKeypoints(currImg, currKeypts, tempShowImg);
-    // tempShowImg = currImg;
-    // cv::RNG rng(time(0));
-    // for (size_t i = 0; i < points2.size(); i++) {
-    //     cv::circle(tempShowImg, points2[i], 2, cv::Scalar::all(255));
-    // }
-    // cv::imwrite("tempShow.jpg", tempShowImg);
-
-    // estimate geometry rigid 2D transformation matrix
+// estimate geometry rigid 2D transformation matrix
+#ifdef USE_OPENCV_FUNCTION
     cv::Mat inliers = cv::Mat::zeros(matches.size(), 1, CV_8U);
     cv::Mat optimalAffineMat = estimateAffinePartial2D(points1, points2, inliers, cv::RANSAC);
     cv::Mat R = optimalAffineMat.rowRange(0, 2).colRange(0, 2);
     double s = std::sqrt(cv::determinant(R));
     cv::Mat rigidtform2dR = R.mul(1.0 / s);
     cv::hconcat(rigidtform2dR, optimalAffineMat.col(2), relTform);
+#else
+    coder::array<double, 2U> pts1_tmp, pts2_tmp;
+    coder::array<boolean_T, 2U> inlierIndex;
+    double tform2x3[6];
+    int status;
+
+    pts1_tmp.set_size(matches.size(), 2);
+    pts2_tmp.set_size(matches.size(), 2);
+    for (size_t i = 0; i < matches.size(); i++) {
+        pts1_tmp[i] = points1[i].x;
+        pts1_tmp[i + matches.size()] = points1[i].y;
+
+        pts2_tmp[i] = points2[i].x;
+        pts2_tmp[i + matches.size()] = points2[i].y;
+    }
+    estimateAffineRigid2D::estimateAffineRigid2D(pts1_tmp, pts2_tmp, tform2x3,
+                                                 inlierIndex, &status);
+    cv::Mat inliers = cv::Mat(matches.size(), 1, CV_8U, inlierIndex.data());
+    relTform = (cv::Mat_<double>(2, 3) << tform2x3[0], tform2x3[2], tform2x3[4], tform2x3[1], tform2x3[3], tform2x3[5]);
+#endif
 
     // build map mode
     cv::Mat previousImgPoseA = previousImgPose;
