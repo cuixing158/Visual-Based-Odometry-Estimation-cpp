@@ -1,5 +1,8 @@
 #include "HDMapping.h"
 
+#include "selectUniform2.h"
+#include "coder_array.h"
+
 namespace buildMapping {
 class HDMapping;
 }
@@ -97,6 +100,45 @@ void ssc(std::vector<cv::KeyPoint> keyPoints, int numRetPoints,
     indexs = ResultVec;
 }
 
+void selectUniformPoints(std::vector<cv::KeyPoint> keyPoints, int numRetPoints,
+                         cv::Size size, std::vector<cv::KeyPoint>& outputPts, std::vector<int>& indexs) {
+    coder::array<double, 2U> points;
+    coder::array<double, 2U> pointsOut;
+    coder::array<double, 1U> b_index;
+    coder::array<double, 1U> responses;
+    double dv[2];
+
+    // points = argInit_Unboundedx2_real_T();
+    points.set_size(keyPoints.size(), 2);
+    responses.set_size(keyPoints.size());
+    for (size_t i = 0; i < points.size(0); i++) {
+        points[i] = keyPoints[i].pt.x;
+        points[i + points.size(0)] = keyPoints[i].pt.y;
+
+        responses[i] = keyPoints[i].response;
+    }
+
+    // std::cout << __LINE__ << "points->size:" << points->size[0U] << "," << points->size[1U] << std::endl;
+    // std::cout << __LINE__ << "responses->size:" << responses->size[0U] << std::endl;
+
+    dv[0] = size.height;
+    dv[1] = size.width;
+    selectUniform2::selectUniform2(points, responses, (double)numRetPoints, dv, pointsOut, b_index);
+    outputPts.clear();
+    indexs.clear();
+    for (size_t i = 0; i < pointsOut.size(0); i++) {
+        indexs.push_back(b_index[i] - 1);
+        outputPts.push_back(keyPoints[(int)(b_index[i]) - 1]);
+        // if (i == 1904) {
+        //     std::cout << "outputPts :" << i << "," << outputPts[i].octave << "," << outputPts[i].pt << std::endl;
+
+        //     cv::KeyPoint oriPt = keyPoints[(int)(b_index->data[i])];
+        //     std::cout << "origin  keyPoints octave :" << oriPt.octave << ",pt:" << oriPt.pt << ",keyPoints.size:" << keyPoints.size() << std::endl;
+        // }
+    }
+    // std::cout << "pointsOut->size:" << pointsOut->size[0U] << ",outputPts->size:" << outputPts.size() << std::endl;
+}
+
 buildMapping::HDMapping::HDMapping() {
     double cumDist = 0.0;
     double pixelExtentInWorldXY = 0.0;
@@ -134,17 +176,21 @@ void buildMapping::HDMapping::constructWorldMap(const cv::Mat& srcImage) {
     if (currImg.empty()) throw std::runtime_error("currImg is empty!");
 
     std::vector<cv::KeyPoint> keyPts;
-    cv::Mat Descriptions;
-    orbDetector->detectAndCompute(currImg, orbDetectMask, keyPts, Descriptions);
+    // cv::Mat Descriptions;
+    orbDetector->detect(currImg, keyPts, orbDetectMask);
     // selectUniform(keyPts, Descriptions, 2000, currKeypts, currDescriptors);
     std::vector<int> indexs;
-    currKeypts.clear();
-    currDescriptors = cv::Mat();
-    ssc(keyPts, 2000, 0.1, currImg.cols, currImg.rows, currKeypts, indexs);
-    for (size_t i = 0; i < indexs.size(); i++) {
-        currDescriptors.push_back(Descriptions.row(indexs[i]));
-    }
+    // currKeypts.clear();
+    // currDescriptors = cv::Mat();
+    // ssc(keyPts, 2000, 0.1, currImg.cols, currImg.rows, currKeypts, indexs);
+    // for (size_t i = 0; i < indexs.size(); i++) {
+    //     currDescriptors.push_back(Descriptions.row(indexs[i]));
+    // }
 
+    selectUniformPoints(keyPts, 2000, cv::Size(currImg.cols, currImg.rows), currKeypts, indexs);
+    orbDetector->compute(currImg, currKeypts, currDescriptors);
+
+    // std::cout << currKeypts.size() << "," << currDescriptors.rows << std::endl;
     if (preKeypts.empty()) {
         prevImg = currImg;
         preKeypts = currKeypts;
@@ -158,7 +204,15 @@ void buildMapping::HDMapping::constructWorldMap(const cv::Mat& srcImage) {
     }
     //match features
     std::vector<cv::DMatch> matches, good_matches;
-    cv::Ptr<cv::DescriptorMatcher> matcher = cv::DescriptorMatcher::create("BruteForce-Hamming");
+    cv::Ptr<cv::DescriptorMatcher> matcher = cv::DescriptorMatcher::create("FlannBased");
+    if (
+        preDescriptors.type() != CV_32F) {
+        preDescriptors.convertTo(preDescriptors, CV_32F);
+    }
+    if (currDescriptors.type() != CV_32F) {
+        currDescriptors.convertTo(currDescriptors, CV_32F);
+    }
+
     matcher->match(preDescriptors, currDescriptors, matches);
     std::vector<cv::Point2f> points1, points2;
     for (size_t i = 0; i < matches.size(); i++) {
@@ -166,8 +220,17 @@ void buildMapping::HDMapping::constructWorldMap(const cv::Mat& srcImage) {
         points2.push_back(currKeypts[matches[i].trainIdx].pt);
     }
 
+    // cv::Mat tempShowImg;
+    // // cv::drawKeypoints(currImg, currKeypts, tempShowImg);
+    // tempShowImg = currImg;
+    // cv::RNG rng(time(0));
+    // for (size_t i = 0; i < points2.size(); i++) {
+    //     cv::circle(tempShowImg, points2[i], 2, cv::Scalar::all(255));
+    // }
+    // cv::imwrite("tempShow.jpg", tempShowImg);
+
     // estimate geometry rigid 2D transformation matrix
-    cv::Mat inliers = cv::Mat::zeros(preKeypts.size(), 1, CV_8U);
+    cv::Mat inliers = cv::Mat::zeros(matches.size(), 1, CV_8U);
     cv::Mat optimalAffineMat = estimateAffinePartial2D(points1, points2, inliers, cv::RANSAC);
     cv::Mat R = optimalAffineMat.rowRange(0, 2).colRange(0, 2);
     double s = std::sqrt(cv::determinant(R));
@@ -223,9 +286,9 @@ void buildMapping::HDMapping::constructWorldMap(const cv::Mat& srcImage) {
     cv::warpAffine(currImg, topImg, tform, cv::Size(HDmapOutput.ref.ImageSize[1], HDmapOutput.ref.ImageSize[0]));
     cv::warpAffine(BW, bwMask, tform, cv::Size(HDmapOutput.ref.ImageSize[1], HDmapOutput.ref.ImageSize[0]));
 
-    cv::imwrite("bigImgCopy1.jpg", HDmapOutput.bigImg);
+    // cv::imwrite("bigImgCopy1.jpg", HDmapOutput.bigImg);
     cv::copyMakeBorder(HDmapOutput.bigImg, HDmapOutput.bigImg, std::round(pad_top), std::round(pad_down), std::round(pad_left), std::round(pad_right), cv::BORDER_CONSTANT, cv::Scalar::all(0));
-    cv::imwrite("bigImgCopy2.jpg", HDmapOutput.bigImg);
+    // cv::imwrite("bigImgCopy2.jpg", HDmapOutput.bigImg);
 
     cv::resize(HDmapOutput.bigImg, HDmapOutput.bigImg, cv::Size(topImg.cols, topImg.rows));
     topImg.copyTo(HDmapOutput.bigImg, bwMask);

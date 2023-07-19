@@ -5,7 +5,6 @@
 cmake_minimum_required(VERSION 3.12)
 project(selectUniform2)
 if(DEFINED ENV{CMAKE_EXPORT_COMPILE_COMMANDS} AND NOT DEFINED CMAKE_EXPORT_COMPILE_COMMANDS)
-    message(STATUS "CMAKE_EXPORT_COMPILE_COMMANDS:${CMAKE_EXPORT_COMPILE_COMMANDS}")
     set(CMAKE_EXPORT_COMPILE_COMMANDS $ENV{CMAKE_EXPORT_COMPILE_COMMANDS})
 endif()
 
@@ -13,8 +12,7 @@ endif()
 ######################################################################
 ## Path variables
 ######################################################################
-get_filename_component(START_DIR . ABSOLUTE)
-message(STATUS "START_DIR:${START_DIR}")
+get_filename_component(START_DIR ./ ABSOLUTE)
 set(MATLAB_ROOT /opt/matlab/R2023a CACHE PATH "")
 if(${CMAKE_CURRENT_BINARY_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
     set(BUILDING_IN_SOURCE_DIR TRUE)
@@ -34,32 +32,28 @@ endif()
 ######################################################################
 find_library(FOUND_LIBM m NO_SYSTEM_ENVIRONMENT_PATH PATHS ${CMAKE_C_IMPLICIT_LINK_DIRECTORIES}
     ${CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES})
-message(STATUS "FOUND_LIBM:${FOUND_LIBM}")
+find_library(FOUND_LIBSTDCXX stdc++ NO_SYSTEM_ENVIRONMENT_PATH PATHS ${CMAKE_C_IMPLICIT_LINK_DIRECTORIES}
+    ${CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES})
 
 ######################################################################
 ## Target definition and commands
 ######################################################################
-add_library(selectUniform2 SHARED ${START_DIR}/rt_nonfinite.c
-    ${START_DIR}/rtGetNaN.c
-    ${START_DIR}/rtGetInf.c
-    ${START_DIR}/selectUniform2.c
-    ${START_DIR}/selectUniform2_emxutil.c
-    ${START_DIR}/selectUniform2_emxAPI.c)
+add_library(selectUniform2 SHARED ${START_DIR}/selectUniform2.cpp)
 set_target_properties(selectUniform2 PROPERTIES
     PREFIX ""
     POSITION_INDEPENDENT_CODE ON
     RUNTIME_OUTPUT_DIRECTORY "${BINARY_START_DIR}/$<0:>"
     LIBRARY_OUTPUT_DIRECTORY "${BINARY_START_DIR}/$<0:>"
     ARCHIVE_OUTPUT_DIRECTORY "${BINARY_START_DIR}/$<0:>")
-target_compile_features(selectUniform2 PUBLIC c_std_99)
+target_compile_features(selectUniform2 PUBLIC cxx_std_11)
 target_compile_definitions(selectUniform2 PRIVATE -DMODEL=selectUniform2)
 target_include_directories(selectUniform2 PUBLIC $<BUILD_INTERFACE:${START_DIR}>
     $<INSTALL_INTERFACE:$<INSTALL_PREFIX>>
     $<BUILD_INTERFACE:${START_DIR}>
     $<INSTALL_INTERFACE:$<INSTALL_PREFIX>>
     $<BUILD_INTERFACE:${MATLAB_ROOT}/extern/include>)
-target_link_libraries(selectUniform2 INTERFACE $<$<BOOL:${FOUND_LIBM}>:m>)
- message(STATUS "$<BUILD_INTERFACE:${START_DIR}>")
+target_link_libraries(selectUniform2 INTERFACE $<$<BOOL:${FOUND_LIBM}>:m>
+    $<$<BOOL:${FOUND_LIBSTDCXX}>:stdc++>)
 
 
 ######################################################################

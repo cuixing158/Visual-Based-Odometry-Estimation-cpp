@@ -32,30 +32,31 @@ endif()
 ######################################################################
 find_library(FOUND_LIBM m NO_SYSTEM_ENVIRONMENT_PATH PATHS ${CMAKE_C_IMPLICIT_LINK_DIRECTORIES}
     ${CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES})
+find_library(FOUND_LIBSTDCXX stdc++ NO_SYSTEM_ENVIRONMENT_PATH PATHS ${CMAKE_C_IMPLICIT_LINK_DIRECTORIES}
+    ${CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES})
 
 ######################################################################
 ## Target definition and commands
 ######################################################################
-add_library(estimateAffineRigid2D SHARED ${START_DIR}/rt_nonfinite.c
-    ${START_DIR}/rtGetNaN.c
-    ${START_DIR}/rtGetInf.c
-    ${START_DIR}/estimateAffineRigid2D.c
-    ${START_DIR}/estimateAffineRigid2D_emxutil.c
-    ${START_DIR}/estimateAffineRigid2D_emxAPI.c)
+add_library(estimateAffineRigid2D SHARED ${START_DIR}/rt_nonfinite.cpp
+    ${START_DIR}/rtGetNaN.cpp
+    ${START_DIR}/rtGetInf.cpp
+    ${START_DIR}/estimateAffineRigid2D.cpp)
 set_target_properties(estimateAffineRigid2D PROPERTIES
     PREFIX ""
     POSITION_INDEPENDENT_CODE ON
     RUNTIME_OUTPUT_DIRECTORY "${BINARY_START_DIR}/$<0:>"
     LIBRARY_OUTPUT_DIRECTORY "${BINARY_START_DIR}/$<0:>"
     ARCHIVE_OUTPUT_DIRECTORY "${BINARY_START_DIR}/$<0:>")
-target_compile_features(estimateAffineRigid2D PUBLIC c_std_99)
+target_compile_features(estimateAffineRigid2D PUBLIC cxx_std_11)
 target_compile_definitions(estimateAffineRigid2D PRIVATE -DMODEL=estimateAffineRigid2D)
-target_include_directories(estimateAffineRigid2D PUBLIC $<BUILD_INTERFACE:${START_DIR}/codegen/lib/estimateAffineRigid2D>
-    $<INSTALL_INTERFACE:$<INSTALL_PREFIX>/codegen/lib/estimateAffineRigid2D>
+target_include_directories(estimateAffineRigid2D PUBLIC $<BUILD_INTERFACE:${START_DIR}>
+    $<INSTALL_INTERFACE:$<INSTALL_PREFIX>>
     $<BUILD_INTERFACE:${START_DIR}>
     $<INSTALL_INTERFACE:$<INSTALL_PREFIX>>
     $<BUILD_INTERFACE:${MATLAB_ROOT}/extern/include>)
-target_link_libraries(estimateAffineRigid2D INTERFACE $<$<BOOL:${FOUND_LIBM}>:m>)
+target_link_libraries(estimateAffineRigid2D INTERFACE $<$<BOOL:${FOUND_LIBM}>:m>
+    $<$<BOOL:${FOUND_LIBSTDCXX}>:stdc++>)
 
 
 ######################################################################

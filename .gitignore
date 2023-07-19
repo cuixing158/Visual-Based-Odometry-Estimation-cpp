@@ -13,7 +13,8 @@
 !/c_cpp_utils/**
 
 !/ThirdParty/
-!/ThirdParty/*
+!/ThirdParty/**/
+
 
 # 增加指定扩展名文件#忽略特殊文件，一般是当前目录下的文件(当前目录不能忽略)
 !.gitignore
@@ -50,6 +51,8 @@
 !*.cgt
 
 #忽略特殊文件，一般是当前目录下的文件(当前目录不能忽略)
+/ThirdParty/rigidTform2d/build
+/ThirdParty/selectUniform2/build
 /codegen_custom_cpp/codegen/
 /yourSpecify.cpp
 /yourSpecify.h

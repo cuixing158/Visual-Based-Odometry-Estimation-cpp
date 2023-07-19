@@ -2,25 +2,21 @@
 #define SELECTUNIFORM2_H
 
 #include "rtwtypes.h"
-#include "selectUniform2_types.h"
-#include <stddef.h>
-#include <stdlib.h>
+#include "coder_array.h"
+#include <cstddef>
+#include <cstdlib>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+namespace selectUniform2 {
+extern void selectUniform2(::coder::array<double, 2U> &points,
+                           ::coder::array<double, 1U> &responses, double N,
+                           const double imageSize[2],
+                           ::coder::array<double, 2U> &pointsOut,
+                           ::coder::array<double, 1U> &b_index);
 
-extern void selectUniform2(emxArray_real_T *points, emxArray_real_T *responses,
-                           double N, const double imageSize[2],
-                           emxArray_real_T *pointsOut,
-                           emxArray_real_T *b_index);
+extern void selectUniform2_initialize();
 
-extern void selectUniform2_initialize(void);
+extern void selectUniform2_terminate();
 
-extern void selectUniform2_terminate(void);
-
-#ifdef __cplusplus
-}
-#endif
+} // namespace selectUniform2
 
 #endif

@@ -1,26 +1,22 @@
 #ifndef ESTIMATEAFFINERIGID2D_H
 #define ESTIMATEAFFINERIGID2D_H
 
-#include "estimateAffineRigid2D_types.h"
 #include "rtwtypes.h"
-#include <stddef.h>
-#include <stdlib.h>
+#include "coder_array.h"
+#include <cstddef>
+#include <cstdlib>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-extern void estimateAffineRigid2D(const emxArray_real_T *pts1,
-                                  const emxArray_real_T *pts2,
+namespace estimateAffineRigid2D {
+extern void estimateAffineRigid2D(const ::coder::array<double, 2U> &pts1,
+                                  const ::coder::array<double, 2U> &pts2,
                                   double tform2x3[6],
-                                  emxArray_boolean_T *inlierIndex, int *status);
+                                  ::coder::array<boolean_T, 2U> &inlierIndex,
+                                  int *status);
 
-extern void estimateAffineRigid2D_initialize(void);
+extern void estimateAffineRigid2D_initialize();
 
-extern void estimateAffineRigid2D_terminate(void);
+extern void estimateAffineRigid2D_terminate();
 
-#ifdef __cplusplus
-}
-#endif
+} // namespace estimateAffineRigid2D
 
 #endif
