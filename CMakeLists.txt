@@ -10,7 +10,7 @@ message(STATUS "Use CMAKE version:${CMAKE_VERSION}")
 
 # set(OpenCV_DIR "D:/opencv_4_4_0/opencv/build") 
 # set(OpenCV_DIR "/home/cuixingxing/opencv4_6_0/lib/cmake/opencv4")
-find_package(OpenCV 4 REQUIRED)
+find_package(OpenCV 3 REQUIRED)
 if(NOT OpenCV_FOUND)
     message(FATAL_ERROR "Opencv3.x not found...nothing will be built.")
 endif()

@@ -1,9 +1,12 @@
+#include <fstream>
 #include "HDMapping.h"
 
 #include "selectUniform2.h"
 #include "coder_array.h"
 #include "estimateAffineRigid2D.h"
 #include "rt_nonfinite.h"
+
+#define DEBUG_SHOW_IMAGE 1
 namespace buildMapping {
 class HDMapping;
 }
@@ -150,6 +153,7 @@ buildMapping::HDMapping::HDMapping() {
     BW = 255 * cv::Mat::ones(480, 640, CV_8UC1);
     BW.rowRange(480 / 2, 480) = 0;
     BW = BW &= orbDetectMask;
+    initViclePtPose = cv::Vec3f((285 + 358) / 2.0, (156, 326) / 2.0, 0);
 
     //第一副图像的像素坐标系为世界坐标系
     preRelTform = (cv::Mat_<double>(2, 3) << 1, 0, 0,
@@ -196,7 +200,7 @@ void buildMapping::HDMapping::constructWorldMap(const cv::Mat& srcImage) {
         HDmapOutput.ref.YWorldLimits[1] = currImg.rows - 1;
     }
     //match features
-    std::vector<cv::DMatch> matches, good_matches;
+    std::vector<cv::DMatch> matches;
     cv::Ptr<cv::DescriptorMatcher> matcher = cv::DescriptorMatcher::create("FlannBased");
     if (
         preDescriptors.type() != CV_32F) {
@@ -215,14 +219,12 @@ void buildMapping::HDMapping::constructWorldMap(const cv::Mat& srcImage) {
 #else
     std::vector<std::vector<cv::DMatch>> matchePoints;
     matcher->knnMatch(preDescriptors, currDescriptors, matchePoints, 2);
-    // Lowe's algorithm
     for (int i = 0; i < matchePoints.size(); i++) {
         if (matchePoints[i][0].distance < 0.6 * matchePoints[i][1].distance) {
             matches.push_back(matchePoints[i][0]);
         }
     }
 #endif
-    std::cout << "matches ratio:" << matches.size() << "/" << matchePoints.size() << std::endl;
 
 // estimate geometry rigid 2D transformation matrix
 #ifdef USE_OPENCV_FUNCTION
@@ -249,18 +251,20 @@ void buildMapping::HDMapping::constructWorldMap(const cv::Mat& srcImage) {
 // cv::imwrite("tempShow.jpg", tempShowImg);
 #else
     std::vector<cv::Point> preP, nextP;
-    preP.reserve(matches.size());
-    nextP.reserve(matches.size());
+    preP.resize(matches.size());
+    nextP.resize(matches.size());
     for (size_t i = 0; i < matches.size(); i++) {
         preP[i] = preKeypts[matches[i].queryIdx].pt;
         nextP[i] = currKeypts[matches[i].trainIdx].pt;
     }
-    cv::Mat inliers;
+    cv::Mat inliers = cv::Mat::zeros(preP.size(), 1, CV_8UC1);
     int status = 0;
     estiTform(preP, nextP, relTform, inliers, status);
 #endif
-
     bool cond = (status > 0 || cv::sum(inliers)[0] <= 3);
+    // std::cout << "inliers:" << inliers << std::endl;
+    // cv::Scalar ss = cv::sum(inliers);
+    // std::cout << __LINE__ << ",cv::sum(inliers)[0]:" << ss << "," << cv::sum(inliers)[0] << std::endl;
     if (cond) {
         std::vector<uchar> statusOK;
         std::vector<float> err;
@@ -271,8 +275,10 @@ void buildMapping::HDMapping::constructWorldMap(const cv::Mat& srcImage) {
         std::vector<cv::Point2f> good_new;
         preP.clear();
         nextP.clear();
+        matches.clear();  // debug
         for (uint i = 0; i < p0.size(); i++) {
             if (statusOK[i] == 1) {
+                matches.push_back(cv::DMatch(preP.size(), nextP.size(), 1));
                 preP.push_back(p0[i]);
                 nextP.push_back(p1[i]);
             }
@@ -281,6 +287,19 @@ void buildMapping::HDMapping::constructWorldMap(const cv::Mat& srcImage) {
         cond = (status > 0 || cv::sum(inliers)[0] <= 3);
         if (cond) {  // may be lost
             relTform = preRelTform;
+
+            std::cout << "may be lost" << std::endl;
+            // // debug output
+            // cv::Mat imgMatches;
+            // std::vector<cv::KeyPoint> temp1, temp2;
+            // matches.clear();  // debug
+            // for (size_t i = 0; i < preP.size(); i++) {
+            //     temp1.push_back(cv::KeyPoint(preP[i], 1.f));
+            //     temp2.push_back(cv::KeyPoint(nextP[i], 1.f));
+            //     matches.push_back(cv::DMatch(i, i, 1));
+            // }
+            // cv::drawMatches(prevImg, temp1, currImg, temp2, matches, imgMatches, cv::Scalar(0, 255, 255), -1, std::vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
+            // cv::imwrite("matchesForce" + std::to_string(num) + ".jpg", imgMatches);
         }
     }
 
@@ -290,11 +309,25 @@ void buildMapping::HDMapping::constructWorldMap(const cv::Mat& srcImage) {
     previousImgPoseA.push_back(homoMatrix);
     cv::Mat currImgPose = relTform * previousImgPoseA;
 
-    cv::Mat tform, tempR, tempT;
+    cv::Mat tform,
+        tempR, tempT;
     tempR = currImgPose.rowRange(0, 2).colRange(0, 2).t();
     tempT = -tempR * currImgPose.col(2);
     cv::hconcat(tempR, tempT, tform);
 
+    // calcuate vehicle poses
+    cv::Mat initViclePtPoseA = (cv::Mat_<double>(3, 3) << 1, 0, initViclePtPose[0],
+                                0, 1, initViclePtPose[1],
+                                0, 0, 1);
+    cv::Mat currVehiclePose = tform * initViclePtPoseA;
+    tempR = (cv::Mat_<double>(3, 3) << currVehiclePose.at<double>(0, 0), currVehiclePose.at<double>(0, 1), 0,
+             currVehiclePose.at<double>(1, 0), currVehiclePose.at<double>(1, 1), 0,
+             0, 0, 1);
+    std::vector<double> angRadius;
+    cv::Rodrigues(tempR, angRadius);
+    vehiclePoses.push_back(cv::Vec3d(currVehiclePose.at<double>(0, 2), currVehiclePose.at<double>(1, 2), angRadius[2]));
+
+#if DEBUG_SHOW_IMAGE
     cv::Mat currCorner = (cv::Mat_<double>(3, 4) << 0, currImg.cols - 1, currImg.cols - 1, 0,
                           0, 0, currImg.rows - 1, currImg.rows - 1,
                           1, 1, 1, 1);
@@ -335,22 +368,38 @@ void buildMapping::HDMapping::constructWorldMap(const cv::Mat& srcImage) {
     cv::copyMakeBorder(HDmapOutput.bigImg, HDmapOutput.bigImg, std::round(pad_top), std::round(pad_down), std::round(pad_left), std::round(pad_right), cv::BORDER_CONSTANT, cv::Scalar::all(0));
     cv::resize(HDmapOutput.bigImg, HDmapOutput.bigImg, cv::Size(topImg.cols, topImg.rows));
     topImg.copyTo(HDmapOutput.bigImg, bwMask);
+    std::vector<cv::DMatch> rigidMatches;
     for (size_t i = 0; i < matches.size(); i++) {
         if (inliers.at<uchar>(i, 0)) {
-            good_matches.push_back(matches[i]);
+            rigidMatches.push_back(matches[i]);
         }
     }
-    std::cout << "good matches ratio:" << good_matches.size() << "/" << matches.size() << std::endl;
+    std::cout << "matches ratio:" << matches.size() << "/" << matchePoints.size() << std::endl;
+    std::cout << "rigid estimate matches ratio:" << rigidMatches.size() << "/" << matches.size() << std::endl;
 
-#if DEBUG_SHOW_IMAGE
+    assert(rigidMatches.size() > 3);
+
     // Draw top matches
     cv::Mat imMatches;
-    cv::drawMatches(prevImg, preKeypts, currImg, currKeypts, good_matches, imMatches, cv::Scalar(0, 255, 255), -1, std::vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
+    cv::drawMatches(prevImg, preKeypts, currImg, currKeypts, rigidMatches, imMatches, cv::Scalar(0, 255, 255), -1, std::vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
     cv::imwrite("matches.jpg", imMatches);
     // cv::Mat dstMat;
     // srcImage.copyTo(dstMat, orbDetectMask);
-    cv::imwrite("bigImgCopy.jpg", HDmapOutput.bigImg);
-//
+    cv::Mat drawImage;
+    cv::cvtColor(HDmapOutput.bigImg, drawImage, cv::COLOR_GRAY2BGR);
+    int lenPoses = vehiclePoses.size();
+    if (lenPoses > 1) {
+        for (size_t i = 0; i < lenPoses - 1; i++) {
+            cv::Point pt1, pt2;
+            cv::Vec3d prePose, nextPose;
+            prePose = vehiclePoses[i];
+            nextPose = vehiclePoses[i + 1];
+            pt1 = cv::Point(prePose[0] - HDmapOutput.ref.XWorldLimits[0], prePose[1] - HDmapOutput.ref.YWorldLimits[0]);
+            pt2 = cv::Point(nextPose[0] - HDmapOutput.ref.XWorldLimits[0], nextPose[1] - HDmapOutput.ref.YWorldLimits[0]);
+            cv::line(drawImage, pt1, pt2, cv::Scalar(0, 0, 255), 4);
+        }
+    }
+    cv::imwrite("bigImgCopy.jpg", drawImage);
 #endif
 
     // update previous state variables
@@ -398,6 +447,6 @@ void buildMapping::HDMapping::estiTform(std::vector<cv::Point>& prePoints, std::
     }
     estimateAffineRigid2D::estimateAffineRigid2D(pts1_tmp, pts2_tmp, tform2x3_,
                                                  inlierIndex, &status);
-    inliers = cv::Mat(prePoints.size(), 1, CV_8U, inlierIndex.data());
+    inliers = cv::Mat(prePoints.size(), 1, CV_8U, inlierIndex.data()).clone();
     tform2x3 = (cv::Mat_<double>(2, 3) << tform2x3_[0], tform2x3_[2], tform2x3_[4], tform2x3_[1], tform2x3_[3], tform2x3_[5]);
 }

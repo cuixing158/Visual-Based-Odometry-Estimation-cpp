@@ -8,7 +8,6 @@
 
 // #include "spdlog/spdlog.h"
 
-#define DEBUG_SHOW_IMAGE 1
 namespace buildMapping {
 class HDMapping {
    public:
@@ -18,7 +17,7 @@ class HDMapping {
 
    public:
     HDmap HDmapOutput;
-    std::vector<cv::Vec3f> vehiclePoses;  // [x,y,theta]位姿
+    std::vector<cv::Vec3d> vehiclePoses;  // [x,y,theta]位姿,theta为弧度
     double cumDist;
     double pixelExtentInWorldXY;
     bool isBuildMap;
@@ -34,6 +33,7 @@ class HDMapping {
     cv::Mat preDescriptors, currDescriptors;
     cv::Mat prevImg;
     cv::Mat preRelTform, relTform, previousImgPose;  // 2*3转换矩阵
+    cv::Vec3d initViclePtPose;                       // [x,y,theta]位姿
 
     //
     cv::Ptr<cv::Feature2D> orbDetector;
