@@ -18,7 +18,7 @@ class HDMapping {
 
    public:
     HDmap HDmapOutput;
-    std::vector<cv::Vec3f> vehiclePoses;
+    std::vector<cv::Vec3f> vehiclePoses;  // [x,y,theta]位姿
     double cumDist;
     double pixelExtentInWorldXY;
     bool isBuildMap;
@@ -39,6 +39,11 @@ class HDMapping {
     cv::Ptr<cv::Feature2D> orbDetector;
 
     void selectUniform(std::vector<cv::KeyPoint>& keypts, cv::Mat& Descriptions, size_t numPoints, std::vector<cv::KeyPoint>& outKeypts, cv::Mat& outDescriptions);
+
+    void selectUniformPoints(std::vector<cv::KeyPoint>& keyPoints, int numRetPoints,
+                             cv::Size size, std::vector<cv::KeyPoint>& outputPts, std::vector<int>& indexs);
+
+    void estiTform(std::vector<cv::Point>& prePoints, std::vector<cv::Point>& currPoints, cv::Mat& tform2x3, cv::Mat& inliers, int& status);
 };
 
 }  // namespace buildMapping

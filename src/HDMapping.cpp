@@ -101,8 +101,8 @@ void ssc(std::vector<cv::KeyPoint> keyPoints, int numRetPoints,
     indexs = ResultVec;
 }
 
-void selectUniformPoints(std::vector<cv::KeyPoint>& keyPoints, int numRetPoints,
-                         cv::Size size, std::vector<cv::KeyPoint>& outputPts, std::vector<int>& indexs) {
+void buildMapping::HDMapping::selectUniformPoints(std::vector<cv::KeyPoint>& keyPoints, int numRetPoints,
+                                                  cv::Size size, std::vector<cv::KeyPoint>& outputPts, std::vector<int>& indexs) {
     outputPts.clear();
     indexs.clear();
     if (numRetPoints >= keyPoints.size()) {
@@ -123,7 +123,6 @@ void selectUniformPoints(std::vector<cv::KeyPoint>& keyPoints, int numRetPoints,
     for (size_t i = 0; i < points.size(0); i++) {
         points[i] = keyPoints[i].pt.x;
         points[i + points.size(0)] = keyPoints[i].pt.y;
-
         responses[i] = keyPoints[i].response;
     }
 
@@ -207,13 +206,40 @@ void buildMapping::HDMapping::constructWorldMap(const cv::Mat& srcImage) {
         currDescriptors.convertTo(currDescriptors, CV_32F);
     }
 
+#ifdef USE_TOPK_BEST_MATCHES
     matcher->match(preDescriptors, currDescriptors, matches);
-    std::vector<cv::Point2f> points1, points2;
+    //只初步选取匹配前num个较好的特征点
+    int numMatches = matches.size() < 10 ? matches.size() : matches.size() / 2;
+    std::nth_element(matches.begin(), matches.begin() + numMatches, matches.end());
+    matches.erase(matches.begin() + numMatches, matches.end());
+#else
+    std::vector<std::vector<cv::DMatch>> matchePoints;
+    matcher->knnMatch(preDescriptors, currDescriptors, matchePoints, 2);
+    // Lowe's algorithm
+    for (int i = 0; i < matchePoints.size(); i++) {
+        if (matchePoints[i][0].distance < 0.6 * matchePoints[i][1].distance) {
+            matches.push_back(matchePoints[i][0]);
+        }
+    }
+#endif
+    std::cout << "matches ratio:" << matches.size() << "/" << matchePoints.size() << std::endl;
+
+// estimate geometry rigid 2D transformation matrix
+#ifdef USE_OPENCV_FUNCTION
+    std::vector<cv::Point2f>
+        points1, points2;
     for (size_t i = 0; i < matches.size(); i++) {
         points1.push_back(preKeypts[matches[i].queryIdx].pt);
         points2.push_back(currKeypts[matches[i].trainIdx].pt);
     }
-// cv::Mat tempShowImg;
+    cv::Mat inliers = cv::Mat::zeros(matches.size(), 1, CV_8U);
+    cv::Mat optimalAffineMat = estimateAffinePartial2D(points1, points2, inliers, cv::RANSAC);
+    cv::Mat R = optimalAffineMat.rowRange(0, 2).colRange(0, 2);
+    double s = std::sqrt(cv::determinant(R));
+    cv::Mat rigidtform2dR = R.mul(1.0 / s);
+    cv::hconcat(rigidtform2dR, optimalAffineMat.col(2), relTform);
+
+//     cv::Mat tempShowImg;
 // // cv::drawKeypoints(currImg, currKeypts, tempShowImg);
 // tempShowImg = currImg;
 // cv::RNG rng(time(0));
@@ -221,35 +247,42 @@ void buildMapping::HDMapping::constructWorldMap(const cv::Mat& srcImage) {
 //     cv::circle(tempShowImg, points2[i], 2, cv::Scalar::all(255));
 // }
 // cv::imwrite("tempShow.jpg", tempShowImg);
-
-// estimate geometry rigid 2D transformation matrix
-#ifdef USE_OPENCV_FUNCTION
-    cv::Mat inliers = cv::Mat::zeros(matches.size(), 1, CV_8U);
-    cv::Mat optimalAffineMat = estimateAffinePartial2D(points1, points2, inliers, cv::RANSAC);
-    cv::Mat R = optimalAffineMat.rowRange(0, 2).colRange(0, 2);
-    double s = std::sqrt(cv::determinant(R));
-    cv::Mat rigidtform2dR = R.mul(1.0 / s);
-    cv::hconcat(rigidtform2dR, optimalAffineMat.col(2), relTform);
 #else
-    coder::array<double, 2U> pts1_tmp, pts2_tmp;
-    coder::array<boolean_T, 2U> inlierIndex;
-    double tform2x3[6];
-    int status;
-
-    pts1_tmp.set_size(matches.size(), 2);
-    pts2_tmp.set_size(matches.size(), 2);
+    std::vector<cv::Point> preP, nextP;
+    preP.reserve(matches.size());
+    nextP.reserve(matches.size());
     for (size_t i = 0; i < matches.size(); i++) {
-        pts1_tmp[i] = points1[i].x;
-        pts1_tmp[i + matches.size()] = points1[i].y;
-
-        pts2_tmp[i] = points2[i].x;
-        pts2_tmp[i + matches.size()] = points2[i].y;
+        preP[i] = preKeypts[matches[i].queryIdx].pt;
+        nextP[i] = currKeypts[matches[i].trainIdx].pt;
     }
-    estimateAffineRigid2D::estimateAffineRigid2D(pts1_tmp, pts2_tmp, tform2x3,
-                                                 inlierIndex, &status);
-    cv::Mat inliers = cv::Mat(matches.size(), 1, CV_8U, inlierIndex.data());
-    relTform = (cv::Mat_<double>(2, 3) << tform2x3[0], tform2x3[2], tform2x3[4], tform2x3[1], tform2x3[3], tform2x3[5]);
+    cv::Mat inliers;
+    int status = 0;
+    estiTform(preP, nextP, relTform, inliers, status);
 #endif
+
+    bool cond = (status > 0 || cv::sum(inliers)[0] <= 3);
+    if (cond) {
+        std::vector<uchar> statusOK;
+        std::vector<float> err;
+        cv::TermCriteria criteria = cv::TermCriteria((cv::TermCriteria::COUNT) + (cv::TermCriteria::EPS), 10, 0.03);
+        std::vector<cv::Point2f> p0, p1;
+        cv::KeyPoint::convert(preKeypts, p0);
+        cv::calcOpticalFlowPyrLK(prevImg, currImg, p0, p1, statusOK, err, cv::Size(15, 15), 2, criteria);
+        std::vector<cv::Point2f> good_new;
+        preP.clear();
+        nextP.clear();
+        for (uint i = 0; i < p0.size(); i++) {
+            if (statusOK[i] == 1) {
+                preP.push_back(p0[i]);
+                nextP.push_back(p1[i]);
+            }
+        }
+        estiTform(preP, nextP, relTform, inliers, status);
+        cond = (status > 0 || cv::sum(inliers)[0] <= 3);
+        if (cond) {  // may be lost
+            relTform = preRelTform;
+        }
+    }
 
     // build map mode
     cv::Mat previousImgPoseA = previousImgPose;
@@ -299,11 +332,7 @@ void buildMapping::HDMapping::constructWorldMap(const cv::Mat& srcImage) {
     tform.colRange(2, 3) = tform.colRange(2, 3) - (cv::Mat_<double>(2, 1) << HDmapOutput.ref.XWorldLimits[0], HDmapOutput.ref.YWorldLimits[0]);
     cv::warpAffine(currImg, topImg, tform, cv::Size(HDmapOutput.ref.ImageSize[1], HDmapOutput.ref.ImageSize[0]));
     cv::warpAffine(BW, bwMask, tform, cv::Size(HDmapOutput.ref.ImageSize[1], HDmapOutput.ref.ImageSize[0]));
-
-    // cv::imwrite("bigImgCopy1.jpg", HDmapOutput.bigImg);
     cv::copyMakeBorder(HDmapOutput.bigImg, HDmapOutput.bigImg, std::round(pad_top), std::round(pad_down), std::round(pad_left), std::round(pad_right), cv::BORDER_CONSTANT, cv::Scalar::all(0));
-    // cv::imwrite("bigImgCopy2.jpg", HDmapOutput.bigImg);
-
     cv::resize(HDmapOutput.bigImg, HDmapOutput.bigImg, cv::Size(topImg.cols, topImg.rows));
     topImg.copyTo(HDmapOutput.bigImg, bwMask);
     for (size_t i = 0; i < matches.size(); i++) {
@@ -311,6 +340,7 @@ void buildMapping::HDMapping::constructWorldMap(const cv::Mat& srcImage) {
             good_matches.push_back(matches[i]);
         }
     }
+    std::cout << "good matches ratio:" << good_matches.size() << "/" << matches.size() << std::endl;
 
 #if DEBUG_SHOW_IMAGE
     // Draw top matches
@@ -320,7 +350,7 @@ void buildMapping::HDMapping::constructWorldMap(const cv::Mat& srcImage) {
     // cv::Mat dstMat;
     // srcImage.copyTo(dstMat, orbDetectMask);
     cv::imwrite("bigImgCopy.jpg", HDmapOutput.bigImg);
-    //
+//
 #endif
 
     // update previous state variables
@@ -328,6 +358,7 @@ void buildMapping::HDMapping::constructWorldMap(const cv::Mat& srcImage) {
     preKeypts = currKeypts;
     preDescriptors = currDescriptors;
     previousImgPose = currImgPose;
+    preRelTform = relTform;
 }
 
 void buildMapping::HDMapping::selectUniform(std::vector<cv::KeyPoint>& keyPts, cv::Mat& Descriptions, size_t numPoints, std::vector<cv::KeyPoint>& outKeypts, cv::Mat& outDescriptions) {
@@ -348,4 +379,25 @@ void buildMapping::HDMapping::selectUniform(std::vector<cv::KeyPoint>& keyPts, c
         outKeypts = keyPts;
         outDescriptions = Descriptions;
     }
+}
+
+void buildMapping::HDMapping::estiTform(std::vector<cv::Point>& prePoints, std::vector<cv::Point>& currPoints, cv::Mat& tform2x3, cv::Mat& inliers, int& status) {
+    coder::array<double, 2U>
+        pts1_tmp, pts2_tmp;
+    coder::array<boolean_T, 2U> inlierIndex;
+    double tform2x3_[6];
+
+    pts1_tmp.set_size(prePoints.size(), 2);
+    pts2_tmp.set_size(currPoints.size(), 2);
+    for (size_t i = 0; i < currPoints.size(); i++) {
+        pts1_tmp[i] = prePoints[i].x;
+        pts1_tmp[i + currPoints.size()] = prePoints[i].y;
+
+        pts2_tmp[i] = currPoints[i].x;
+        pts2_tmp[i + currPoints.size()] = currPoints[i].y;
+    }
+    estimateAffineRigid2D::estimateAffineRigid2D(pts1_tmp, pts2_tmp, tform2x3_,
+                                                 inlierIndex, &status);
+    inliers = cv::Mat(prePoints.size(), 1, CV_8U, inlierIndex.data());
+    tform2x3 = (cv::Mat_<double>(2, 3) << tform2x3_[0], tform2x3_[2], tform2x3_[4], tform2x3_[1], tform2x3_[3], tform2x3_[5]);
 }
