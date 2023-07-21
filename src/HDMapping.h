@@ -16,10 +16,13 @@ class HDMapping {
     void constructWorldMap(const cv::Mat& srcImage);
 
    public:
+    enum matchFeatureMethod { ORB_FEATURES,
+                              LK_TRACK_FEATURES,
+                              HYBRID_FEATURES };
     HDmap HDmapOutput;
     std::vector<cv::Vec3d> vehiclePoses;  // [x,y,theta]位姿,theta为弧度
-    double cumDist;
-    double pixelExtentInWorldXY;
+    double cumDist;                       // 行驶累计距离，单位：米
+    double pixelExtentInWorldXY;          // 每个像素实际物理长度距离，单位：米/像素
     bool isBuildMap;
     double buildMapStopFrame;
     bool isBuildMapOver;
@@ -37,13 +40,11 @@ class HDMapping {
 
     //
     cv::Ptr<cv::Feature2D> orbDetector;
-
-    void selectUniform(std::vector<cv::KeyPoint>& keypts, cv::Mat& Descriptions, size_t numPoints, std::vector<cv::KeyPoint>& outKeypts, cv::Mat& outDescriptions);
-
+    matchFeatureMethod method;
     void selectUniformPoints(std::vector<cv::KeyPoint>& keyPoints, int numRetPoints,
                              cv::Size size, std::vector<cv::KeyPoint>& outputPts, std::vector<int>& indexs);
 
-    void estiTform(std::vector<cv::Point>& prePoints, std::vector<cv::Point>& currPoints, cv::Mat& tform2x3, cv::Mat& inliers, int& status);
+    void estiTform(std::vector<cv::Point2f>& prePoints, std::vector<cv::Point2f>& currPoints, cv::Mat& tform2x3, cv::Mat& inliers, int& status);
 };
 
 }  // namespace buildMapping

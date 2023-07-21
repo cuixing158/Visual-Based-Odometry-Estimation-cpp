@@ -24,12 +24,15 @@ int main(int, char **) {
     std::sort(imagePaths.begin(), imagePaths.end(), [](std::string p1, std::string p2) { return atoi(filesystem::path(p1).filenameNoExt().c_str()) < atoi(filesystem::path(p2).filenameNoExt().c_str()); });
 
     buildMapping::HDMapping obj;
+    double cumTime = 0.0;
     for (size_t i = 0; i < numImgs; i++) {
         std::cout << imagePaths[i] << std::endl;
         cv::Mat srcImage = cv::imread(imagePaths[i]);
         double t1 = cv::getTickCount();
         obj.constructWorldMap(srcImage);
-        printf("Elapsed second Time:%.5f\n", (double)(cv::getTickCount() - t1) / cv::getTickFrequency());
+        double elapseTime = (double)(cv::getTickCount() - t1) / cv::getTickFrequency();
+        cumTime += elapseTime;
+        printf("Elapsed second Time:%.5f,avg time:%.6f\n", elapseTime, cumTime / (i + 1));
     }
 
     return 0;
