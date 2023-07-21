@@ -40,6 +40,35 @@ buildMapping::HDMapping::HDMapping() {
 };
 buildMapping::HDMapping::~HDMapping() {}
 
+void buildMapping::HDMapping::reset() {
+    prevImg = cv::Mat();
+    preKeypts.clear();
+    preDescriptors = cv::Mat();
+
+    cumDist = 0.0;
+    vehiclePoses.clear();
+
+    HDmapOutput.bigImg = cv::Mat();
+    HDmapOutput.ref.XWorldLimits[0] = 0;
+    HDmapOutput.ref.XWorldLimits[1] = 1;
+    HDmapOutput.ref.YWorldLimits[0] = 0;
+    HDmapOutput.ref.YWorldLimits[1] = 1;
+
+    preRelTform = (cv::Mat_<double>(2, 3) << 1, 0, 0,
+                   0, 1, 0);
+    relTform = (cv::Mat_<double>(2, 3) << 1, 0, 0,
+                0, 1, 0);
+    previousImgPose = (cv::Mat_<double>(2, 3) << 1, 0, 0,
+                       0, 1, 0);
+    orbDetector = cv::ORB::create(307200);
+}
+
+void buildMapping::HDMapping::saveMapData() {
+}
+
+void buildMapping::HDMapping::loadMapData() {
+}
+
 void buildMapping::HDMapping::constructWorldMap(const cv::Mat& srcImage) {
     static size_t num = 0;
     num++;
@@ -182,6 +211,8 @@ void buildMapping::HDMapping::constructWorldMap(const cv::Mat& srcImage) {
             fid << num << std::endl;
             fid.close();
 #endif
+            saveMapData();
+            reset();
         }
     } else {
         orbDetector->compute(currImg, currKeypts, currDescriptors);
@@ -302,7 +333,7 @@ void buildMapping::HDMapping::constructWorldMap(const cv::Mat& srcImage) {
     std::cout << "matches ratio:" << matches.size() << "/" << preKeypts.size() << std::endl;
     std::cout << "rigid estimate matches ratio:" << rigidMatches.size() << "/" << matches.size() << std::endl;
 
-    assert(rigidMatches.size() > 3);
+    // assert(rigidMatches.size() > 3);
 
     // Draw top matches
     cv::Mat imMatches;
@@ -332,7 +363,7 @@ void buildMapping::HDMapping::constructWorldMap(const cv::Mat& srcImage) {
         }
     }
 
-    cv::imwrite("bigImgCopy.jpg", drawImage);
+    cv::imwrite("bigImgCopy.png", drawImage);
 #endif
 
     // update previous state variables

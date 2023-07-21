@@ -45,6 +45,10 @@ class HDMapping {
                              cv::Size size, std::vector<cv::KeyPoint>& outputPts, std::vector<int>& indexs);
 
     void estiTform(std::vector<cv::Point2f>& prePoints, std::vector<cv::Point2f>& currPoints, cv::Mat& tform2x3, cv::Mat& inliers, int& status);
+
+    void reset();
+    void saveMapData();
+    void loadMapData();
 };
 
 }  // namespace buildMapping

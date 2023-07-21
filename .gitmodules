@@ -1,0 +1,3 @@
+[submodule "DBOW3"]
+	path = DBOW3
+	url = git@github.com:cuixing158/DBOW3.git
