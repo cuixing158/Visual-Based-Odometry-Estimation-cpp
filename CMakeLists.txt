@@ -24,6 +24,7 @@ src/HDMapping.cpp)
 target_compile_features(main INTERFACE cxx_std_11)
 target_include_directories(main PRIVATE ${OpenCV_INCLUDE_DIRS} src c_cpp_utils c_cpp_utils/spdlog ThirdParty/rigidTform2d ThirdParty/selectUniform2)
 target_link_libraries(main PRIVATE ${OpenCV_LIBS} ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/rigidTform2d/build/estimateAffineRigid2D.so ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/selectUniform2/build/selectUniform2.so)
+message(STATUS "CMAKE_CURRENT_SOURCE_DIR:${CMAKE_CURRENT_SOURCE_DIR}")
 
 add_executable(selectUniform2 ThirdParty/selectUniform2/examples/main.cpp)
 target_include_directories(selectUniform2 PRIVATE  ThirdParty/selectUniform2)

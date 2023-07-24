@@ -18,15 +18,17 @@
 #include "src/HDMapping.h"
 
 int main(int, char **) {
-    std::string imagePath = "/opt_disk2/rd22946/AllDataAndModels/from_tongwenchao/116_new_undistort/116";  //"/opt_disk2/rd22946/AllDataAndModels/from_tongwenchao/map_R_new_undistort/map_R";
+    std::string imagePath = "opt_disk2/rd22946/AllDataAndModels/from_tongwenchao/116_new_undistort/116";  // opt_disk2/rd22946/AllDataAndModels/from_tongwenchao/116_new_undistort/116";  //"/opt_disk2/rd22946/AllDataAndModels/from_tongwenchao/map_R_new_undistort/map_R";
     std::vector<std::string> imagePaths;
     size_t numImgs = getFullNames(filesystem::path(imagePath), imagePaths, ".jpg");
+    // std::sort(imagePaths.begin(), imagePaths.end(),
+    //           [](std::string p1, std::string p2) { return atoi(filesystem::path(p1).filenameNoExt().substr(6).c_str()) < atoi(filesystem::path(p2).filenameNoExt().substr(6).c_str()); });
     std::sort(imagePaths.begin(), imagePaths.end(),
-              [](std::string p1, std::string p2) { return atoi(filesystem::path(p1).filenameNoExt().substr(6).c_str()) < atoi(filesystem::path(p2).filenameNoExt().substr(6).c_str()); });
+              [](std::string p1, std::string p2) { return atoi(filesystem::path(p1).filenameNoExt().c_str()) < atoi(filesystem::path(p2).filenameNoExt().c_str()); });
 
     buildMapping::HDMapping obj;
     double cumTime = 0.0;
-    for (size_t i = 351; i < 1160; i++) {
+    for (size_t i = 1; i < numImgs; i++) {  // from 351, to 1160 for 116_new_undistort/116
         std::cout << imagePaths[i] << std::endl;
         cv::Mat srcImage = cv::imread(imagePaths[i]);
         double t1 = cv::getTickCount();
