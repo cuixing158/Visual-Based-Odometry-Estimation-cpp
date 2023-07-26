@@ -20,9 +20,24 @@ endif()
 
 
 add_executable(main main.cpp
-src/HDMapping.cpp)
+src/HDMapping.cpp 
+DBOW3/src/BowVector.cpp
+DBOW3/src/Database.cpp
+DBOW3/src/DescManip.cpp
+DBOW3/src/FeatureVector.cpp
+DBOW3/src/QueryResults.cpp
+DBOW3/src/quicklz.c
+DBOW3/src/ScoringObject.cpp
+DBOW3/src/Vocabulary.cpp)
 target_compile_features(main INTERFACE cxx_std_11)
-target_include_directories(main PRIVATE ${OpenCV_INCLUDE_DIRS} src c_cpp_utils c_cpp_utils/spdlog ThirdParty/rigidTform2d ThirdParty/selectUniform2)
+target_include_directories(main PRIVATE ${OpenCV_INCLUDE_DIRS}
+ src 
+ c_cpp_utils 
+ c_cpp_utils/spdlog
+ ThirdParty/rigidTform2d
+ ThirdParty/selectUniform2
+ ThirdParty/slamMapGraph2D
+ DBOW3/src)
 target_link_libraries(main PRIVATE ${OpenCV_LIBS} ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/rigidTform2d/build/estimateAffineRigid2D.so ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/selectUniform2/build/selectUniform2.so)
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR:${CMAKE_CURRENT_SOURCE_DIR}")
 

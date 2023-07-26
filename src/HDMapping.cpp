@@ -99,11 +99,12 @@ void buildMapping::HDMapping::constructWorldMap(const cv::Mat& srcImage) {
     cv::Mat inliers;
     int status = 0;
     int rigidTformType = 0;
+    orbDetector->compute(currImg, currKeypts, currDescriptors);
+    if (preDescriptors.empty()) {
+        preDescriptors = currDescriptors;
+    }
+
     if (method == buildMapping::HDMapping::matchFeatureMethod::HYBRID_FEATURES) {
-        orbDetector->compute(currImg, currKeypts, currDescriptors);
-        if (preDescriptors.empty()) {
-            preDescriptors = currDescriptors;
-        }
         //match features
         cv::Ptr<cv::DescriptorMatcher> matcher = cv::DescriptorMatcher::create("FlannBased");
         if (
@@ -215,14 +216,9 @@ void buildMapping::HDMapping::constructWorldMap(const cv::Mat& srcImage) {
             reset();
         }
     } else {
-        orbDetector->compute(currImg, currKeypts, currDescriptors);
-        if (preDescriptors.empty()) {
-            preDescriptors = currDescriptors;
-        }
         //match features
         cv::Ptr<cv::DescriptorMatcher> matcher = cv::DescriptorMatcher::create("FlannBased");
-        if (
-            preDescriptors.type() != CV_32F) {
+        if (preDescriptors.type() != CV_32F) {
             preDescriptors.convertTo(preDescriptors, CV_32F);
         }
         if (currDescriptors.type() != CV_32F) {

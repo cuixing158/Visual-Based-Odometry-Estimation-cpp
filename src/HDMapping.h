@@ -6,6 +6,10 @@
 #include "opencv2/opencv.hpp"
 #include "constructWorldMap_types.h"
 
+// DBoW3
+#include "DBoW3.h"
+#include "DescManip.h"
+
 // #include "spdlog/spdlog.h"
 
 namespace buildMapping {
@@ -45,6 +49,11 @@ class HDMapping {
                              cv::Size size, std::vector<cv::KeyPoint>& outputPts, std::vector<int>& indexs);
 
     void estiTform(std::vector<cv::Point2f>& prePoints, std::vector<cv::Point2f>& currPoints, cv::Mat& tform2x3, cv::Mat& inliers, int& status);
+
+    // loop
+    std::vector<cv::Mat> m_features;
+    DBoW3::Database db;
+    void loopDatabase_add_feature(cv::Mat& imageFeature);
 
     void reset();
     void saveMapData();
