@@ -20,6 +20,54 @@ typedef struct imageKptsAndFeatures {
     std::vector<cv::KeyPoint> keyPoints;
     cv::Mat features;
 } imageKptsAndFeatures;
+
+template <typename T>
+std::vector<int> findItems(std::vector<T> const& v, int greatThanTarget) {
+    std::vector<int> indexs;
+    auto it = v.begin();
+    while ((it = std::find_if(it, v.end(), [&](T const& e) { return e >= greatThanTarget; })) != v.end()) {
+        indexs.push_back(std::distance(v.begin(), it));
+        it++;
+    }
+    return indexs;
+}
+
+/**
+* @brief       组合
+* @details     从全排列推算组合情况. 功能等同于MATLAB的nchoosek函数
+* @param[in]   V  V is a vector of length N, produces a matrix
+    with N!/K!(N-K)! rows and K columns. Each row of the result has K of
+    the elements in the vector V.
+* @param[out]  outArgName output argument description.
+* @return      返回值
+* @retval      返回值类型
+* @par 标识符
+*     保留
+* @par 其它
+*
+* @par 修改日志
+*      cuixingxing于2023/07/28创建
+*/
+template <typename T>
+std::vector<std::vector<T>> nchoosek(std::vector<T> V, int K) {
+    int N = V.size();
+    std::string bitmask(K, 1);  // K leading 1's
+    bitmask.resize(N, 0);       // N-K trailing 0's
+
+    std::vector<std::vector<T>> arr;
+    do {
+        std::vector<T> t_arr(K);
+        int j = 0;
+        for (int i = 0; i < N; ++i) {
+            int ele = V[i];
+            if (bitmask[i]) {
+                t_arr[j++] = ele;
+            }
+        }
+        arr.push_back(t_arr);
+    } while (std::prev_permutation(bitmask.begin(), bitmask.end()));
+    return arr;
+}
 class HDMapping {
    public:
     HDMapping();
@@ -63,11 +111,10 @@ class HDMapping {
     // loop
     std::vector<imageKptsAndFeatures> m_points_features;
     DBoW3::Database m_db;
-    SlamGraph2D::myGraph m_instancePtr;
     SlamGraph2D::slamPoseGraph m_pg;  // 索引从1开始
     void detectLoopAndAddGraph();
     void loopDatabaseAddFeaturesAndSave(std::string saveDataBaseYmlGz = "./database.yml.gz");
-    DBoW3::QueryResults buildMapping::HDMapping::retrieveImages(cv::Mat queryImage);
+    DBoW3::QueryResults retrieveImages(cv::Mat queryImage);
 
     void reset();
     void saveMapData();

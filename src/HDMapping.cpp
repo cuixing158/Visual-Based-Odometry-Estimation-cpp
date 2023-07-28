@@ -9,59 +9,13 @@
 
 #include "myGraph.h"
 #include "slamPoseGraph.h"
+#include "poseGraph.h"
 
 #include "../c_cpp_utils/path.h"
 
 #define DEBUG_SHOW_IMAGE 1
 // #define USE_SSC_UNIFORM
 
-template <typename T>
-std::vector<int> findItems(std::vector<T> const& v, int greatThanTarget) {
-    std::vector<int> indexs;
-    auto it = v.begin();
-    while ((it = std::find_if(it, v.end(), [&](T const& e) { return e >= greatThanTarget; })) != v.end()) {
-        indexs.push_back(std::distance(v.begin(), it));
-        it++;
-    }
-    return indexs;
-}
-
-/**
-* @brief       组合
-* @details     从全排列推算组合情况. 功能等同于MATLAB的nchoosek函数
-* @param[in]   V  V is a vector of length N, produces a matrix
-    with N!/K!(N-K)! rows and K columns. Each row of the result has K of
-    the elements in the vector V.
-* @param[out]  outArgName output argument description.
-* @return      返回值
-* @retval      返回值类型
-* @par 标识符
-*     保留
-* @par 其它
-*
-* @par 修改日志
-*      cuixingxing于2023/07/28创建
-*/
-template <typename T>
-std::vector<std::vector<T>> nchoosek(std::vector<T> V, int K) {
-    int N = V.size();
-    std::string bitmask(K, 1);  // K leading 1's
-    bitmask.resize(N, 0);       // N-K trailing 0's
-
-    std::vector<std::vector<T>> arr;
-    do {
-        std::vector<T> t_arr(K);
-        int j = 0;
-        for (int i = 0; i < N; ++i) {
-            int ele = V[i];
-            if (bitmask[i]) {
-                t_arr[j++] = ele;
-            }
-        }
-        arr.push_back(t_arr);
-    } while (std::prev_permutation(bitmask.begin(), bitmask.end()));
-    return arr;
-}
 namespace buildMapping {
 class HDMapping;
 }
@@ -128,7 +82,7 @@ void buildMapping::HDMapping::saveMapData() {
 void buildMapping::HDMapping::loadMapData() {
 }
 
-void buildMapping::HDMapping::constructWorldMap(const cv::Mat& srcImage, bool isStopConstructWorldMap = false) {
+void buildMapping::HDMapping::constructWorldMap(const cv::Mat& srcImage, bool isStopConstructWorldMap) {
     static size_t num = 0;
 
     cv::Mat currImg = srcImage;
@@ -348,6 +302,17 @@ void buildMapping::HDMapping::constructWorldMap(const cv::Mat& srcImage, bool is
     // 开始poseGraph优化建图
     if (isStopConstructWorldMap) {
         detectLoopAndAddGraph();
+        //optimize pose
+        SlamGraph2D::myGraph instance;
+        SlamGraph2D::coder::poseGraph lobj_2;
+        SlamGraph2D::coder::robotics::core::internal::BlockMatrix lobj_1[3];
+        m_pg.optimizePoseGraph2D(&instance, lobj_1[1], lobj_2);
+        // updateNodeVehiclePtPoses = zeros(currFrameIdx,3);
+        // if options.usePoseGraph
+        //     updatePg = optimizePoseGraph(pg);
+        //     updateNodeVehiclePtPoses = nodeEstimates(updatePg)+[initViclePtPose.Translation,0];
+        //     updateNodeVehiclePtPoses = updateNodeVehiclePtPoses(1:currFrameIdx,:);
+        // else
     }
 
 #if DEBUG_SHOW_IMAGE
@@ -445,8 +410,7 @@ void buildMapping::HDMapping::constructWorldMap(const cv::Mat& srcImage, bool is
 }
 
 void buildMapping::HDMapping::estiTform(std::vector<cv::Point2f>& prePoints, std::vector<cv::Point2f>& currPoints, cv::Mat& tform2x3, cv::Mat& inliers, int& status) {
-    coder::array<double, 2U>
-        pts1_tmp, pts2_tmp;
+    coder::array<double, 2U> pts1_tmp, pts2_tmp;
     coder::array<boolean_T, 2U> inlierIndex;
     double tform2x3_[6];
 
@@ -459,8 +423,7 @@ void buildMapping::HDMapping::estiTform(std::vector<cv::Point2f>& prePoints, std
         pts2_tmp[i] = currPoints[i].x;
         pts2_tmp[i + currPoints.size()] = currPoints[i].y;
     }
-    estimateAffineRigid2D::estimateAffineRigid2D(pts1_tmp, pts2_tmp, tform2x3_,
-                                                 inlierIndex, &status);
+    estimateAffineRigid2D::estimateAffineRigid2D(pts1_tmp, pts2_tmp, tform2x3_, inlierIndex, &status);
     inliers = cv::Mat(prePoints.size(), 1, CV_8U, inlierIndex.data()).clone();
     tform2x3 = (cv::Mat_<double>(2, 3) << tform2x3_[0], tform2x3_[2], tform2x3_[4], tform2x3_[1], tform2x3_[3], tform2x3_[5]);
 }
@@ -500,7 +463,7 @@ void buildMapping::HDMapping::selectUniformPoints(std::vector<cv::KeyPoint>& key
     }
 }
 
-void buildMapping::HDMapping::loopDatabaseAddFeaturesAndSave(std::string saveDataBaseYmlGz = "./database.yml.gz") {
+void buildMapping::HDMapping::loopDatabaseAddFeaturesAndSave(std::string saveDataBaseYmlGz) {
     // branching factor and depth levels
     const int k = 10;
     const int L = 4;
