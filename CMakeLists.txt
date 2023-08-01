@@ -22,32 +22,19 @@ add_executable(rigidTform2d ThirdParty/rigidTform2d/examples/main.cpp)
 target_include_directories(rigidTform2d PRIVATE  ThirdParty/rigidTform2d ThirdParty/rigidTform2d/examples/main.h)
 target_link_libraries(rigidTform2d PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/rigidTform2d/build/estimateAffineRigid2D.so m)
 
-add_executable(main main.cpp
-src/HDMapping.cpp 
-DBOW3/src/BowVector.cpp
-DBOW3/src/Database.cpp
-DBOW3/src/DescManip.cpp
-DBOW3/src/FeatureVector.cpp
-DBOW3/src/QueryResults.cpp
-DBOW3/src/quicklz.c
-DBOW3/src/ScoringObject.cpp
-DBOW3/src/Vocabulary.cpp
-ThirdParty/rigidTform2d/estimateAffineRigid2D.cpp
-ThirdParty/rigidTform2d/rt_nonfinite.cpp
-ThirdParty/rigidTform2d/rtGetInf.cpp
-ThirdParty/rigidTform2d/rtGetNaN.cpp)
+add_executable(main main.cpp src/HDMapping.cpp)
 target_compile_features(main INTERFACE cxx_std_11)
 target_include_directories(main PRIVATE ${OpenCV_INCLUDE_DIRS}
- src 
- c_cpp_utils 
- c_cpp_utils/spdlog
+c_cpp_utils 
  ThirdParty/rigidTform2d
  ThirdParty/selectUniform2
  ThirdParty/slamMapGraph2D
  DBOW3/src)
-target_link_libraries(main PRIVATE ${OpenCV_LIBS}  ThirdParty/rigidTform2d/build/estimateAffineRigid2D.so
+target_link_libraries(main PRIVATE ${OpenCV_LIBS}  
 ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/selectUniform2/build/selectUniform2.so 
-${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/slamMapGraph2D/build/slamMapGraph2D.so)
+${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/slamMapGraph2D/build/slamMapGraph2D.so
+${CMAKE_CURRENT_SOURCE_DIR}/DBOW3/build/src/libDBoW3.so 
+${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/rigidTform2d/build/estimateAffineRigid2D.so m)
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR:${CMAKE_CURRENT_SOURCE_DIR}")
 
 add_executable(selectUniform2 ThirdParty/selectUniform2/examples/main.cpp)
