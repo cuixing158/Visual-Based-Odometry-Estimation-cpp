@@ -25,11 +25,11 @@ target_link_libraries(rigidTform2d PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ThirdPart
 add_executable(main main.cpp src/HDMapping.cpp)
 target_compile_features(main INTERFACE cxx_std_11)
 target_include_directories(main PRIVATE ${OpenCV_INCLUDE_DIRS}
-c_cpp_utils 
- ThirdParty/rigidTform2d
- ThirdParty/selectUniform2
- ThirdParty/slamMapGraph2D
- DBOW3/src)
+${CMAKE_CURRENT_SOURCE_DIR}
+ThirdParty/rigidTform2d
+ThirdParty/selectUniform2
+ThirdParty/slamMapGraph2D
+DBOW3/src)
 target_link_libraries(main PRIVATE ${OpenCV_LIBS}  
 ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/selectUniform2/build/selectUniform2.so 
 ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/slamMapGraph2D/build/slamMapGraph2D.so

@@ -2,17 +2,6 @@
 #include <algorithm>
 #include "HDMapping.h"
 
-#include "selectUniform2.h"
-#include "coder_array.h"
-#include "estimateAffineRigid2D.h"
-#include "rt_nonfinite.h"
-
-#include "myGraph.h"
-#include "slamPoseGraph.h"
-#include "poseGraph.h"
-
-#include "path.h"
-
 #define DEBUG_SHOW_IMAGE 1
 // #define USE_SSC_UNIFORM
 
@@ -423,7 +412,7 @@ void buildMapping::HDMapping::estiTform(std::vector<cv::Point2f>& prePoints, std
         pts2_tmp[i] = currPoints[i].x;
         pts2_tmp[i + currPoints.size()] = currPoints[i].y;
     }
-    // estimateAffineRigid2D::estimateAffineRigid2D(pts1_tmp, pts2_tmp, tform2x3_, inlierIndex, &status);
+    estimateAffineRigid2D::estimateAffineRigid2D(pts1_tmp, pts2_tmp, tform2x3_, inlierIndex, &status);
     inliers = cv::Mat(prePoints.size(), 1, CV_8U, inlierIndex.data()).clone();
     tform2x3 = (cv::Mat_<double>(2, 3) << tform2x3_[0], tform2x3_[2], tform2x3_[4], tform2x3_[1], tform2x3_[3], tform2x3_[5]);
 }

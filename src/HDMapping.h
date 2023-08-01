@@ -1,10 +1,15 @@
-#ifndef HDMAPPING_H
-#define HDMAPPING_H
+#pragma once
 
 #include <vector>
 #include <random>
 #include "opencv2/opencv.hpp"
 #include "constructWorldMap_types.h"
+
+#include "estimateAffineRigid2D.h"
+#include "selectUniform2.h"
+#include "coder_array.h"
+
+#include "c_cpp_utils/path.h"
 
 // DBoW3
 #include "DBoW3.h"
@@ -12,7 +17,8 @@
 
 //loop
 #include "slamPoseGraph.h"
-// #include "spdlog/spdlog.h"
+#include "myGraph.h"
+#include "poseGraph.h"
 
 namespace buildMapping {
 
@@ -122,5 +128,3 @@ class HDMapping {
 };
 
 }  // namespace buildMapping
-
-#endif
