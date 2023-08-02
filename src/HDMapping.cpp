@@ -2,7 +2,8 @@
 #include <algorithm>
 #include "HDMapping.h"
 
-#define DEBUG_SHOW_IMAGE 1
+#define DEBUG_SHOW_REALTIME_IMAGE 0
+#define DEBUG_SHOW_FUSE_OPTIMIZE_IMAGE 1
 // #define USE_SSC_UNIFORM
 
 namespace buildMapping {
@@ -71,7 +72,7 @@ void buildMapping::HDMapping::saveMapData() {
 void buildMapping::HDMapping::loadMapData() {
 }
 
-void buildMapping::HDMapping::constructWorldMap(const cv::Mat& srcImage, bool isStopConstructWorldMap) {
+buildMapping::HDMapping::buildMapStatus buildMapping::HDMapping::constructWorldMap(const cv::Mat& srcImage, bool isStopConstructWorldMap) {
     static size_t num = 0;
 
     cv::Mat currImg = srcImage;
@@ -215,7 +216,7 @@ void buildMapping::HDMapping::constructWorldMap(const cv::Mat& srcImage, bool is
             fid.close();
 #endif
             saveMapData();
-            reset();
+            // reset();
         }
     } else {
         //match features
@@ -296,15 +297,34 @@ void buildMapping::HDMapping::constructWorldMap(const cv::Mat& srcImage, bool is
         SlamGraph2D::coder::poseGraph lobj_2;
         SlamGraph2D::coder::robotics::core::internal::BlockMatrix lobj_1[3];
         m_pg.optimizePoseGraph2D(&instance, lobj_1[1], lobj_2);
-        // updateNodeVehiclePtPoses = zeros(currFrameIdx,3);
-        // if options.usePoseGraph
-        //     updatePg = optimizePoseGraph(pg);
-        //     updateNodeVehiclePtPoses = nodeEstimates(updatePg)+[initViclePtPose.Translation,0];
-        //     updateNodeVehiclePtPoses = updateNodeVehiclePtPoses(1:currFrameIdx,:);
-        // else
+
+        coder::array<double, 2U> updateNodePoses;
+        m_pg.nodeEstimates2D(updateNodePoses);  // default start from (0,0,0)
+        std::vector<cv::Vec3d> updateNodeVehiclePtPoses;
+        for (size_t node_idx = 0; node_idx < num; node_idx++) {
+            updateNodeVehiclePtPoses.push_back(cv::Vec3d(updateNodePoses.at(node_idx, 0), updateNodePoses.at(node_idx, 1), updateNodePoses.at(node_idx, 2)) +
+                                               m_initViclePtPose);
+        }
+        m_vehiclePoses = updateNodeVehiclePtPoses;
+
+// 融合姿态图输出
+#if DEBUG_SHOW_FUSE_OPTIMIZE_IMAGE
+        std::string imageFilesList = "imageFilesList.txt";
+        fuseOptimizeHDMap(imageFilesList, updateNodeVehiclePtPoses);
+        cv::Mat drawImage;
+        drawRoutePath(drawImage);
+        cv::imwrite("bigImgCopy_fuseOptimize.png", drawImage);
+#endif
+
+        // 保存特征和状态相关数据
+        // inputOutputStruct.isBuildMapOver = true;% 建图完毕
+
+        // writeStructBin(imageViewSt, options.imageViewStConfigFile, options.imageViewStDataFile);
+        // writeStructBin(inputOutputStruct, options.hdMapConfigFile, options.hdMapDataFile);
+        return buildMapStatus::BUILD_MAP_OVER;
     }
 
-#if DEBUG_SHOW_IMAGE
+#if DEBUG_SHOW_REALTIME_IMAGE
     cv::Mat currCorner = (cv::Mat_<double>(3, 4) << 0, currImg.cols - 1, currImg.cols - 1, 0,
                           0, 0, currImg.rows - 1, currImg.rows - 1,
                           1, 1, 1, 1);
@@ -370,20 +390,7 @@ void buildMapping::HDMapping::constructWorldMap(const cv::Mat& srcImage, bool is
     // cv::Mat dstMat;
     // srcImage.copyTo(dstMat, orbDetectMask);
     cv::Mat drawImage;
-    cv::cvtColor(m_HDmapOutput.bigImg, drawImage, cv::COLOR_GRAY2BGR);
-    int lenPoses = m_vehiclePoses.size();
-    if (lenPoses > 1) {
-        for (size_t i = 0; i < lenPoses - 1; i++) {
-            cv::Point pt1, pt2;
-            cv::Vec3d prePose, nextPose;
-            prePose = m_vehiclePoses[i];
-            nextPose = m_vehiclePoses[i + 1];
-            pt1 = cv::Point(prePose[0] - m_HDmapOutput.ref.XWorldLimits[0], prePose[1] - m_HDmapOutput.ref.YWorldLimits[0]);
-            pt2 = cv::Point(nextPose[0] - m_HDmapOutput.ref.XWorldLimits[0], nextPose[1] - m_HDmapOutput.ref.YWorldLimits[0]);
-            cv::line(drawImage, pt1, pt2, cv::Scalar(0, 0, 255), 4);
-        }
-    }
-
+    drawRoutePath(drawImage);
     cv::imwrite("bigImgCopy.png", drawImage);
 #endif
 
@@ -396,6 +403,7 @@ void buildMapping::HDMapping::constructWorldMap(const cv::Mat& srcImage, bool is
     m_preViclePtPose = currVehiclePtPose;
 
     num++;
+    return buildMapStatus::BUILD_MAP_PROCESSING;
 }
 
 void buildMapping::HDMapping::estiTform(std::vector<cv::Point2f>& prePoints, std::vector<cv::Point2f>& currPoints, cv::Mat& tform2x3, cv::Mat& inliers, int& status) {
@@ -602,6 +610,98 @@ void buildMapping::HDMapping::detectLoopAndAddGraph() {
             cv::Rodrigues(tempR, angRadius);
             double measurement[3] = {loopTform.at<double>(0, 2), loopTform.at<double>(1, 2), angRadius[2]};  // 注意角度，是相对值, 单位为弧度
             m_pg.addRelativePose2D(measurement, idx, loopCandidate);
+        }
+    }
+}
+
+void buildMapping::HDMapping::fuseOptimizeHDMap(std::string imageFilesList, std::vector<cv::Vec3d>& updateNodeVehiclePtPoses) {
+    int numNodes = updateNodeVehiclePtPoses.size();
+    cv::Mat relTformA = (cv::Mat_<double>(3, 3) << 1, 0, -updateNodeVehiclePtPoses[0][0],
+                         0, 1, -updateNodeVehiclePtPoses[0][1],
+                         0, 0, 1);
+
+    m_HDmapOutput.ref.XWorldLimits[0] = 0.0;
+    m_HDmapOutput.ref.XWorldLimits[1] = 0.5;
+    m_HDmapOutput.ref.YWorldLimits[0] = 0.0;
+    m_HDmapOutput.ref.YWorldLimits[1] = 0.5;
+    m_HDmapOutput.bigImg.release();
+
+    int idx = 0;
+    std::ifstream fid(imageFilesList);
+    std::string line;
+    while (std::getline(fid, line) && (idx < numNodes)) {
+        cv::Mat currImg = cv::imread(line);
+        double theta = updateNodeVehiclePtPoses[idx][2];  // in radian
+        cv::Mat currNodeVehiclePtPoseA = (cv::Mat_<double>(3, 3) << std::cos(theta), -std::sin(theta), updateNodeVehiclePtPoses[idx][0],
+                                          std::sin(theta), std::cos(theta), updateNodeVehiclePtPoses[idx][1],
+                                          0, 0, 1);
+        cv::Mat imageTargetPoseA = currNodeVehiclePtPoseA * relTformA;
+        cv::Mat tform = imageTargetPoseA;
+        cv::Mat currCorner = (cv::Mat_<double>(3, 4) << 0, currImg.cols - 1, currImg.cols - 1, 0,
+                              0, 0, currImg.rows - 1, currImg.rows - 1,
+                              1, 1, 1, 1);
+        currCorner = tform * currCorner;
+
+        double xmin, xmax, ymin, ymax;
+        cv::minMaxLoc(currCorner.row(0), &xmin, &xmax);
+        cv::minMaxLoc(currCorner.row(1), &ymin, &ymax);
+        double pad_left = 0, pad_right = 0, pad_top = 0, pad_down = 0;
+        if (xmin < m_HDmapOutput.ref.XWorldLimits[0]) {
+            pad_left = m_HDmapOutput.ref.XWorldLimits[0] - xmin;
+            m_HDmapOutput.ref.XWorldLimits[0] = xmin;
+        }
+
+        if (xmax > m_HDmapOutput.ref.XWorldLimits[1]) {
+            pad_right = xmax - m_HDmapOutput.ref.XWorldLimits[1];
+            m_HDmapOutput.ref.XWorldLimits[1] = xmax;
+        }
+
+        if (ymin < m_HDmapOutput.ref.YWorldLimits[0]) {
+            pad_top = m_HDmapOutput.ref.YWorldLimits[0] - ymin;
+            m_HDmapOutput.ref.YWorldLimits[0] = ymin;
+        }
+
+        if (ymax > m_HDmapOutput.ref.YWorldLimits[1]) {
+            pad_down = ymax - m_HDmapOutput.ref.YWorldLimits[1];
+            m_HDmapOutput.ref.YWorldLimits[1] = ymax;
+        }
+
+        m_HDmapOutput.ref.ImageSize[0] = std::round(m_HDmapOutput.ref.YWorldLimits[1] - m_HDmapOutput.ref.YWorldLimits[0]) + 1;
+        m_HDmapOutput.ref.ImageSize[1] = std::round(m_HDmapOutput.ref.XWorldLimits[1] - m_HDmapOutput.ref.XWorldLimits[0]) + 1;
+
+        // 平移到可视化区域
+        cv::Mat topImg, bwMask;
+        tform.colRange(2, 3) = tform.colRange(2, 3) - (cv::Mat_<double>(2, 1) << m_HDmapOutput.ref.XWorldLimits[0], m_HDmapOutput.ref.YWorldLimits[0]);
+        cv::warpAffine(currImg, topImg, tform, cv::Size(m_HDmapOutput.ref.ImageSize[1], m_HDmapOutput.ref.ImageSize[0]));
+        if (idx == 0) {
+            cv::Mat temp = cv::Mat::ones(m_BW.rows, m_BW.cols, m_BW.type());
+            cv::warpAffine(temp, bwMask, tform, cv::Size(m_HDmapOutput.ref.ImageSize[1], m_HDmapOutput.ref.ImageSize[0]));
+            m_HDmapOutput.bigImg = currImg;
+        } else {
+            cv::warpAffine(m_BW, bwMask, tform, cv::Size(m_HDmapOutput.ref.ImageSize[1], m_HDmapOutput.ref.ImageSize[0]));
+        }
+        cv::copyMakeBorder(m_HDmapOutput.bigImg, m_HDmapOutput.bigImg, std::round(pad_top), std::round(pad_down), std::round(pad_left), std::round(pad_right), cv::BORDER_CONSTANT, cv::Scalar::all(0));
+        cv::resize(m_HDmapOutput.bigImg, m_HDmapOutput.bigImg, cv::Size(topImg.cols, topImg.rows));
+        topImg.copyTo(m_HDmapOutput.bigImg, bwMask);
+
+        idx = idx + 1;
+    }
+    fid.close();
+}
+
+void buildMapping::HDMapping::drawRoutePath(cv::Mat& drawImage) const {
+    drawImage.release();
+    cv::cvtColor(m_HDmapOutput.bigImg, drawImage, cv::COLOR_GRAY2BGR);
+    int lenPoses = m_vehiclePoses.size();
+    if (lenPoses > 1) {
+        for (size_t i = 0; i < lenPoses - 1; i++) {
+            cv::Point pt1, pt2;
+            cv::Vec3d prePose, nextPose;
+            prePose = m_vehiclePoses[i];
+            nextPose = m_vehiclePoses[i + 1];
+            pt1 = cv::Point(prePose[0] - m_HDmapOutput.ref.XWorldLimits[0], prePose[1] - m_HDmapOutput.ref.YWorldLimits[0]);
+            pt2 = cv::Point(nextPose[0] - m_HDmapOutput.ref.XWorldLimits[0], nextPose[1] - m_HDmapOutput.ref.YWorldLimits[0]);
+            cv::line(drawImage, pt1, pt2, cv::Scalar(0, 0, 255), 4);
         }
     }
 }

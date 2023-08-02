@@ -18,25 +18,33 @@
 #include "src/HDMapping.h"
 
 int main(int, char **) {
-    std::string imagePath = "opt_disk2/rd22946/AllDataAndModels/from_tongwenchao/116_new_undistort/116";  // opt_disk2/rd22946/AllDataAndModels/from_tongwenchao/116_new_undistort/116";  //"/opt_disk2/rd22946/AllDataAndModels/from_tongwenchao/map_R_new_undistort/map_R";
+    std::string imagePath = "/opt_disk2/rd22946/AllDataAndModels/from_tongwenchao/map_R_new_undistort/map_R";  // opt_disk2/rd22946/AllDataAndModels/from_tongwenchao/116_new_undistort/116";  //"/opt_disk2/rd22946/AllDataAndModels/from_tongwenchao/map_R_new_undistort/map_R";
     std::vector<std::string> imagePaths;
     size_t numImgs = getFullNames(filesystem::path(imagePath), imagePaths, ".jpg");
     // std::sort(imagePaths.begin(), imagePaths.end(),
     //           [](std::string p1, std::string p2) { return atoi(filesystem::path(p1).filenameNoExt().substr(6).c_str()) < atoi(filesystem::path(p2).filenameNoExt().substr(6).c_str()); });
     std::sort(imagePaths.begin(), imagePaths.end(),
               [](std::string p1, std::string p2) { return atoi(filesystem::path(p1).filenameNoExt().c_str()) < atoi(filesystem::path(p2).filenameNoExt().c_str()); });
+    std::ofstream fid("imageFilesList.txt");
 
     buildMapping::HDMapping obj;
     double cumTime = 0.0;
+    bool flag = false;
     for (size_t i = 1; i < numImgs; i++) {  // from 351, to 1160 for 116_new_undistort/116
-        std::cout << imagePaths[i] << std::endl;
+        fid << imagePaths[i] << std::endl;
         cv::Mat srcImage = cv::imread(imagePaths[i]);
+        if (i == 1200) {
+            flag = true;
+        }
         double t1 = cv::getTickCount();
-        obj.constructWorldMap(srcImage);
+        buildMapping::HDMapping::buildMapStatus status = obj.constructWorldMap(srcImage, flag);
         double elapseTime = (double)(cv::getTickCount() - t1) / cv::getTickFrequency();
         cumTime += elapseTime;
-        printf("Elapsed second Time:%.5f,avg time:%.6f\n", elapseTime, cumTime / (i + 1));
+        printf("%zd,Elapsed second Time:%.5f,avg time:%.6f\n", i, elapseTime, cumTime / (i + 1));
+        if (status == buildMapping::HDMapping::buildMapStatus::BUILD_MAP_OVER) {
+            break;
+        }
     }
-
+    fid.close();
     return 0;
 }

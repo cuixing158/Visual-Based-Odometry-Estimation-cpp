@@ -76,17 +76,21 @@ std::vector<std::vector<T>> nchoosek(std::vector<T> V, int K) {
 }
 class HDMapping {
    public:
+    typedef enum { ORB_FEATURES,
+                   LK_TRACK_FEATURES,
+                   HYBRID_FEATURES } matchFeatureMethod;
+
+    typedef enum { BUILD_MAP_OVER,
+                   BUILD_MAP_PROCESSING } buildMapStatus;
+
+   public:
     HDMapping();
     ~HDMapping();
-    void constructWorldMap(const cv::Mat& srcImage, bool isStopConstructWorldMap = false);
+    buildMapping::HDMapping::buildMapStatus constructWorldMap(const cv::Mat& srcImage, bool isStopConstructWorldMap = false);
 
     void localizeWorldMap();
 
    public:
-    enum matchFeatureMethod { ORB_FEATURES,
-                              LK_TRACK_FEATURES,
-                              HYBRID_FEATURES };
-
     HDmap m_HDmapOutput;
     std::vector<cv::Vec3d> m_vehiclePoses;  // [x,y,theta]位姿,theta为弧度
     double m_cumDist;                       // 行驶累计距离，单位：米
@@ -99,7 +103,7 @@ class HDMapping {
 
    private:
     // 预定义变量
-    cv::Mat m_orbDetectMask, m_BW;  // 分别对应MATLAB中的vehiclePolygon所围成的mask，BW变量，只用于更新的ROI
+    cv::Mat m_orbDetectMask, m_BW;  // 分别对应MATLAB中的vehiclePolygon所围成的mask，BW变量，分别用于检测ROI，更新的ROI
     std::vector<cv::KeyPoint> m_preKeypts, m_currKeypts;
     cv::Mat m_preDescriptors, m_currDescriptors;
     cv::Mat m_prevImg;
@@ -114,6 +118,8 @@ class HDMapping {
 
     void estiTform(std::vector<cv::Point2f>& prePoints, std::vector<cv::Point2f>& currPoints, cv::Mat& tform2x3, cv::Mat& inliers, int& status);
 
+    void fuseOptimizeHDMap(std::string imageFilesList, std::vector<cv::Vec3d>& updateNodeVehiclePtPoses);
+
     // loop
     std::vector<imageKptsAndFeatures> m_points_features;
     DBoW3::Database m_db;
@@ -125,6 +131,7 @@ class HDMapping {
     void reset();
     void saveMapData();
     void loadMapData();
+    void drawRoutePath(cv::Mat& drawImage) const;
 };
 
 }  // namespace buildMapping

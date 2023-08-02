@@ -57,6 +57,8 @@
 /ThirdParty/selectUniform2/build
 /ThirdParty/slamMapGraph2D/build
 
+imageFilesList.txt
+
 /codegen_custom_cpp/codegen/
 /yourSpecify.cpp
 /yourSpecify.h
