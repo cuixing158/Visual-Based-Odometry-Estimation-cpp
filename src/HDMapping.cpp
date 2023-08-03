@@ -26,7 +26,7 @@ buildMapping::HDMapping::HDMapping() {
     m_BW.rowRange(480 / 2, 480) = 0;
     m_BW = m_BW &= m_orbDetectMask;
     m_initViclePtPose = cv::Vec3f((285 + 358) / 2.0, (156, 326) / 2.0, 0);
-    m_method = matchFeatureMethod::LK_TRACK_FEATURES;
+    m_method = matchFeatureMethod::HYBRID_FEATURES;
 
     //第一副图像的像素坐标系为世界坐标系
     m_preRelTform = (cv::Mat_<double>(2, 3) << 1, 0, 0,
@@ -113,31 +113,35 @@ buildMapping::HDMapping::buildMapStatus buildMapping::HDMapping::constructWorldM
 
     if (m_method == buildMapping::HDMapping::matchFeatureMethod::HYBRID_FEATURES) {
         //match features
-        cv::Ptr<cv::DescriptorMatcher> matcher = cv::DescriptorMatcher::create("FlannBased");
+        cv::FlannBasedMatcher matcher;
+        double t2 = cv::getTickCount();
+        cv::Mat feature1, feature2;
         if (
             m_preDescriptors.type() != CV_32F) {
-            m_preDescriptors.convertTo(m_preDescriptors, CV_32F);
+            m_preDescriptors.convertTo(feature1, CV_32F);
         }
         if (m_currDescriptors.type() != CV_32F) {
-            m_currDescriptors.convertTo(m_currDescriptors, CV_32F);
+            m_currDescriptors.convertTo(feature2, CV_32F);
         }
 
-#ifdef USE_TOPK_BEST_MATCHES
-        matcher->match(preDescriptors, currDescriptors, matches);
+#if 1
+        matcher.match(feature1, feature2, matches);
         //只初步选取匹配前num个较好的特征点
         int numMatches = matches.size() < 10 ? matches.size() : matches.size() / 2;
         std::nth_element(matches.begin(), matches.begin() + numMatches, matches.end());
         matches.erase(matches.begin() + numMatches, matches.end());
 #else
         std::vector<std::vector<cv::DMatch>> matchePoints;
-        matcher->knnMatch(m_preDescriptors, m_currDescriptors, matchePoints, 2);
+        matcher.knnMatch(feature1, feature2, matchePoints, 2);
         for (int i = 0; i < matchePoints.size(); i++) {
             if (matchePoints[i][0].distance < 0.6 * matchePoints[i][1].distance) {
                 matches.push_back(matchePoints[i][0]);
             }
         }
 #endif
+        printf("match Elapsed second Time:%.6f\n", (cv::getTickCount() - t2) * 1.0 / cv::getTickFrequency());
 
+        double t3 = cv::getTickCount();
         // estimate geometry rigid 2D transformation matrix
 #ifdef USE_OPENCV_FUNCTION
         std::vector<cv::Point2f>
@@ -160,7 +164,10 @@ buildMapping::HDMapping::buildMapStatus buildMapping::HDMapping::constructWorldM
             nextP[i] = m_currKeypts[matches[i].trainIdx].pt;
         }
         estiTform(preP, nextP, m_relTform, inliers, status);
+        待调查此处性能
 #endif
+        printf("estimate Elapsed second Time:%.6f\n", (cv::getTickCount() - t3) * 1.0 / cv::getTickFrequency());
+
         bool cond = (status > 0 || cv::sum(inliers)[0] <= 3);
         if (cond) {
             rigidTformType = 1;
@@ -224,22 +231,24 @@ buildMapping::HDMapping::buildMapStatus buildMapping::HDMapping::constructWorldM
         }
     } else {
         //match features
-        cv::Ptr<cv::DescriptorMatcher> matcher = cv::DescriptorMatcher::create("FlannBased");
+        // cv::Ptr<cv::DescriptorMatcher> matcher = cv::DescriptorMatcher::create("FlannBased");
+        cv::FlannBasedMatcher matcher;
+        cv::Mat feature1, feature2;
         if (m_preDescriptors.type() != CV_32F) {
-            m_preDescriptors.convertTo(m_preDescriptors, CV_32F);
+            m_preDescriptors.convertTo(feature1, CV_32F);
         }
         if (m_currDescriptors.type() != CV_32F) {
-            m_currDescriptors.convertTo(m_currDescriptors, CV_32F);
+            m_currDescriptors.convertTo(feature2, CV_32F);
         }
-#if 1
-        matcher->match(m_preDescriptors, m_currDescriptors, matches);
+#if 0
+        matcher.match(feature1,feature2, matches);
         //只初步选取匹配前num个较好的特征点
         int numMatches = matches.size() < 10 ? matches.size() : matches.size() / 2;
         std::nth_element(matches.begin(), matches.begin() + numMatches, matches.end());
         matches.erase(matches.begin() + numMatches, matches.end());
 #else
         std::vector<std::vector<cv::DMatch>> matchePoints;
-        matcher->knnMatch(m_preDescriptors, m_currDescriptors, matchePoints, 2);
+        matcher.knnMatch(feature1, feature2, matchePoints, 2);
         for (int i = 0; i < matchePoints.size(); i++) {
             if (matchePoints[i][0].distance < 0.6 * matchePoints[i][1].distance) {
                 matches.push_back(matchePoints[i][0]);
@@ -255,7 +264,7 @@ buildMapping::HDMapping::buildMapStatus buildMapping::HDMapping::constructWorldM
         }
         estiTform(preP, nextP, m_relTform, inliers, status);
     }
-    printf("LK_TRACK Elapsed second Time:%.6f\n", (cv::getTickCount() - t1) * 1.0 / cv::getTickFrequency());
+    printf("ORB_TRACK Elapsed second Time:%.6f\n", (cv::getTickCount() - t1) * 1.0 / cv::getTickFrequency());
 
     t1 = cv::getTickCount();
     // build map mode
@@ -533,7 +542,7 @@ void buildMapping::HDMapping::detectLoopAndAddGraph() {
     }
 
     // multiple loop
-    int buildMapStopFrame = m_points_features.size() - 1;
+    int buildMapStopFrame = m_points_features.size();
     int startDetectLoopIndex = std::max(buildMapStopFrame - 500, 0);
     int endDetectLoopIndex = buildMapStopFrame;
     int topK = 10;

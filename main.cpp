@@ -32,15 +32,16 @@ int main(int, char **) {
     buildMapping::HDMapping obj;
     double cumTime = 0.0;
     bool flag = false;
-    ProfilerStart("main.prof");         //开启性能分析
-    for (size_t i = 1; i < 300; i++) {  // from 351, to 1160 for 116_new_undistort/116
+    buildMapping::HDMapping::buildMapStatus status = buildMapping::HDMapping::buildMapStatus::BUILD_MAP_PROCESSING;
+    ProfilerStart("main.prof");             //开启性能分析
+    for (size_t i = 1; i < numImgs; i++) {  // from 351, to 1160 for 116_new_undistort/116
         fid << imagePaths[i] << std::endl;
         cv::Mat srcImage = cv::imread(imagePaths[i]);
-        if (i == 1200) {
+        if (i == 150) {
             flag = true;
         }
         double t1 = cv::getTickCount();
-        buildMapping::HDMapping::buildMapStatus status = obj.constructWorldMap(srcImage, flag);
+        status = obj.constructWorldMap(srcImage, flag);
         double elapseTime = (double)(cv::getTickCount() - t1) / cv::getTickFrequency();
         cumTime += elapseTime;
         printf("%zd,Elapsed second Time:%.5f,avg time:%.6f\n", i, elapseTime, cumTime / (i + 1));
