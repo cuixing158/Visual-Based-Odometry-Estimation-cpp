@@ -6,7 +6,7 @@
 #include "estimateAffineRigid2D.h"
 #include "rt_nonfinite.h"
 
-#define DEBUG_SHOW_IMAGE 1
+#define DEBUG_SHOW_IMAGE 0
 // #define USE_SSC_UNIFORM
 namespace buildMapping {
 class HDMapping;
@@ -79,6 +79,7 @@ void buildMapping::HDMapping::constructWorldMap(const cv::Mat& srcImage) {
 
     if (currImg.empty()) throw std::runtime_error("currImg is empty!");
 
+    double t1 = cv::getTickCount();
     std::vector<cv::KeyPoint> keyPts;
     orbDetector->detect(currImg, keyPts, orbDetectMask);
     std::vector<int> indexs;
@@ -93,7 +94,9 @@ void buildMapping::HDMapping::constructWorldMap(const cv::Mat& srcImage) {
         HDmapOutput.ref.YWorldLimits[0] = 0;
         HDmapOutput.ref.YWorldLimits[1] = currImg.rows - 1;
     }
+    printf("Detect Elapsed second Time:%.6f\n", (cv::getTickCount() - t1) * 1.0 / cv::getTickFrequency());
 
+    t1 = cv::getTickCount();
     std::vector<cv::DMatch> matches;
     std::vector<cv::Point2f> preP, nextP;
     cv::Mat inliers;
@@ -253,7 +256,9 @@ void buildMapping::HDMapping::constructWorldMap(const cv::Mat& srcImage) {
         }
         estiTform(preP, nextP, relTform, inliers, status);
     }
+    printf("LK_TRACK Elapsed second Time:%.6f\n", (cv::getTickCount() - t1) * 1.0 / cv::getTickFrequency());
 
+    t1 = cv::getTickCount();
     // build map mode
     cv::Mat previousImgPoseA = previousImgPose;
     cv::Mat homoMatrix = (cv::Mat_<double>(1, 3) << 0, 0, 1);
@@ -372,6 +377,7 @@ void buildMapping::HDMapping::constructWorldMap(const cv::Mat& srcImage) {
     preDescriptors = currDescriptors;
     previousImgPose = currImgPose;
     preRelTform = relTform;
+    printf("BUILDMAP Elapsed second Time:%.6f\n\n", (cv::getTickCount() - t1) * 1.0 / cv::getTickFrequency());
 }
 
 void buildMapping::HDMapping::estiTform(std::vector<cv::Point2f>& prePoints, std::vector<cv::Point2f>& currPoints, cv::Mat& tform2x3, cv::Mat& inliers, int& status) {
