@@ -4,6 +4,7 @@
 
 #define DEBUG_SHOW_REALTIME_IMAGE 0
 #define DEBUG_SHOW_FUSE_OPTIMIZE_IMAGE 1
+
 // #define USE_SSC_UNIFORM
 
 namespace buildMapping {
@@ -25,7 +26,7 @@ buildMapping::HDMapping::HDMapping() {
     m_BW.rowRange(480 / 2, 480) = 0;
     m_BW = m_BW &= m_orbDetectMask;
     m_initViclePtPose = cv::Vec3f((285 + 358) / 2.0, (156, 326) / 2.0, 0);
-    m_method = matchFeatureMethod::ORB_FEATURES;
+    m_method = matchFeatureMethod::LK_TRACK_FEATURES;
 
     //第一副图像的像素坐标系为世界坐标系
     m_preRelTform = (cv::Mat_<double>(2, 3) << 1, 0, 0,
@@ -81,6 +82,7 @@ buildMapping::HDMapping::buildMapStatus buildMapping::HDMapping::constructWorldM
 
     if (currImg.empty()) throw std::runtime_error("currImg is empty!");
 
+    double t1 = cv::getTickCount();
     std::vector<cv::KeyPoint> keyPts;
     m_orbDetector->detect(currImg, keyPts, m_orbDetectMask);
     std::vector<int> indexs;
@@ -95,7 +97,9 @@ buildMapping::HDMapping::buildMapStatus buildMapping::HDMapping::constructWorldM
         m_HDmapOutput.ref.YWorldLimits[0] = 0;
         m_HDmapOutput.ref.YWorldLimits[1] = currImg.rows - 1;
     }
+    printf("Detect Elapsed second Time:%.6f\n", (cv::getTickCount() - t1) * 1.0 / cv::getTickFrequency());
 
+    t1 = cv::getTickCount();
     std::vector<cv::DMatch> matches;
     std::vector<cv::Point2f> preP, nextP;
     cv::Mat inliers;
@@ -251,7 +255,9 @@ buildMapping::HDMapping::buildMapStatus buildMapping::HDMapping::constructWorldM
         }
         estiTform(preP, nextP, m_relTform, inliers, status);
     }
+    printf("LK_TRACK Elapsed second Time:%.6f\n", (cv::getTickCount() - t1) * 1.0 / cv::getTickFrequency());
 
+    t1 = cv::getTickCount();
     // build map mode
     cv::Mat previousImgPoseA = m_previousImgPose;
     cv::Mat homoMatrix = (cv::Mat_<double>(1, 3) << 0, 0, 1);
@@ -402,6 +408,7 @@ buildMapping::HDMapping::buildMapStatus buildMapping::HDMapping::constructWorldM
     m_preViclePtPose = currVehiclePtPose;
 
     num++;
+    printf("BUILDMAP Elapsed second Time:%.6f\n\n", (cv::getTickCount() - t1) * 1.0 / cv::getTickFrequency());
     return buildMapStatus::BUILD_MAP_PROCESSING;
 }
 
