@@ -12,6 +12,8 @@
 #include <algorithm>
 #include <iostream>
 #include <fstream>
+
+#include <gperftools/profiler.h>
 #include "opencv2/opencv.hpp"
 
 #include "c_cpp_utils/path.h"
@@ -30,7 +32,8 @@ int main(int, char **) {
     buildMapping::HDMapping obj;
     double cumTime = 0.0;
     bool flag = false;
-    for (size_t i = 1; i < numImgs; i++) {  // from 351, to 1160 for 116_new_undistort/116
+    ProfilerStart("main.prof");         //开启性能分析
+    for (size_t i = 1; i < 300; i++) {  // from 351, to 1160 for 116_new_undistort/116
         fid << imagePaths[i] << std::endl;
         cv::Mat srcImage = cv::imread(imagePaths[i]);
         if (i == 1200) {
@@ -46,5 +49,6 @@ int main(int, char **) {
         }
     }
     fid.close();
+    ProfilerStop();  //停止性能分析
     return 0;
 }

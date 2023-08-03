@@ -34,7 +34,7 @@ target_link_libraries(main PRIVATE ${OpenCV_LIBS}
 ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/selectUniform2/build/selectUniform2.so 
 ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/slamMapGraph2D/build/slamMapGraph2D.so
 ${CMAKE_CURRENT_SOURCE_DIR}/DBOW3/build/src/libDBoW3.so 
-${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/rigidTform2d/build/estimateAffineRigid2D.so m)
+${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/rigidTform2d/build/estimateAffineRigid2D.so m profiler)
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR:${CMAKE_CURRENT_SOURCE_DIR}")
 
 add_executable(selectUniform2 ThirdParty/selectUniform2/examples/main.cpp)

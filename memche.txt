@@ -1,0 +1,1130 @@
+==1060201== Memcheck, a memory error detector
+==1060201== Copyright (C) 2002-2022, and GNU GPL'd, by Julian Seward et al.
+==1060201== Using Valgrind-3.20.0 and LibVEX; rerun with -h for copyright info
+==1060201== Command: ./main
+==1060201== Parent PID: 3823452
+==1060201== 
+==1060201== Warning: noted but unhandled ioctl 0x30000001 with no size/direction hints.
+==1060201==    This could cause spurious value errors to appear.
+==1060201==    See README_MISSING_SYSCALL_OR_IOCTL for guidance on writing a proper wrapper.
+==1060201== Warning: noted but unhandled ioctl 0x27 with no size/direction hints.
+==1060201==    This could cause spurious value errors to appear.
+==1060201==    See README_MISSING_SYSCALL_OR_IOCTL for guidance on writing a proper wrapper.
+==1060201== Warning: noted but unhandled ioctl 0x25 with no size/direction hints.
+==1060201==    This could cause spurious value errors to appear.
+==1060201==    See README_MISSING_SYSCALL_OR_IOCTL for guidance on writing a proper wrapper.
+==1060201== Warning: noted but unhandled ioctl 0x17 with no size/direction hints.
+==1060201==    This could cause spurious value errors to appear.
+==1060201==    See README_MISSING_SYSCALL_OR_IOCTL for guidance on writing a proper wrapper.
+==1060201== Warning: set address range perms: large range [0x200000000, 0x400200000) (noaccess)
+==1060201== Warning: set address range perms: large range [0x59cba000, 0x79cb9000) (noaccess)
+==1060201== Warning: noted but unhandled ioctl 0x19 with no size/direction hints.
+==1060201==    This could cause spurious value errors to appear.
+==1060201==    See README_MISSING_SYSCALL_OR_IOCTL for guidance on writing a proper wrapper.
+==1060201== Warning: noted but unhandled ioctl 0x49 with no size/direction hints.
+==1060201==    This could cause spurious value errors to appear.
+==1060201==    See README_MISSING_SYSCALL_OR_IOCTL for guidance on writing a proper wrapper.
+==1060201== Warning: noted but unhandled ioctl 0x21 with no size/direction hints.
+==1060201==    This could cause spurious value errors to appear.
+==1060201==    See README_MISSING_SYSCALL_OR_IOCTL for guidance on writing a proper wrapper.
+==1060201== Warning: noted but unhandled ioctl 0x1b with no size/direction hints.
+==1060201==    This could cause spurious value errors to appear.
+==1060201==    See README_MISSING_SYSCALL_OR_IOCTL for guidance on writing a proper wrapper.
+==1060201== Warning: noted but unhandled ioctl 0x44 with no size/direction hints.
+==1060201==    This could cause spurious value errors to appear.
+==1060201==    See README_MISSING_SYSCALL_OR_IOCTL for guidance on writing a proper wrapper.
+==1060201== Warning: noted but unhandled ioctl 0x48 with no size/direction hints.
+==1060201==    This could cause spurious value errors to appear.
+==1060201==    See README_MISSING_SYSCALL_OR_IOCTL for guidance on writing a proper wrapper.
+==1060201== Warning: set address range perms: large range [0x70000000, 0x87fff000) (noaccess)
+==1060201== Invalid write of size 8
+==1060201==    at 0x69D7EDE: cv::Mat::Mat() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x8318972: cv::flann::Index::Index(cv::_InputArray const&, cv::flann::IndexParams const&, cvflann::flann_distance_t) (in /opt_disk2/rd22946/opencv4_6_0/lib/libopencv_world.so.4.6.0)
+==1060201==    by 0x4C841AA: cv::FlannBasedMatcher::train() (in /usr/local/lib/libopencv_features2d.so.3.4.16)
+==1060201==    by 0x4C7BDC3: cv::DescriptorMatcher::knnMatch(cv::_InputArray const&, std::vector<std::vector<cv::DMatch, std::allocator<cv::DMatch> >, std::allocator<std::vector<cv::DMatch, std::allocator<cv::DMatch> > > >&, int, cv::_InputArray const&, bool) (in /usr/local/lib/libopencv_features2d.so.3.4.16)
+==1060201==    by 0x4C7E77F: cv::DescriptorMatcher::match(cv::_InputArray const&, std::vector<cv::DMatch, std::allocator<cv::DMatch> >&, cv::_InputArray const&) (in /usr/local/lib/libopencv_features2d.so.3.4.16)
+==1060201==    by 0x4C7EA54: cv::DescriptorMatcher::match(cv::_InputArray const&, cv::_InputArray const&, std::vector<cv::DMatch, std::allocator<cv::DMatch> >&, cv::_InputArray const&) const (in /usr/local/lib/libopencv_features2d.so.3.4.16)
+==1060201==    by 0x14E85D: buildMapping::HDMapping::constructWorldMap(cv::Mat const&, bool) (HDMapping.cpp:231)
+==1060201==    by 0x11AED6: main (main.cpp:43)
+==1060201==  Address 0x17952cd0 is 0 bytes after a block of size 32 alloc'd
+==1060201==    at 0x483CFE3: operator new(unsigned long) (vg_replace_malloc.c:434)
+==1060201==    by 0x4C84192: cv::FlannBasedMatcher::train() (in /usr/local/lib/libopencv_features2d.so.3.4.16)
+==1060201==    by 0x4C7BDC3: cv::DescriptorMatcher::knnMatch(cv::_InputArray const&, std::vector<std::vector<cv::DMatch, std::allocator<cv::DMatch> >, std::allocator<std::vector<cv::DMatch, std::allocator<cv::DMatch> > > >&, int, cv::_InputArray const&, bool) (in /usr/local/lib/libopencv_features2d.so.3.4.16)
+==1060201==    by 0x4C7E77F: cv::DescriptorMatcher::match(cv::_InputArray const&, std::vector<cv::DMatch, std::allocator<cv::DMatch> >&, cv::_InputArray const&) (in /usr/local/lib/libopencv_features2d.so.3.4.16)
+==1060201==    by 0x4C7EA54: cv::DescriptorMatcher::match(cv::_InputArray const&, cv::_InputArray const&, std::vector<cv::DMatch, std::allocator<cv::DMatch> >&, cv::_InputArray const&) const (in /usr/local/lib/libopencv_features2d.so.3.4.16)
+==1060201==    by 0x14E85D: buildMapping::HDMapping::constructWorldMap(cv::Mat const&, bool) (HDMapping.cpp:231)
+==1060201==    by 0x11AED6: main (main.cpp:43)
+==1060201== 
+==1060201== Invalid write of size 8
+==1060201==    at 0x69D7EE9: cv::Mat::Mat() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x8318972: cv::flann::Index::Index(cv::_InputArray const&, cv::flann::IndexParams const&, cvflann::flann_distance_t) (in /opt_disk2/rd22946/opencv4_6_0/lib/libopencv_world.so.4.6.0)
+==1060201==    by 0x4C841AA: cv::FlannBasedMatcher::train() (in /usr/local/lib/libopencv_features2d.so.3.4.16)
+==1060201==    by 0x4C7BDC3: cv::DescriptorMatcher::knnMatch(cv::_InputArray const&, std::vector<std::vector<cv::DMatch, std::allocator<cv::DMatch> >, std::allocator<std::vector<cv::DMatch, std::allocator<cv::DMatch> > > >&, int, cv::_InputArray const&, bool) (in /usr/local/lib/libopencv_features2d.so.3.4.16)
+==1060201==    by 0x4C7E77F: cv::DescriptorMatcher::match(cv::_InputArray const&, std::vector<cv::DMatch, std::allocator<cv::DMatch> >&, cv::_InputArray const&) (in /usr/local/lib/libopencv_features2d.so.3.4.16)
+==1060201==    by 0x4C7EA54: cv::DescriptorMatcher::match(cv::_InputArray const&, cv::_InputArray const&, std::vector<cv::DMatch, std::allocator<cv::DMatch> >&, cv::_InputArray const&) const (in /usr/local/lib/libopencv_features2d.so.3.4.16)
+==1060201==    by 0x14E85D: buildMapping::HDMapping::constructWorldMap(cv::Mat const&, bool) (HDMapping.cpp:231)
+==1060201==    by 0x11AED6: main (main.cpp:43)
+==1060201==  Address 0x17952ce0 is 16 bytes after a block of size 32 alloc'd
+==1060201==    at 0x483CFE3: operator new(unsigned long) (vg_replace_malloc.c:434)
+==1060201==    by 0x4C84192: cv::FlannBasedMatcher::train() (in /usr/local/lib/libopencv_features2d.so.3.4.16)
+==1060201==    by 0x4C7BDC3: cv::DescriptorMatcher::knnMatch(cv::_InputArray const&, std::vector<std::vector<cv::DMatch, std::allocator<cv::DMatch> >, std::allocator<std::vector<cv::DMatch, std::allocator<cv::DMatch> > > >&, int, cv::_InputArray const&, bool) (in /usr/local/lib/libopencv_features2d.so.3.4.16)
+==1060201==    by 0x4C7E77F: cv::DescriptorMatcher::match(cv::_InputArray const&, std::vector<cv::DMatch, std::allocator<cv::DMatch> >&, cv::_InputArray const&) (in /usr/local/lib/libopencv_features2d.so.3.4.16)
+==1060201==    by 0x4C7EA54: cv::DescriptorMatcher::match(cv::_InputArray const&, cv::_InputArray const&, std::vector<cv::DMatch, std::allocator<cv::DMatch> >&, cv::_InputArray const&) const (in /usr/local/lib/libopencv_features2d.so.3.4.16)
+==1060201==    by 0x14E85D: buildMapping::HDMapping::constructWorldMap(cv::Mat const&, bool) (HDMapping.cpp:231)
+==1060201==    by 0x11AED6: main (main.cpp:43)
+==1060201== 
+
+valgrind: m_mallocfree.c:303 (get_bszB_as_is): Assertion 'bszB_lo == bszB_hi' failed.
+valgrind: Heap block lo/hi size mismatch: lo = 96, hi = 0.
+This is probably caused by your program erroneously writing past the
+end of a heap block and corrupting heap metadata.  If you fix any
+invalid writes reported by Memcheck, this assertion failure will
+probably go away.  Please try that before reporting this as a bug.
+
+
+host stacktrace:
+==1060201==    at 0x58048A1A: show_sched_status_wrk (m_libcassert.c:406)
+==1060201==    by 0x58048B47: report_and_quit (m_libcassert.c:477)
+==1060201==    by 0x58048CEB: vgPlain_assert_fail (m_libcassert.c:543)
+==1060201==    by 0x580535B4: get_bszB_as_is (m_mallocfree.c:303)
+==1060201==    by 0x580535B4: is_inuse_block (m_mallocfree.c:331)
+==1060201==    by 0x580535B4: vgPlain_describe_arena_addr (m_mallocfree.c:1604)
+==1060201==    by 0x5803F85A: vgPlain_describe_addr (m_addrinfo.c:185)
+==1060201==    by 0x5803E70F: vgMemCheck_update_Error_extra (mc_errors.c:1185)
+==1060201==    by 0x580438C4: vgPlain_maybe_record_error (m_errormgr.c:822)
+==1060201==    by 0x5803DB48: vgMemCheck_record_address_error (mc_errors.c:765)
+==1060201==    by 0x10040AB6EC: ???
+==1060201==    by 0x1002EB5F2F: ???
+==1060201==    by 0x1002EB5F17: ???
+==1060201==    by 0x1002EB5F2F: ???
+==1060201==    by 0x1002EB5F3F: ???
+
+sched status:
+  running_tid=1
+
+Thread 1: status = VgTs_Runnable (lwpid 1060201)
+==1060201==    at 0x69D7EED: cv::Mat::Mat() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x8318972: cv::flann::Index::Index(cv::_InputArray const&, cv::flann::IndexParams const&, cvflann::flann_distance_t) (in /opt_disk2/rd22946/opencv4_6_0/lib/libopencv_world.so.4.6.0)
+==1060201==    by 0x4C841AA: cv::FlannBasedMatcher::train() (in /usr/local/lib/libopencv_features2d.so.3.4.16)
+==1060201==    by 0x4C7BDC3: cv::DescriptorMatcher::knnMatch(cv::_InputArray const&, std::vector<std::vector<cv::DMatch, std::allocator<cv::DMatch> >, std::allocator<std::vector<cv::DMatch, std::allocator<cv::DMatch> > > >&, int, cv::_InputArray const&, bool) (in /usr/local/lib/libopencv_features2d.so.3.4.16)
+==1060201==    by 0x4C7E77F: cv::DescriptorMatcher::match(cv::_InputArray const&, std::vector<cv::DMatch, std::allocator<cv::DMatch> >&, cv::_InputArray const&) (in /usr/local/lib/libopencv_features2d.so.3.4.16)
+==1060201==    by 0x4C7EA54: cv::DescriptorMatcher::match(cv::_InputArray const&, cv::_InputArray const&, std::vector<cv::DMatch, std::allocator<cv::DMatch> >&, cv::_InputArray const&) const (in /usr/local/lib/libopencv_features2d.so.3.4.16)
+==1060201==    by 0x14E85D: buildMapping::HDMapping::constructWorldMap(cv::Mat const&, bool) (HDMapping.cpp:231)
+==1060201==    by 0x11AED6: main (main.cpp:43)
+client stack range: [0x1FFEFF3000 0x1FFF000FFF] client SP: 0x1FFEFFE268
+valgrind stack range: [0x1002DB6000 0x1002EB5FFF] top usage: 18664 of 1048576
+
+Thread 2: status = VgTs_WaitSys syscall 202 (lwpid 1061091)
+==1060201==    at 0xB4ED376: futex_wait_cancelable (futex-internal.h:183)
+==1060201==    by 0xB4ED376: __pthread_cond_wait_common (pthread_cond_wait.c:508)
+==1060201==    by 0xB4ED376: pthread_cond_wait@@GLIBC_2.3.2 (pthread_cond_wait.c:647)
+==1060201==    by 0x6A9A76E: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x1869B000 0x18E99FFF] client SP: 0x18E99460
+valgrind stack range: [0x100985C000 0x100995BFFF] top usage: 6840 of 1048576
+
+Thread 3: status = VgTs_WaitSys syscall 202 (lwpid 1061092)
+==1060201==    at 0xB4ED376: futex_wait_cancelable (futex-internal.h:183)
+==1060201==    by 0xB4ED376: __pthread_cond_wait_common (pthread_cond_wait.c:508)
+==1060201==    by 0xB4ED376: pthread_cond_wait@@GLIBC_2.3.2 (pthread_cond_wait.c:647)
+==1060201==    by 0x6A9A76E: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x18E9C000 0x1969AFFF] client SP: 0x1969A460
+valgrind stack range: [0x1009B60000 0x1009C5FFFF] top usage: 6840 of 1048576
+
+Thread 4: status = VgTs_WaitSys syscall 202 (lwpid 1061097)
+==1060201==    at 0xB4ED376: futex_wait_cancelable (futex-internal.h:183)
+==1060201==    by 0xB4ED376: __pthread_cond_wait_common (pthread_cond_wait.c:508)
+==1060201==    by 0xB4ED376: pthread_cond_wait@@GLIBC_2.3.2 (pthread_cond_wait.c:647)
+==1060201==    by 0x6A9A76E: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x1969D000 0x19E9BFFF] client SP: 0x19E9B460
+valgrind stack range: [0x1009E64000 0x1009F63FFF] top usage: 6840 of 1048576
+
+Thread 5: status = VgTs_WaitSys syscall 202 (lwpid 1061098)
+==1060201==    at 0xB4ED376: futex_wait_cancelable (futex-internal.h:183)
+==1060201==    by 0xB4ED376: __pthread_cond_wait_common (pthread_cond_wait.c:508)
+==1060201==    by 0xB4ED376: pthread_cond_wait@@GLIBC_2.3.2 (pthread_cond_wait.c:647)
+==1060201==    by 0x6A9A76E: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x19E9E000 0x1A69CFFF] client SP: 0x1A69C460
+valgrind stack range: [0x100A168000 0x100A267FFF] top usage: 6840 of 1048576
+
+Thread 6: status = VgTs_WaitSys syscall 202 (lwpid 1061099)
+==1060201==    at 0xB4ED376: futex_wait_cancelable (futex-internal.h:183)
+==1060201==    by 0xB4ED376: __pthread_cond_wait_common (pthread_cond_wait.c:508)
+==1060201==    by 0xB4ED376: pthread_cond_wait@@GLIBC_2.3.2 (pthread_cond_wait.c:647)
+==1060201==    by 0x6A9A76E: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x1A69F000 0x1AE9DFFF] client SP: 0x1AE9D460
+valgrind stack range: [0x100A46C000 0x100A56BFFF] top usage: 6840 of 1048576
+
+Thread 7: status = VgTs_WaitSys syscall 202 (lwpid 1061100)
+==1060201==    at 0xB4ED376: futex_wait_cancelable (futex-internal.h:183)
+==1060201==    by 0xB4ED376: __pthread_cond_wait_common (pthread_cond_wait.c:508)
+==1060201==    by 0xB4ED376: pthread_cond_wait@@GLIBC_2.3.2 (pthread_cond_wait.c:647)
+==1060201==    by 0x6A9A76E: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x1AEA0000 0x1B69EFFF] client SP: 0x1B69E460
+valgrind stack range: [0x100A770000 0x100A86FFFF] top usage: 6840 of 1048576
+
+Thread 8: status = VgTs_WaitSys syscall 202 (lwpid 1061111)
+==1060201==    at 0xB4ED376: futex_wait_cancelable (futex-internal.h:183)
+==1060201==    by 0xB4ED376: __pthread_cond_wait_common (pthread_cond_wait.c:508)
+==1060201==    by 0xB4ED376: pthread_cond_wait@@GLIBC_2.3.2 (pthread_cond_wait.c:647)
+==1060201==    by 0x6A9A76E: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x1B6A1000 0x1BE9FFFF] client SP: 0x1BE9F460
+valgrind stack range: [0x100AA78000 0x100AB77FFF] top usage: 6840 of 1048576
+
+Thread 9: status = VgTs_WaitSys syscall 202 (lwpid 1061112)
+==1060201==    at 0xB4ED376: futex_wait_cancelable (futex-internal.h:183)
+==1060201==    by 0xB4ED376: __pthread_cond_wait_common (pthread_cond_wait.c:508)
+==1060201==    by 0xB4ED376: pthread_cond_wait@@GLIBC_2.3.2 (pthread_cond_wait.c:647)
+==1060201==    by 0x6A9A76E: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x1BEA2000 0x1C6A0FFF] client SP: 0x1C6A0460
+valgrind stack range: [0x100AD7C000 0x100AE7BFFF] top usage: 6840 of 1048576
+
+Thread 10: status = VgTs_WaitSys syscall 202 (lwpid 1061117)
+==1060201==    at 0xB4ED376: futex_wait_cancelable (futex-internal.h:183)
+==1060201==    by 0xB4ED376: __pthread_cond_wait_common (pthread_cond_wait.c:508)
+==1060201==    by 0xB4ED376: pthread_cond_wait@@GLIBC_2.3.2 (pthread_cond_wait.c:647)
+==1060201==    by 0x6A9A76E: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x1C6A3000 0x1CEA1FFF] client SP: 0x1CEA1460
+valgrind stack range: [0x100B080000 0x100B17FFFF] top usage: 6840 of 1048576
+
+Thread 11: status = VgTs_WaitSys syscall 202 (lwpid 1061118)
+==1060201==    at 0xB4ED376: futex_wait_cancelable (futex-internal.h:183)
+==1060201==    by 0xB4ED376: __pthread_cond_wait_common (pthread_cond_wait.c:508)
+==1060201==    by 0xB4ED376: pthread_cond_wait@@GLIBC_2.3.2 (pthread_cond_wait.c:647)
+==1060201==    by 0x6A9A76E: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x1CEA4000 0x1D6A2FFF] client SP: 0x1D6A2460
+valgrind stack range: [0x100B384000 0x100B483FFF] top usage: 6840 of 1048576
+
+Thread 12: status = VgTs_WaitSys syscall 202 (lwpid 1061119)
+==1060201==    at 0xB4ED376: futex_wait_cancelable (futex-internal.h:183)
+==1060201==    by 0xB4ED376: __pthread_cond_wait_common (pthread_cond_wait.c:508)
+==1060201==    by 0xB4ED376: pthread_cond_wait@@GLIBC_2.3.2 (pthread_cond_wait.c:647)
+==1060201==    by 0x6A9A76E: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x1D6A5000 0x1DEA3FFF] client SP: 0x1DEA3460
+valgrind stack range: [0x100B688000 0x100B787FFF] top usage: 6840 of 1048576
+
+Thread 13: status = VgTs_WaitSys syscall 202 (lwpid 1061120)
+==1060201==    at 0xB4ED376: futex_wait_cancelable (futex-internal.h:183)
+==1060201==    by 0xB4ED376: __pthread_cond_wait_common (pthread_cond_wait.c:508)
+==1060201==    by 0xB4ED376: pthread_cond_wait@@GLIBC_2.3.2 (pthread_cond_wait.c:647)
+==1060201==    by 0x6A9A76E: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x1DEA6000 0x1E6A4FFF] client SP: 0x1E6A4460
+valgrind stack range: [0x100B98C000 0x100BA8BFFF] top usage: 6840 of 1048576
+
+Thread 14: status = VgTs_WaitSys syscall 202 (lwpid 1061124)
+==1060201==    at 0xB4ED376: futex_wait_cancelable (futex-internal.h:183)
+==1060201==    by 0xB4ED376: __pthread_cond_wait_common (pthread_cond_wait.c:508)
+==1060201==    by 0xB4ED376: pthread_cond_wait@@GLIBC_2.3.2 (pthread_cond_wait.c:647)
+==1060201==    by 0x6A9A76E: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x1E6A7000 0x1EEA5FFF] client SP: 0x1EEA5460
+valgrind stack range: [0x100BC90000 0x100BD8FFFF] top usage: 6840 of 1048576
+
+Thread 15: status = VgTs_WaitSys syscall 202 (lwpid 1061125)
+==1060201==    at 0xB4ED376: futex_wait_cancelable (futex-internal.h:183)
+==1060201==    by 0xB4ED376: __pthread_cond_wait_common (pthread_cond_wait.c:508)
+==1060201==    by 0xB4ED376: pthread_cond_wait@@GLIBC_2.3.2 (pthread_cond_wait.c:647)
+==1060201==    by 0x6A9A76E: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x1EEA8000 0x1F6A6FFF] client SP: 0x1F6A6460
+valgrind stack range: [0x100BF94000 0x100C093FFF] top usage: 6840 of 1048576
+
+Thread 16: status = VgTs_WaitSys syscall 202 (lwpid 1061129)
+==1060201==    at 0xB4ED376: futex_wait_cancelable (futex-internal.h:183)
+==1060201==    by 0xB4ED376: __pthread_cond_wait_common (pthread_cond_wait.c:508)
+==1060201==    by 0xB4ED376: pthread_cond_wait@@GLIBC_2.3.2 (pthread_cond_wait.c:647)
+==1060201==    by 0x6A9A76E: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x1F6A9000 0x1FEA7FFF] client SP: 0x1FEA7460
+valgrind stack range: [0x100C298000 0x100C397FFF] top usage: 6840 of 1048576
+
+Thread 17: status = VgTs_WaitSys syscall 202 (lwpid 1061138)
+==1060201==    at 0xB4ED376: futex_wait_cancelable (futex-internal.h:183)
+==1060201==    by 0xB4ED376: __pthread_cond_wait_common (pthread_cond_wait.c:508)
+==1060201==    by 0xB4ED376: pthread_cond_wait@@GLIBC_2.3.2 (pthread_cond_wait.c:647)
+==1060201==    by 0x6A9A76E: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x1FEAA000 0x206A8FFF] client SP: 0x206A8460
+valgrind stack range: [0x100C59C000 0x100C69BFFF] top usage: 6840 of 1048576
+
+Thread 18: status = VgTs_WaitSys syscall 202 (lwpid 1061149)
+==1060201==    at 0xB4ED376: futex_wait_cancelable (futex-internal.h:183)
+==1060201==    by 0xB4ED376: __pthread_cond_wait_common (pthread_cond_wait.c:508)
+==1060201==    by 0xB4ED376: pthread_cond_wait@@GLIBC_2.3.2 (pthread_cond_wait.c:647)
+==1060201==    by 0x6A9A76E: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x206AB000 0x20EA9FFF] client SP: 0x20EA9460
+valgrind stack range: [0x100C8A0000 0x100C99FFFF] top usage: 6840 of 1048576
+
+Thread 19: status = VgTs_WaitSys syscall 202 (lwpid 1061154)
+==1060201==    at 0xB4ED376: futex_wait_cancelable (futex-internal.h:183)
+==1060201==    by 0xB4ED376: __pthread_cond_wait_common (pthread_cond_wait.c:508)
+==1060201==    by 0xB4ED376: pthread_cond_wait@@GLIBC_2.3.2 (pthread_cond_wait.c:647)
+==1060201==    by 0x6A9A76E: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x20EAC000 0x216AAFFF] client SP: 0x216AA460
+valgrind stack range: [0x100CBA4000 0x100CCA3FFF] top usage: 6840 of 1048576
+
+Thread 20: status = VgTs_WaitSys syscall 202 (lwpid 1061162)
+==1060201==    at 0xB4ED376: futex_wait_cancelable (futex-internal.h:183)
+==1060201==    by 0xB4ED376: __pthread_cond_wait_common (pthread_cond_wait.c:508)
+==1060201==    by 0xB4ED376: pthread_cond_wait@@GLIBC_2.3.2 (pthread_cond_wait.c:647)
+==1060201==    by 0x6A9A76E: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x216AD000 0x21EABFFF] client SP: 0x21EAB460
+valgrind stack range: [0x100CEA8000 0x100CFA7FFF] top usage: 6840 of 1048576
+
+Thread 21: status = VgTs_WaitSys syscall 202 (lwpid 1061168)
+==1060201==    at 0xB4ED376: futex_wait_cancelable (futex-internal.h:183)
+==1060201==    by 0xB4ED376: __pthread_cond_wait_common (pthread_cond_wait.c:508)
+==1060201==    by 0xB4ED376: pthread_cond_wait@@GLIBC_2.3.2 (pthread_cond_wait.c:647)
+==1060201==    by 0x6A9A76E: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x21EAE000 0x226ACFFF] client SP: 0x226AC460
+valgrind stack range: [0x100D1AC000 0x100D2ABFFF] top usage: 6840 of 1048576
+
+Thread 22: status = VgTs_WaitSys syscall 202 (lwpid 1061187)
+==1060201==    at 0xB4ED376: futex_wait_cancelable (futex-internal.h:183)
+==1060201==    by 0xB4ED376: __pthread_cond_wait_common (pthread_cond_wait.c:508)
+==1060201==    by 0xB4ED376: pthread_cond_wait@@GLIBC_2.3.2 (pthread_cond_wait.c:647)
+==1060201==    by 0x6A9A76E: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x226AF000 0x22EADFFF] client SP: 0x22EAD460
+valgrind stack range: [0x100D4B0000 0x100D5AFFFF] top usage: 6840 of 1048576
+
+Thread 23: status = VgTs_WaitSys syscall 202 (lwpid 1061188)
+==1060201==    at 0xB4ED376: futex_wait_cancelable (futex-internal.h:183)
+==1060201==    by 0xB4ED376: __pthread_cond_wait_common (pthread_cond_wait.c:508)
+==1060201==    by 0xB4ED376: pthread_cond_wait@@GLIBC_2.3.2 (pthread_cond_wait.c:647)
+==1060201==    by 0x6A9A76E: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x22EB0000 0x236AEFFF] client SP: 0x236AE460
+valgrind stack range: [0x100D7B4000 0x100D8B3FFF] top usage: 6840 of 1048576
+
+Thread 24: status = VgTs_WaitSys syscall 202 (lwpid 1061189)
+==1060201==    at 0xB4ED376: futex_wait_cancelable (futex-internal.h:183)
+==1060201==    by 0xB4ED376: __pthread_cond_wait_common (pthread_cond_wait.c:508)
+==1060201==    by 0xB4ED376: pthread_cond_wait@@GLIBC_2.3.2 (pthread_cond_wait.c:647)
+==1060201==    by 0x6A9A76E: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x236B1000 0x23EAFFFF] client SP: 0x23EAF460
+valgrind stack range: [0x100DABC000 0x100DBBBFFF] top usage: 6840 of 1048576
+
+Thread 25: status = VgTs_WaitSys syscall 202 (lwpid 1061193)
+==1060201==    at 0xB4ED376: futex_wait_cancelable (futex-internal.h:183)
+==1060201==    by 0xB4ED376: __pthread_cond_wait_common (pthread_cond_wait.c:508)
+==1060201==    by 0xB4ED376: pthread_cond_wait@@GLIBC_2.3.2 (pthread_cond_wait.c:647)
+==1060201==    by 0x6A9A76E: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x23EB2000 0x246B0FFF] client SP: 0x246B0460
+valgrind stack range: [0x100DDC0000 0x100DEBFFFF] top usage: 6840 of 1048576
+
+Thread 26: status = VgTs_WaitSys syscall 202 (lwpid 1061196)
+==1060201==    at 0xB4ED376: futex_wait_cancelable (futex-internal.h:183)
+==1060201==    by 0xB4ED376: __pthread_cond_wait_common (pthread_cond_wait.c:508)
+==1060201==    by 0xB4ED376: pthread_cond_wait@@GLIBC_2.3.2 (pthread_cond_wait.c:647)
+==1060201==    by 0x6A9A76E: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x246B3000 0x24EB1FFF] client SP: 0x24EB1460
+valgrind stack range: [0x100E0C4000 0x100E1C3FFF] top usage: 6840 of 1048576
+
+Thread 27: status = VgTs_WaitSys syscall 202 (lwpid 1061202)
+==1060201==    at 0xB4ED376: futex_wait_cancelable (futex-internal.h:183)
+==1060201==    by 0xB4ED376: __pthread_cond_wait_common (pthread_cond_wait.c:508)
+==1060201==    by 0xB4ED376: pthread_cond_wait@@GLIBC_2.3.2 (pthread_cond_wait.c:647)
+==1060201==    by 0x6A9A76E: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x24EB4000 0x256B2FFF] client SP: 0x256B2460
+valgrind stack range: [0x100E3C8000 0x100E4C7FFF] top usage: 6840 of 1048576
+
+Thread 28: status = VgTs_WaitSys syscall 202 (lwpid 1061215)
+==1060201==    at 0xB4ED376: futex_wait_cancelable (futex-internal.h:183)
+==1060201==    by 0xB4ED376: __pthread_cond_wait_common (pthread_cond_wait.c:508)
+==1060201==    by 0xB4ED376: pthread_cond_wait@@GLIBC_2.3.2 (pthread_cond_wait.c:647)
+==1060201==    by 0x6A9A76E: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x256B5000 0x25EB3FFF] client SP: 0x25EB3460
+valgrind stack range: [0x100E6CC000 0x100E7CBFFF] top usage: 6840 of 1048576
+
+Thread 29: status = VgTs_WaitSys syscall 202 (lwpid 1061216)
+==1060201==    at 0xB4ED376: futex_wait_cancelable (futex-internal.h:183)
+==1060201==    by 0xB4ED376: __pthread_cond_wait_common (pthread_cond_wait.c:508)
+==1060201==    by 0xB4ED376: pthread_cond_wait@@GLIBC_2.3.2 (pthread_cond_wait.c:647)
+==1060201==    by 0x6A9A76E: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x25EB6000 0x266B4FFF] client SP: 0x266B4460
+valgrind stack range: [0x100E9D0000 0x100EACFFFF] top usage: 6840 of 1048576
+
+Thread 30: status = VgTs_WaitSys syscall 202 (lwpid 1061221)
+==1060201==    at 0xB4ED376: futex_wait_cancelable (futex-internal.h:183)
+==1060201==    by 0xB4ED376: __pthread_cond_wait_common (pthread_cond_wait.c:508)
+==1060201==    by 0xB4ED376: pthread_cond_wait@@GLIBC_2.3.2 (pthread_cond_wait.c:647)
+==1060201==    by 0x6A9A76E: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x266B7000 0x26EB5FFF] client SP: 0x26EB5460
+valgrind stack range: [0x100ECD4000 0x100EDD3FFF] top usage: 6840 of 1048576
+
+Thread 31: status = VgTs_WaitSys syscall 202 (lwpid 1061222)
+==1060201==    at 0xB4ED376: futex_wait_cancelable (futex-internal.h:183)
+==1060201==    by 0xB4ED376: __pthread_cond_wait_common (pthread_cond_wait.c:508)
+==1060201==    by 0xB4ED376: pthread_cond_wait@@GLIBC_2.3.2 (pthread_cond_wait.c:647)
+==1060201==    by 0x6A9A76E: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x26EB8000 0x276B6FFF] client SP: 0x276B6460
+valgrind stack range: [0x100EFD8000 0x100F0D7FFF] top usage: 6840 of 1048576
+
+Thread 32: status = VgTs_WaitSys syscall 202 (lwpid 1061227)
+==1060201==    at 0xB4ED376: futex_wait_cancelable (futex-internal.h:183)
+==1060201==    by 0xB4ED376: __pthread_cond_wait_common (pthread_cond_wait.c:508)
+==1060201==    by 0xB4ED376: pthread_cond_wait@@GLIBC_2.3.2 (pthread_cond_wait.c:647)
+==1060201==    by 0x6A9A76E: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x276B9000 0x27EB7FFF] client SP: 0x27EB7460
+valgrind stack range: [0x100F2DC000 0x100F3DBFFF] top usage: 6840 of 1048576
+
+Thread 33: status = VgTs_WaitSys syscall 202 (lwpid 1061228)
+==1060201==    at 0xB4ED376: futex_wait_cancelable (futex-internal.h:183)
+==1060201==    by 0xB4ED376: __pthread_cond_wait_common (pthread_cond_wait.c:508)
+==1060201==    by 0xB4ED376: pthread_cond_wait@@GLIBC_2.3.2 (pthread_cond_wait.c:647)
+==1060201==    by 0x6A9A76E: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x27EBA000 0x286B8FFF] client SP: 0x286B8460
+valgrind stack range: [0x100F5E0000 0x100F6DFFFF] top usage: 6840 of 1048576
+
+Thread 34: status = VgTs_WaitSys syscall 202 (lwpid 1061230)
+==1060201==    at 0xB4ED376: futex_wait_cancelable (futex-internal.h:183)
+==1060201==    by 0xB4ED376: __pthread_cond_wait_common (pthread_cond_wait.c:508)
+==1060201==    by 0xB4ED376: pthread_cond_wait@@GLIBC_2.3.2 (pthread_cond_wait.c:647)
+==1060201==    by 0x6A9A76E: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x286BB000 0x28EB9FFF] client SP: 0x28EB9460
+valgrind stack range: [0x100F8E4000 0x100F9E3FFF] top usage: 6840 of 1048576
+
+Thread 35: status = VgTs_WaitSys syscall 24 (lwpid 1061236)
+==1060201==    at 0x7C8F71B: sched_yield (syscall-template.S:78)
+==1060201==    by 0x6A9A8D2: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x28EBC000 0x296BAFFF] client SP: 0x296BA528
+valgrind stack range: [0x100FBE8000 0x100FCE7FFF] top usage: 6840 of 1048576
+
+Thread 36: status = VgTs_Yielding (lwpid 1061247)
+==1060201==    at 0x6A9A901: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x296BD000 0x29EBBFFF] client SP: 0x29EBB530
+valgrind stack range: [0x100FEEC000 0x100FFEBFFF] top usage: 6840 of 1048576
+
+Thread 37: status = VgTs_WaitSys syscall 202 (lwpid 1061248)
+==1060201==    at 0xB4ED376: futex_wait_cancelable (futex-internal.h:183)
+==1060201==    by 0xB4ED376: __pthread_cond_wait_common (pthread_cond_wait.c:508)
+==1060201==    by 0xB4ED376: pthread_cond_wait@@GLIBC_2.3.2 (pthread_cond_wait.c:647)
+==1060201==    by 0x6A9A76E: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x29EBE000 0x2A6BCFFF] client SP: 0x2A6BC460
+valgrind stack range: [0x10101F0000 0x10102EFFFF] top usage: 6840 of 1048576
+
+Thread 38: status = VgTs_WaitSys syscall 202 (lwpid 1061253)
+==1060201==    at 0xB4ED376: futex_wait_cancelable (futex-internal.h:183)
+==1060201==    by 0xB4ED376: __pthread_cond_wait_common (pthread_cond_wait.c:508)
+==1060201==    by 0xB4ED376: pthread_cond_wait@@GLIBC_2.3.2 (pthread_cond_wait.c:647)
+==1060201==    by 0x6A9A76E: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x2A6BF000 0x2AEBDFFF] client SP: 0x2AEBD460
+valgrind stack range: [0x10104F4000 0x10105F3FFF] top usage: 6840 of 1048576
+
+Thread 39: status = VgTs_WaitSys syscall 24 (lwpid 1061257)
+==1060201==    at 0x7C8F71B: sched_yield (syscall-template.S:78)
+==1060201==    by 0x6A9A8D2: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x2AEC0000 0x2B6BEFFF] client SP: 0x2B6BE528
+valgrind stack range: [0x10107F8000 0x10108F7FFF] top usage: 6840 of 1048576
+
+Thread 40: status = VgTs_WaitSys syscall 24 (lwpid 1061261)
+==1060201==    at 0x7C8F71B: sched_yield (syscall-template.S:78)
+==1060201==    by 0x6A9A8D2: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x2B6C1000 0x2BEBFFFF] client SP: 0x2BEBF528
+valgrind stack range: [0x1010B00000 0x1010BFFFFF] top usage: 6840 of 1048576
+
+Thread 41: status = VgTs_WaitSys syscall 202 (lwpid 1061265)
+==1060201==    at 0xB4ED376: futex_wait_cancelable (futex-internal.h:183)
+==1060201==    by 0xB4ED376: __pthread_cond_wait_common (pthread_cond_wait.c:508)
+==1060201==    by 0xB4ED376: pthread_cond_wait@@GLIBC_2.3.2 (pthread_cond_wait.c:647)
+==1060201==    by 0x6A9A76E: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x2BEC2000 0x2C6C0FFF] client SP: 0x2C6C0460
+valgrind stack range: [0x1010E04000 0x1010F03FFF] top usage: 6840 of 1048576
+
+Thread 42: status = VgTs_WaitSys syscall 24 (lwpid 1061266)
+==1060201==    at 0x7C8F71B: sched_yield (syscall-template.S:78)
+==1060201==    by 0x6A9A8D2: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x2C6C3000 0x2CEC1FFF] client SP: 0x2CEC1528
+valgrind stack range: [0x1011108000 0x1011207FFF] top usage: 6840 of 1048576
+
+Thread 43: status = VgTs_WaitSys syscall 24 (lwpid 1061267)
+==1060201==    at 0x7C8F71B: sched_yield (syscall-template.S:78)
+==1060201==    by 0x6A9A8D2: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x2CEC4000 0x2D6C2FFF] client SP: 0x2D6C2528
+valgrind stack range: [0x101140C000 0x101150BFFF] top usage: 6840 of 1048576
+
+Thread 44: status = VgTs_WaitSys syscall 202 (lwpid 1061273)
+==1060201==    at 0xB4ED376: futex_wait_cancelable (futex-internal.h:183)
+==1060201==    by 0xB4ED376: __pthread_cond_wait_common (pthread_cond_wait.c:508)
+==1060201==    by 0xB4ED376: pthread_cond_wait@@GLIBC_2.3.2 (pthread_cond_wait.c:647)
+==1060201==    by 0x6A9A76E: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x2D6C5000 0x2DEC3FFF] client SP: 0x2DEC3460
+valgrind stack range: [0x1011710000 0x101180FFFF] top usage: 6840 of 1048576
+
+Thread 45: status = VgTs_WaitSys syscall 24 (lwpid 1061282)
+==1060201==    at 0x7C8F71B: sched_yield (syscall-template.S:78)
+==1060201==    by 0x6A9A8D2: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x2DEC6000 0x2E6C4FFF] client SP: 0x2E6C4528
+valgrind stack range: [0x1011A14000 0x1011B13FFF] top usage: 6840 of 1048576
+
+Thread 46: status = VgTs_WaitSys syscall 24 (lwpid 1061285)
+==1060201==    at 0x7C8F71B: sched_yield (syscall-template.S:78)
+==1060201==    by 0x6A9A8D2: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x2E6C7000 0x2EEC5FFF] client SP: 0x2EEC5528
+valgrind stack range: [0x1011D18000 0x1011E17FFF] top usage: 6840 of 1048576
+
+Thread 47: status = VgTs_WaitSys syscall 24 (lwpid 1061286)
+==1060201==    at 0x7C8F71B: sched_yield (syscall-template.S:78)
+==1060201==    by 0x6A9A8D2: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x2EEC8000 0x2F6C6FFF] client SP: 0x2F6C6528
+valgrind stack range: [0x101201C000 0x101211BFFF] top usage: 6840 of 1048576
+
+Thread 48: status = VgTs_WaitSys syscall 202 (lwpid 1061287)
+==1060201==    at 0xB4ED376: futex_wait_cancelable (futex-internal.h:183)
+==1060201==    by 0xB4ED376: __pthread_cond_wait_common (pthread_cond_wait.c:508)
+==1060201==    by 0xB4ED376: pthread_cond_wait@@GLIBC_2.3.2 (pthread_cond_wait.c:647)
+==1060201==    by 0x6A9A76E: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x2F6C9000 0x2FEC7FFF] client SP: 0x2FEC7460
+valgrind stack range: [0x1012320000 0x101241FFFF] top usage: 6840 of 1048576
+
+Thread 49: status = VgTs_WaitSys syscall 24 (lwpid 1061288)
+==1060201==    at 0x7C8F71B: sched_yield (syscall-template.S:78)
+==1060201==    by 0x6A9A8D2: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x2FECA000 0x306C8FFF] client SP: 0x306C8528
+valgrind stack range: [0x1012624000 0x1012723FFF] top usage: 6840 of 1048576
+
+Thread 50: status = VgTs_WaitSys syscall 202 (lwpid 1061293)
+==1060201==    at 0xB4ED376: futex_wait_cancelable (futex-internal.h:183)
+==1060201==    by 0xB4ED376: __pthread_cond_wait_common (pthread_cond_wait.c:508)
+==1060201==    by 0xB4ED376: pthread_cond_wait@@GLIBC_2.3.2 (pthread_cond_wait.c:647)
+==1060201==    by 0x6A9A76E: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x306CB000 0x30EC9FFF] client SP: 0x30EC9460
+valgrind stack range: [0x1012928000 0x1012A27FFF] top usage: 6840 of 1048576
+
+Thread 51: status = VgTs_WaitSys syscall 24 (lwpid 1061297)
+==1060201==    at 0x7C8F71B: sched_yield (syscall-template.S:78)
+==1060201==    by 0x6A9A8D2: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x30ECC000 0x316CAFFF] client SP: 0x316CA528
+valgrind stack range: [0x1012C2C000 0x1012D2BFFF] top usage: 6840 of 1048576
+
+Thread 52: status = VgTs_WaitSys syscall 24 (lwpid 1061298)
+==1060201==    at 0x7C8F71B: sched_yield (syscall-template.S:78)
+==1060201==    by 0x6A9A8D2: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x316CD000 0x31ECBFFF] client SP: 0x31ECB528
+valgrind stack range: [0x1012F30000 0x101302FFFF] top usage: 6840 of 1048576
+
+Thread 53: status = VgTs_WaitSys syscall 24 (lwpid 1061299)
+==1060201==    at 0x7C8F71B: sched_yield (syscall-template.S:78)
+==1060201==    by 0x6A9A8D2: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x31ECE000 0x326CCFFF] client SP: 0x326CC528
+valgrind stack range: [0x1013234000 0x1013333FFF] top usage: 6840 of 1048576
+
+Thread 54: status = VgTs_WaitSys syscall 24 (lwpid 1061300)
+==1060201==    at 0x7C8F71B: sched_yield (syscall-template.S:78)
+==1060201==    by 0x6A9A8D2: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x326CF000 0x32ECDFFF] client SP: 0x32ECD528
+valgrind stack range: [0x1013538000 0x1013637FFF] top usage: 6840 of 1048576
+
+Thread 55: status = VgTs_WaitSys syscall 24 (lwpid 1061301)
+==1060201==    at 0x7C8F71B: sched_yield (syscall-template.S:78)
+==1060201==    by 0x6A9A8D2: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x32ED0000 0x336CEFFF] client SP: 0x336CE528
+valgrind stack range: [0x101383C000 0x101393BFFF] top usage: 6840 of 1048576
+
+Thread 56: status = VgTs_WaitSys syscall 24 (lwpid 1061302)
+==1060201==    at 0x7C8F71B: sched_yield (syscall-template.S:78)
+==1060201==    by 0x6A9A8D2: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x336D1000 0x33ECFFFF] client SP: 0x33ECF528
+valgrind stack range: [0x1013B44000 0x1013C43FFF] top usage: 6840 of 1048576
+
+Thread 57: status = VgTs_WaitSys syscall 24 (lwpid 1061303)
+==1060201==    at 0x7C8F71B: sched_yield (syscall-template.S:78)
+==1060201==    by 0x6A9A8D2: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x33ED2000 0x346D0FFF] client SP: 0x346D0528
+valgrind stack range: [0x1013E48000 0x1013F47FFF] top usage: 6840 of 1048576
+
+Thread 58: status = VgTs_WaitSys syscall 24 (lwpid 1061311)
+==1060201==    at 0x7C8F71B: sched_yield (syscall-template.S:78)
+==1060201==    by 0x6A9A8D2: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x346D3000 0x34ED1FFF] client SP: 0x34ED1528
+valgrind stack range: [0x101414C000 0x101424BFFF] top usage: 6840 of 1048576
+
+Thread 59: status = VgTs_WaitSys syscall 24 (lwpid 1061321)
+==1060201==    at 0x7C8F71B: sched_yield (syscall-template.S:78)
+==1060201==    by 0x6A9A8D2: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x34ED4000 0x356D2FFF] client SP: 0x356D2528
+valgrind stack range: [0x1014450000 0x101454FFFF] top usage: 6840 of 1048576
+
+Thread 60: status = VgTs_WaitSys syscall 24 (lwpid 1061322)
+==1060201==    at 0x7C8F71B: sched_yield (syscall-template.S:78)
+==1060201==    by 0x6A9A8D2: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x356D5000 0x35ED3FFF] client SP: 0x35ED3528
+valgrind stack range: [0x1014754000 0x1014853FFF] top usage: 6840 of 1048576
+
+Thread 61: status = VgTs_WaitSys syscall 24 (lwpid 1061323)
+==1060201==    at 0x7C8F71B: sched_yield (syscall-template.S:78)
+==1060201==    by 0x6A9A8D2: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x35ED6000 0x366D4FFF] client SP: 0x366D4528
+valgrind stack range: [0x1014A58000 0x1014B57FFF] top usage: 6840 of 1048576
+
+Thread 62: status = VgTs_WaitSys syscall 24 (lwpid 1061324)
+==1060201==    at 0x7C8F71B: sched_yield (syscall-template.S:78)
+==1060201==    by 0x6A9A8D2: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x366D7000 0x36ED5FFF] client SP: 0x36ED5528
+valgrind stack range: [0x1014D5C000 0x1014E5BFFF] top usage: 6840 of 1048576
+
+Thread 63: status = VgTs_WaitSys syscall 24 (lwpid 1061330)
+==1060201==    at 0x7C8F71B: sched_yield (syscall-template.S:78)
+==1060201==    by 0x6A9A8D2: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x36ED8000 0x376D6FFF] client SP: 0x376D6528
+valgrind stack range: [0x1015060000 0x101515FFFF] top usage: 6840 of 1048576
+
+Thread 64: status = VgTs_WaitSys syscall 24 (lwpid 1061333)
+==1060201==    at 0x7C8F71B: sched_yield (syscall-template.S:78)
+==1060201==    by 0x6A9A8D2: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x376D9000 0x37ED7FFF] client SP: 0x37ED7528
+valgrind stack range: [0x1015364000 0x1015463FFF] top usage: 6840 of 1048576
+
+Thread 65: status = VgTs_WaitSys syscall 24 (lwpid 1061335)
+==1060201==    at 0x7C8F71B: sched_yield (syscall-template.S:78)
+==1060201==    by 0x6A9A8D2: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x37EDA000 0x386D8FFF] client SP: 0x386D8528
+valgrind stack range: [0x1015668000 0x1015767FFF] top usage: 6840 of 1048576
+
+Thread 66: status = VgTs_WaitSys syscall 24 (lwpid 1061349)
+==1060201==    at 0x7C8F71B: sched_yield (syscall-template.S:78)
+==1060201==    by 0x6A9A8D2: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x386DB000 0x38ED9FFF] client SP: 0x38ED9528
+valgrind stack range: [0x101596C000 0x1015A6BFFF] top usage: 6840 of 1048576
+
+Thread 67: status = VgTs_WaitSys syscall 24 (lwpid 1061363)
+==1060201==    at 0x7C8F71B: sched_yield (syscall-template.S:78)
+==1060201==    by 0x6A9A8D2: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x38EDC000 0x396DAFFF] client SP: 0x396DA528
+valgrind stack range: [0x1015C70000 0x1015D6FFFF] top usage: 6840 of 1048576
+
+Thread 68: status = VgTs_WaitSys syscall 202 (lwpid 1061364)
+==1060201==    at 0xB4ED376: futex_wait_cancelable (futex-internal.h:183)
+==1060201==    by 0xB4ED376: __pthread_cond_wait_common (pthread_cond_wait.c:508)
+==1060201==    by 0xB4ED376: pthread_cond_wait@@GLIBC_2.3.2 (pthread_cond_wait.c:647)
+==1060201==    by 0x6A9A76E: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x396DD000 0x39EDBFFF] client SP: 0x39EDB460
+valgrind stack range: [0x1015F74000 0x1016073FFF] top usage: 6840 of 1048576
+
+Thread 69: status = VgTs_WaitSys syscall 24 (lwpid 1061369)
+==1060201==    at 0x7C8F71B: sched_yield (syscall-template.S:78)
+==1060201==    by 0x6A9A8D2: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x39EDE000 0x3A6DCFFF] client SP: 0x3A6DC528
+valgrind stack range: [0x1016278000 0x1016377FFF] top usage: 6840 of 1048576
+
+Thread 70: status = VgTs_Yielding (lwpid 1061370)
+==1060201==    at 0x6A9A901: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x3A6DF000 0x3AEDDFFF] client SP: 0x3AEDD530
+valgrind stack range: [0x101657C000 0x101667BFFF] top usage: 6840 of 1048576
+
+Thread 71: status = VgTs_WaitSys syscall 24 (lwpid 1061371)
+==1060201==    at 0x7C8F71B: sched_yield (syscall-template.S:78)
+==1060201==    by 0x6A9A8D2: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x3AEE0000 0x3B6DEFFF] client SP: 0x3B6DE528
+valgrind stack range: [0x1016880000 0x101697FFFF] top usage: 6840 of 1048576
+
+Thread 72: status = VgTs_WaitSys syscall 24 (lwpid 1061372)
+==1060201==    at 0x7C8F71B: sched_yield (syscall-template.S:78)
+==1060201==    by 0x6A9A8D2: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x3B6E1000 0x3BEDFFFF] client SP: 0x3BEDF528
+valgrind stack range: [0x1016B88000 0x1016C87FFF] top usage: 6840 of 1048576
+
+Thread 73: status = VgTs_WaitSys syscall 202 (lwpid 1061373)
+==1060201==    at 0xB4ED376: futex_wait_cancelable (futex-internal.h:183)
+==1060201==    by 0xB4ED376: __pthread_cond_wait_common (pthread_cond_wait.c:508)
+==1060201==    by 0xB4ED376: pthread_cond_wait@@GLIBC_2.3.2 (pthread_cond_wait.c:647)
+==1060201==    by 0x6A9A76E: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x3BEE2000 0x3C6E0FFF] client SP: 0x3C6E0460
+valgrind stack range: [0x1016E8C000 0x1016F8BFFF] top usage: 6840 of 1048576
+
+Thread 74: status = VgTs_WaitSys syscall 24 (lwpid 1061374)
+==1060201==    at 0x7C8F71B: sched_yield (syscall-template.S:78)
+==1060201==    by 0x6A9A8D2: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x3C6E3000 0x3CEE1FFF] client SP: 0x3CEE1528
+valgrind stack range: [0x1017190000 0x101728FFFF] top usage: 6840 of 1048576
+
+Thread 75: status = VgTs_WaitSys syscall 24 (lwpid 1061381)
+==1060201==    at 0x7C8F71B: sched_yield (syscall-template.S:78)
+==1060201==    by 0x6A9A8D2: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x3CEE4000 0x3D6E2FFF] client SP: 0x3D6E2528
+valgrind stack range: [0x1017494000 0x1017593FFF] top usage: 6840 of 1048576
+
+Thread 76: status = VgTs_WaitSys syscall 24 (lwpid 1061387)
+==1060201==    at 0x7C8F71B: sched_yield (syscall-template.S:78)
+==1060201==    by 0x6A9A8D2: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x3D6E5000 0x3DEE3FFF] client SP: 0x3DEE3528
+valgrind stack range: [0x1017798000 0x1017897FFF] top usage: 6840 of 1048576
+
+Thread 77: status = VgTs_WaitSys syscall 24 (lwpid 1061388)
+==1060201==    at 0x7C8F71B: sched_yield (syscall-template.S:78)
+==1060201==    by 0x6A9A8D2: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x3DEE6000 0x3E6E4FFF] client SP: 0x3E6E4528
+valgrind stack range: [0x1017A9C000 0x1017B9BFFF] top usage: 6840 of 1048576
+
+Thread 78: status = VgTs_WaitSys syscall 24 (lwpid 1061389)
+==1060201==    at 0x7C8F71B: sched_yield (syscall-template.S:78)
+==1060201==    by 0x6A9A8D2: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x3E6E7000 0x3EEE5FFF] client SP: 0x3EEE5528
+valgrind stack range: [0x1017DA0000 0x1017E9FFFF] top usage: 6840 of 1048576
+
+Thread 79: status = VgTs_WaitSys syscall 24 (lwpid 1061390)
+==1060201==    at 0x7C8F71B: sched_yield (syscall-template.S:78)
+==1060201==    by 0x6A9A8D2: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x3EEE8000 0x3F6E6FFF] client SP: 0x3F6E6528
+valgrind stack range: [0x10180A4000 0x10181A3FFF] top usage: 6840 of 1048576
+
+Thread 80: status = VgTs_Yielding (lwpid 1061391)
+==1060201==    at 0x6A9A901: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x3F6E9000 0x3FEE7FFF] client SP: 0x3FEE7530
+valgrind stack range: [0x10183A8000 0x10184A7FFF] top usage: 6840 of 1048576
+
+Thread 81: status = VgTs_WaitSys syscall 24 (lwpid 1061396)
+==1060201==    at 0x7C8F71B: sched_yield (syscall-template.S:78)
+==1060201==    by 0x6A9A8D2: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x3FEEA000 0x406E8FFF] client SP: 0x406E8528
+valgrind stack range: [0x10186AC000 0x10187ABFFF] top usage: 6840 of 1048576
+
+Thread 82: status = VgTs_WaitSys syscall 24 (lwpid 1061400)
+==1060201==    at 0x7C8F71B: sched_yield (syscall-template.S:78)
+==1060201==    by 0x6A9A8D2: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x406EB000 0x40EE9FFF] client SP: 0x40EE9528
+valgrind stack range: [0x10189B0000 0x1018AAFFFF] top usage: 6840 of 1048576
+
+Thread 83: status = VgTs_WaitSys syscall 24 (lwpid 1061401)
+==1060201==    at 0x7C8F71B: sched_yield (syscall-template.S:78)
+==1060201==    by 0x6A9A8D2: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x40EEC000 0x416EAFFF] client SP: 0x416EA528
+valgrind stack range: [0x1018CB4000 0x1018DB3FFF] top usage: 6840 of 1048576
+
+Thread 84: status = VgTs_WaitSys syscall 24 (lwpid 1061405)
+==1060201==    at 0x7C8F71B: sched_yield (syscall-template.S:78)
+==1060201==    by 0x6A9A8D2: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x416ED000 0x41EEBFFF] client SP: 0x41EEB528
+valgrind stack range: [0x1018FB8000 0x10190B7FFF] top usage: 6840 of 1048576
+
+Thread 85: status = VgTs_WaitSys syscall 24 (lwpid 1061406)
+==1060201==    at 0x7C8F71B: sched_yield (syscall-template.S:78)
+==1060201==    by 0x6A9A8D2: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x41EEE000 0x426ECFFF] client SP: 0x426EC528
+valgrind stack range: [0x10192BC000 0x10193BBFFF] top usage: 6840 of 1048576
+
+Thread 86: status = VgTs_WaitSys syscall 24 (lwpid 1061407)
+==1060201==    at 0x7C8F71B: sched_yield (syscall-template.S:78)
+==1060201==    by 0x6A9A8D2: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x426EF000 0x42EEDFFF] client SP: 0x42EED528
+valgrind stack range: [0x10195C0000 0x10196BFFFF] top usage: 6840 of 1048576
+
+Thread 87: status = VgTs_WaitSys syscall 24 (lwpid 1061408)
+==1060201==    at 0x7C8F71B: sched_yield (syscall-template.S:78)
+==1060201==    by 0x6A9A8D2: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x42EF0000 0x436EEFFF] client SP: 0x436EE528
+valgrind stack range: [0x10198C4000 0x10199C3FFF] top usage: 6840 of 1048576
+
+Thread 88: status = VgTs_WaitSys syscall 24 (lwpid 1061409)
+==1060201==    at 0x7C8F71B: sched_yield (syscall-template.S:78)
+==1060201==    by 0x6A9A8D2: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x436F1000 0x43EEFFFF] client SP: 0x43EEF528
+valgrind stack range: [0x1019BCC000 0x1019CCBFFF] top usage: 6840 of 1048576
+
+Thread 89: status = VgTs_WaitSys syscall 24 (lwpid 1061414)
+==1060201==    at 0x7C8F71B: sched_yield (syscall-template.S:78)
+==1060201==    by 0x6A9A8D2: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x43EF2000 0x446F0FFF] client SP: 0x446F0528
+valgrind stack range: [0x1019ED0000 0x1019FCFFFF] top usage: 6840 of 1048576
+
+Thread 90: status = VgTs_WaitSys syscall 24 (lwpid 1061420)
+==1060201==    at 0x7C8F71B: sched_yield (syscall-template.S:78)
+==1060201==    by 0x6A9A8D2: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x446F3000 0x44EF1FFF] client SP: 0x44EF1528
+valgrind stack range: [0x101A1D4000 0x101A2D3FFF] top usage: 6840 of 1048576
+
+Thread 91: status = VgTs_WaitSys syscall 24 (lwpid 1061428)
+==1060201==    at 0x7C8F71B: sched_yield (syscall-template.S:78)
+==1060201==    by 0x6A9A8D2: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x44EF4000 0x456F2FFF] client SP: 0x456F2528
+valgrind stack range: [0x101A4D8000 0x101A5D7FFF] top usage: 6840 of 1048576
+
+Thread 92: status = VgTs_WaitSys syscall 24 (lwpid 1061430)
+==1060201==    at 0x7C8F71B: sched_yield (syscall-template.S:78)
+==1060201==    by 0x6A9A8D2: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x456F5000 0x45EF3FFF] client SP: 0x45EF3528
+valgrind stack range: [0x101A7DC000 0x101A8DBFFF] top usage: 6840 of 1048576
+
+Thread 93: status = VgTs_WaitSys syscall 24 (lwpid 1061433)
+==1060201==    at 0x7C8F71B: sched_yield (syscall-template.S:78)
+==1060201==    by 0x6A9A8D2: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x45EF6000 0x466F4FFF] client SP: 0x466F4528
+valgrind stack range: [0x101AAE0000 0x101ABDFFFF] top usage: 6840 of 1048576
+
+Thread 94: status = VgTs_WaitSys syscall 24 (lwpid 1061434)
+==1060201==    at 0x7C8F71B: sched_yield (syscall-template.S:78)
+==1060201==    by 0x6A9A8D2: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x466F7000 0x46EF5FFF] client SP: 0x46EF5528
+valgrind stack range: [0x101ADE4000 0x101AEE3FFF] top usage: 6840 of 1048576
+
+Thread 95: status = VgTs_WaitSys syscall 24 (lwpid 1061439)
+==1060201==    at 0x7C8F71B: sched_yield (syscall-template.S:78)
+==1060201==    by 0x6A9A8D2: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x46EF8000 0x476F6FFF] client SP: 0x476F6528
+valgrind stack range: [0x101B0E8000 0x101B1E7FFF] top usage: 6840 of 1048576
+
+Thread 96: status = VgTs_WaitSys syscall 202 (lwpid 1061440)
+==1060201==    at 0xB4ED376: futex_wait_cancelable (futex-internal.h:183)
+==1060201==    by 0xB4ED376: __pthread_cond_wait_common (pthread_cond_wait.c:508)
+==1060201==    by 0xB4ED376: pthread_cond_wait@@GLIBC_2.3.2 (pthread_cond_wait.c:647)
+==1060201==    by 0x6A9A76E: cv::WorkerThread::thread_body() (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0x6A9A9BC: cv::WorkerThread::thread_loop_wrapper(void*) (in /usr/local/lib/libopencv_core.so.3.4.16)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x476F9000 0x47EF7FFF] client SP: 0x47EF7460
+valgrind stack range: [0x101B3EC000 0x101B4EBFFF] top usage: 6840 of 1048576
+
+Thread 97: status = VgTs_WaitSys syscall 7 (lwpid 1061602)
+==1060201==    at 0x7C9F99F: poll (poll.c:29)
+==1060201==    by 0x489DDC58: ??? (in /usr/lib/x86_64-linux-gnu/libnvidia-opencl.so.515.48.07)
+==1060201==    by 0x48A83E9A: ??? (in /usr/lib/x86_64-linux-gnu/libnvidia-opencl.so.515.48.07)
+==1060201==    by 0x489D89A7: ??? (in /usr/lib/x86_64-linux-gnu/libnvidia-opencl.so.515.48.07)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x4AB42000 0x4B340FFF] client SP: 0x4B340440
+valgrind stack range: [0x101BAA3000 0x101BBA2FFF] top usage: 6840 of 1048576
+
+Thread 98: status = VgTs_WaitSys syscall 202 (lwpid 1061733)
+==1060201==    at 0xB4F0454: futex_abstimed_wait_cancelable (futex-internal.h:320)
+==1060201==    by 0xB4F0454: do_futex_wait.constprop.0 (sem_waitcommon.c:112)
+==1060201==    by 0xB4F0547: __new_sem_wait_slow.constprop.0 (sem_waitcommon.c:184)
+==1060201==    by 0x48832711: ??? (in /usr/lib/x86_64-linux-gnu/libnvidia-opencl.so.515.48.07)
+==1060201==    by 0x489D89A7: ??? (in /usr/lib/x86_64-linux-gnu/libnvidia-opencl.so.515.48.07)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x52001000 0x527FFFFF] client SP: 0x527FF4E0
+valgrind stack range: [0x101BEF8000 0x101BFF7FFF] top usage: 6840 of 1048576
+
+Thread 99: status = VgTs_WaitSys syscall 202 (lwpid 1061771)
+==1060201==    at 0xB4F0454: futex_abstimed_wait_cancelable (futex-internal.h:320)
+==1060201==    by 0xB4F0454: do_futex_wait.constprop.0 (sem_waitcommon.c:112)
+==1060201==    by 0xB4F0547: __new_sem_wait_slow.constprop.0 (sem_waitcommon.c:184)
+==1060201==    by 0x48832711: ??? (in /usr/lib/x86_64-linux-gnu/libnvidia-opencl.so.515.48.07)
+==1060201==    by 0x489D89A7: ??? (in /usr/lib/x86_64-linux-gnu/libnvidia-opencl.so.515.48.07)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x52802000 0x53000FFF] client SP: 0x530004E0
+valgrind stack range: [0x101C1FC000 0x101C2FBFFF] top usage: 6840 of 1048576
+
+Thread 100: status = VgTs_WaitSys syscall 202 (lwpid 1061777)
+==1060201==    at 0xB4F0454: futex_abstimed_wait_cancelable (futex-internal.h:320)
+==1060201==    by 0xB4F0454: do_futex_wait.constprop.0 (sem_waitcommon.c:112)
+==1060201==    by 0xB4F0547: __new_sem_wait_slow.constprop.0 (sem_waitcommon.c:184)
+==1060201==    by 0x48832711: ??? (in /usr/lib/x86_64-linux-gnu/libnvidia-opencl.so.515.48.07)
+==1060201==    by 0x489D89A7: ??? (in /usr/lib/x86_64-linux-gnu/libnvidia-opencl.so.515.48.07)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x53003000 0x53801FFF] client SP: 0x538014E0
+valgrind stack range: [0x101C500000 0x101C5FFFFF] top usage: 6840 of 1048576
+
+Thread 101: status = VgTs_WaitSys syscall 202 (lwpid 1061782)
+==1060201==    at 0xB4F0454: futex_abstimed_wait_cancelable (futex-internal.h:320)
+==1060201==    by 0xB4F0454: do_futex_wait.constprop.0 (sem_waitcommon.c:112)
+==1060201==    by 0xB4F0547: __new_sem_wait_slow.constprop.0 (sem_waitcommon.c:184)
+==1060201==    by 0x48832711: ??? (in /usr/lib/x86_64-linux-gnu/libnvidia-opencl.so.515.48.07)
+==1060201==    by 0x489D89A7: ??? (in /usr/lib/x86_64-linux-gnu/libnvidia-opencl.so.515.48.07)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x53804000 0x54002FFF] client SP: 0x540024E0
+valgrind stack range: [0x101C804000 0x101C903FFF] top usage: 6840 of 1048576
+
+Thread 102: status = VgTs_WaitSys syscall 202 (lwpid 1061783)
+==1060201==    at 0xB4F0454: futex_abstimed_wait_cancelable (futex-internal.h:320)
+==1060201==    by 0xB4F0454: do_futex_wait.constprop.0 (sem_waitcommon.c:112)
+==1060201==    by 0xB4F0547: __new_sem_wait_slow.constprop.0 (sem_waitcommon.c:184)
+==1060201==    by 0x48832711: ??? (in /usr/lib/x86_64-linux-gnu/libnvidia-opencl.so.515.48.07)
+==1060201==    by 0x489D89A7: ??? (in /usr/lib/x86_64-linux-gnu/libnvidia-opencl.so.515.48.07)
+==1060201==    by 0xB4E6608: start_thread (pthread_create.c:477)
+==1060201==    by 0x7CAC132: clone (clone.S:95)
+client stack range: [0x54005000 0x54803FFF] client SP: 0x548034E0
+valgrind stack range: [0x101CB08000 0x101CC07FFF] top usage: 6840 of 1048576
+
+
+Note: see also the FAQ in the source distribution.
+It contains workarounds to several common problems.
+In particular, if Valgrind aborted or crashed after
+identifying problems in your program, there's a good chance
+that fixing those problems will prevent Valgrind aborting or
+crashing, especially if it happened in m_mallocfree.c.
+
+If that doesn't help, please report this bug to: www.valgrind.org
+
+In the bug report, send all the above text, the valgrind
+version, and what OS and version you are using.  Thanks.
+

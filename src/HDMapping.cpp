@@ -25,7 +25,7 @@ buildMapping::HDMapping::HDMapping() {
     m_BW.rowRange(480 / 2, 480) = 0;
     m_BW = m_BW &= m_orbDetectMask;
     m_initViclePtPose = cv::Vec3f((285 + 358) / 2.0, (156, 326) / 2.0, 0);
-    m_method = matchFeatureMethod::LK_TRACK_FEATURES;
+    m_method = matchFeatureMethod::ORB_FEATURES;
 
     //第一副图像的像素坐标系为世界坐标系
     m_preRelTform = (cv::Mat_<double>(2, 3) << 1, 0, 0,
@@ -227,9 +227,8 @@ buildMapping::HDMapping::buildMapStatus buildMapping::HDMapping::constructWorldM
         if (m_currDescriptors.type() != CV_32F) {
             m_currDescriptors.convertTo(m_currDescriptors, CV_32F);
         }
-
-#ifdef USE_TOPK_BEST_MATCHES
-        matcher->match(preDescriptors, currDescriptors, matches);
+#if 1
+        matcher->match(m_preDescriptors, m_currDescriptors, matches);
         //只初步选取匹配前num个较好的特征点
         int numMatches = matches.size() < 10 ? matches.size() : matches.size() / 2;
         std::nth_element(matches.begin(), matches.begin() + numMatches, matches.end());
