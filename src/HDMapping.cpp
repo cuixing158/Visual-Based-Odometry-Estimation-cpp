@@ -2,7 +2,7 @@
 #include <algorithm>
 #include "HDMapping.h"
 
-#define DEBUG_SHOW_REALTIME_IMAGE 0
+#define DEBUG_SHOW_REALTIME_IMAGE 1
 #define DEBUG_SHOW_FUSE_OPTIMIZE_IMAGE 1
 
 // #define USE_SSC_UNIFORM
@@ -26,7 +26,7 @@ buildMapping::HDMapping::HDMapping() {
     m_BW.rowRange(480 / 2, 480) = 0;
     m_BW = m_BW &= m_orbDetectMask;
     m_initViclePtPose = cv::Vec3f((285 + 358) / 2.0, (156, 326) / 2.0, 0);
-    m_method = matchFeatureMethod::HYBRID_FEATURES;
+    m_method = matchFeatureMethod::LK_TRACK_FEATURES;
 
     //第一副图像的像素坐标系为世界坐标系
     m_preRelTform = (cv::Mat_<double>(2, 3) << 1, 0, 0,
@@ -111,20 +111,19 @@ buildMapping::HDMapping::buildMapStatus buildMapping::HDMapping::constructWorldM
     }
     m_points_features.push_back({m_currKeypts, m_currDescriptors});
 
+    printf("compute Elapsed second Time:%.6f\n", (cv::getTickCount() - t1) * 1.0 / cv::getTickFrequency());
+    t1 = cv::getTickCount();
     if (m_method == buildMapping::HDMapping::matchFeatureMethod::HYBRID_FEATURES) {
-        //match features
-        cv::FlannBasedMatcher matcher;
         double t2 = cv::getTickCount();
+        //match features
+        // https://stackoverflow.com/questions/43830849/opencv-use-flann-with-orb-descriptors-to-match-features
+        // cv::FlannBasedMatcher matcher;  // = cv::FlannBasedMatcher(cv::makePtr<cv::flann::LshIndexParams>(20, 10, 2));
+        cv::BFMatcher matcher(cv::NORM_HAMMING);
         cv::Mat feature1, feature2;
-        if (
-            m_preDescriptors.type() != CV_32F) {
-            m_preDescriptors.convertTo(feature1, CV_32F);
-        }
-        if (m_currDescriptors.type() != CV_32F) {
-            m_currDescriptors.convertTo(feature2, CV_32F);
-        }
+        m_preDescriptors.convertTo(feature1, CV_8U);
+        m_currDescriptors.convertTo(feature2, CV_8U);
 
-#if 1
+#if 0
         matcher.match(feature1, feature2, matches);
         //只初步选取匹配前num个较好的特征点
         int numMatches = matches.size() < 10 ? matches.size() : matches.size() / 2;
@@ -134,13 +133,15 @@ buildMapping::HDMapping::buildMapStatus buildMapping::HDMapping::constructWorldM
         std::vector<std::vector<cv::DMatch>> matchePoints;
         matcher.knnMatch(feature1, feature2, matchePoints, 2);
         for (int i = 0; i < matchePoints.size(); i++) {
-            if (matchePoints[i][0].distance < 0.6 * matchePoints[i][1].distance) {
+            if (matchePoints[i][0].distance < 0.5 * matchePoints[i][1].distance) {
                 matches.push_back(matchePoints[i][0]);
             }
         }
 #endif
         printf("match Elapsed second Time:%.6f\n", (cv::getTickCount() - t2) * 1.0 / cv::getTickFrequency());
-
+        // cv::Mat drawDstImage;
+        // cv::drawMatches(m_prevImg, m_preKeypts, currImg, m_currKeypts, matches, drawDstImage, cv::Scalar(0, 255, 0), -1, std::vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
+        // cv::imwrite("drawDstImage.jpg", drawDstImage);
         double t3 = cv::getTickCount();
         // estimate geometry rigid 2D transformation matrix
 #ifdef USE_OPENCV_FUNCTION
@@ -164,10 +165,10 @@ buildMapping::HDMapping::buildMapStatus buildMapping::HDMapping::constructWorldM
             nextP[i] = m_currKeypts[matches[i].trainIdx].pt;
         }
         estiTform(preP, nextP, m_relTform, inliers, status);
-        待调查此处性能
 #endif
         printf("estimate Elapsed second Time:%.6f\n", (cv::getTickCount() - t3) * 1.0 / cv::getTickFrequency());
-
+        // std::cout << "status:" << status << ",sum:" << cv::sum(inliers) << ",matches.size():" << matches.size() << std::endl;
+        double t4 = cv::getTickCount();
         bool cond = (status > 0 || cv::sum(inliers)[0] <= 3);
         if (cond) {
             rigidTformType = 1;
@@ -194,6 +195,7 @@ buildMapping::HDMapping::buildMapStatus buildMapping::HDMapping::constructWorldM
                 m_relTform = m_preRelTform;
             }
         }
+        printf("cond Elapsed second Time:%.6f\n", (cv::getTickCount() - t4) * 1.0 / cv::getTickFrequency());
     } else if (m_method == buildMapping::HDMapping::matchFeatureMethod::LK_TRACK_FEATURES) {
         rigidTformType = 1;
         std::vector<uchar> statusOK;
@@ -201,27 +203,41 @@ buildMapping::HDMapping::buildMapStatus buildMapping::HDMapping::constructWorldM
         cv::TermCriteria criteria = cv::TermCriteria((cv::TermCriteria::COUNT) + (cv::TermCriteria::EPS), 10, 0.03);
         std::vector<cv::Point2f> p0, p1;
         cv::KeyPoint::convert(m_preKeypts, p0);
+        double t21 = cv::getTickCount();
         cv::calcOpticalFlowPyrLK(m_prevImg, currImg, p0, p1, statusOK, err, cv::Size(15, 15), 2, criteria);
+        printf("LK Elapsed second Time:%.6f\n", (cv::getTickCount() - t21) * 1.0 / cv::getTickFrequency());
         preP.clear();
         nextP.clear();
-#if DEBUG_SHOW_IMAGE
+#if DEBUG_SHOW_REALTIME_IMAGE
         matches.clear();  // debug
 #endif
         for (uint i = 0; i < p0.size(); i++) {
             if (statusOK[i] == 1) {
-#if DEBUG_SHOW_IMAGE
+#if DEBUG_SHOW_REALTIME_IMAGE
                 matches.push_back(cv::DMatch(preP.size(), nextP.size(), 1));
 #endif
                 preP.push_back(p0[i]);
                 nextP.push_back(p1[i]);
             }
         }
+        double t22 = cv::getTickCount();
+#if 1
+        // cv::Mat inliers = cv::Mat::zeros(matches.size(), 1, CV_8U);
+        cv::Mat optimalAffineMat = estimateAffinePartial2D(preP, nextP, inliers, cv::RANSAC, 1.5, 2000, 0.99, 0);
+        cv::Mat R = optimalAffineMat.rowRange(0, 2).colRange(0, 2);
+        double s = std::sqrt(cv::determinant(R));
+        cv::Mat rigidtform2dR = R.mul(1.0 / s);
+        cv::hconcat(rigidtform2dR, optimalAffineMat.col(2), m_relTform);
+        status = std::abs(s - 1.0) / 1.0 < 0.03 ? 0 : 1;
+#else
         estiTform(preP, nextP, m_relTform, inliers, status);
+#endif
+        printf("estiTform Elapsed second Time:%.6f\n", (cv::getTickCount() - t22) * 1.0 / cv::getTickFrequency());
         bool cond = (status > 0 || cv::sum(inliers)[0] <= 3);
         if (cond) {
             rigidTformType = 2;
             m_relTform = m_preRelTform;
-#if DEBUG_SHOW_IMAGE
+#if DEBUG_SHOW_REALTIME_IMAGE
             std::ofstream fid("out_may_be_lost_frame.txt", std::ios_base::app);
             fid << num << std::endl;
             fid.close();
@@ -264,7 +280,7 @@ buildMapping::HDMapping::buildMapStatus buildMapping::HDMapping::constructWorldM
         }
         estiTform(preP, nextP, m_relTform, inliers, status);
     }
-    printf("ORB_TRACK Elapsed second Time:%.6f\n", (cv::getTickCount() - t1) * 1.0 / cv::getTickFrequency());
+    printf("  (match+esti+cond)Track_Features Elapsed second Time:%.6f\n", (cv::getTickCount() - t1) * 1.0 / cv::getTickFrequency());
 
     t1 = cv::getTickCount();
     // build map mode
@@ -386,7 +402,7 @@ buildMapping::HDMapping::buildMapStatus buildMapping::HDMapping::constructWorldM
         }
     }
     std::cout << "matches ratio:" << matches.size() << "/" << m_preKeypts.size() << std::endl;
-    std::cout << "rigid estimate matches ratio:" << rigidMatches.size() << "/" << matches.size() << std::endl;
+    std::cout << "rigid estimate matches ratio:" << rigidMatches.size() << "/" << matches.size() << ",rigidTformType:" << rigidTformType << std::endl;
 
     // assert(rigidMatches.size() > 3);
 
@@ -411,7 +427,7 @@ buildMapping::HDMapping::buildMapStatus buildMapping::HDMapping::constructWorldM
     // update previous state variables
     m_prevImg = currImg;
     m_preKeypts = m_currKeypts;
-    m_preDescriptors = m_currDescriptors;
+    m_preDescriptors = m_currDescriptors.clone();
     m_previousImgPose = currImgPose;
     m_preRelTform = m_relTform;
     m_preViclePtPose = currVehiclePtPose;

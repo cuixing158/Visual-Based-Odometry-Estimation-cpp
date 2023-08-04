@@ -1,37 +1,30 @@
+// https://stackoverflow.com/questions/43830849/opencv-use-flann-with-orb-descriptors-to-match-features
 #include <iostream>
 // #include <math>
 #include "opencv2/opencv.hpp"
+cv::Mat src;
 
-void subsetPoints(std::vector<cv::KeyPoint> keyPts, int N, std::vector<cv::KeyPoint> &outputPts) {
-    outputPts.clear();
-    if (keyPts.size() > N) {
-        for (size_t i = 0; i < N; i++) {
-            outputPts.push_back(keyPts[i]);
-        }
-    }
+void myfun(cv::Mat& out) {
+        src = (cv::Mat_<double>(2, 3) << 1, 2, 3, 4, 5, 9);
+    out = cv::Mat(2, 3, CV_64F, src.data);
+    src.release();
 }
+int main(int argc, char** argv) {
+    // Read both images.
+    cv::Mat image1 = cv::imread("/opt_disk2/rd22946/AllDataAndModels/from_tongwenchao/map_R_new_undistort/map_R/1.jpg", cv::IMREAD_GRAYSCALE);
+    if (image1.empty()) {
+        std::cerr << "Couldn't read image in " << argv[1] << std::endl;
+        return 1;
+    }
+    cv::Mat image2 = cv::imread("/opt_disk2/rd22946/AllDataAndModels/from_tongwenchao/map_R_new_undistort/map_R/2.jpg", cv::IMREAD_GRAYSCALE);
+    if (image2.empty()) {
+        std::cerr << "Couldn't read image in " << argv[2] << std::endl;
+        return 1;
+    }
 
-int main(int, char **) {
-    cv::Mat srcImg = cv::imread("/opt_disk2/rd22946/MATLAB/R2023a/toolbox/matlab/imagesci/peppers.png", 0);
-    cv::Ptr<cv::FeatureDetector> orbDetector = cv::ORB::create(srcImg.rows * srcImg.cols);
-
-    cv::Mat currDescriptors;
-    std::vector<cv::KeyPoint> keyPts, currKeypts;
-    orbDetector->detect(srcImg, keyPts);
-    // selectUniform(keyPts, Descriptions, 2000, currKeypts, currDescriptors);
-    std::vector<int> indexs;
-    // currKeypts.clear();
-    // currDescriptors = cv::Mat();
-    // ssc(keyPts, 2000, 0.1, currImg.cols, currImg.rows, currKeypts, indexs);
-    // for (size_t i = 0; i < indexs.size(); i++) {
-    //     currDescriptors.push_back(Descriptions.row(indexs[i]));
-    // }
-    subsetPoints(keyPts, 20, currKeypts);
-
-    // for (size_t i = 0; i < 10; i++) {
-    //     std::cout << currKeypts[i].pt << std::endl;
-    // }
-
-    orbDetector->compute(srcImg, currKeypts, currDescriptors);
-    std::cout << currDescriptors.size << std::endl;
+    cv::Mat image3;
+    myfun(image3);
+    std::cout << image3 << std::endl;
+    // cv::imshow("Matches", image_matches);
+    return 0;
 }

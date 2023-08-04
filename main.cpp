@@ -37,7 +37,7 @@ int main(int, char **) {
     for (size_t i = 1; i < numImgs; i++) {  // from 351, to 1160 for 116_new_undistort/116
         fid << imagePaths[i] << std::endl;
         cv::Mat srcImage = cv::imread(imagePaths[i]);
-        if (i == 150) {
+        if (i == 1200) {
             flag = true;
         }
         double t1 = cv::getTickCount();
