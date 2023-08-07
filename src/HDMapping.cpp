@@ -156,7 +156,8 @@ buildMapping::HDMapping::buildMapStatus buildMapping::HDMapping::constructWorldM
         cv::Mat R = optimalAffineMat.rowRange(0, 2).colRange(0, 2);
         double s = std::sqrt(cv::determinant(R));
         cv::Mat rigidtform2dR = R.mul(1.0 / s);
-        cv::hconcat(rigidtform2dR, optimalAffineMat.col(2), relTform);
+        cv::hconcat(rigidtform2dR, optimalAffineMat.col(2), m_relTform);
+        status = std::abs(s - 1.0) / 1.0 < 0.03 ? 0 : 1;
 #else
         preP.resize(matches.size());
         nextP.resize(matches.size());
@@ -221,19 +222,30 @@ buildMapping::HDMapping::buildMapStatus buildMapping::HDMapping::constructWorldM
             }
         }
         double t22 = cv::getTickCount();
-#if 1
+
         // cv::Mat inliers = cv::Mat::zeros(matches.size(), 1, CV_8U);
         cv::Mat optimalAffineMat = estimateAffinePartial2D(preP, nextP, inliers, cv::RANSAC, 1.5, 2000, 0.99, 0);
-        cv::Mat R = optimalAffineMat.rowRange(0, 2).colRange(0, 2);
-        double s = std::sqrt(cv::determinant(R));
-        cv::Mat rigidtform2dR = R.mul(1.0 / s);
-        cv::hconcat(rigidtform2dR, optimalAffineMat.col(2), m_relTform);
-        status = std::abs(s - 1.0) / 1.0 < 0.03 ? 0 : 1;
-#else
-        estiTform(preP, nextP, m_relTform, inliers, status);
-#endif
+        std::vector<cv::Point2f> refineP0, refineP1;
+        for (size_t i = 0; i < inliers.rows; i++) {
+            if (inliers.at<uchar>(0, i) == 1) {
+                refineP0.push_back(preP[i]);
+                refineP1.push_back(nextP[i]);
+            }
+        }
+        cv::Mat inliersIner;
+        estiTform(refineP0, refineP1, m_relTform, inliersIner, status);
+        int innerIdx = 0;
+        for (size_t i = 0; i < inliers.rows; i++) {
+            if (inliers.at<uchar>(0, i) == 1) {
+                if (inliersIner.at<uchar>(0, innerIdx) == 0) {
+                    inliers.at<uchar>(0, i) = 0;
+                }
+                innerIdx++;
+            }
+        }
+
         printf("estiTform Elapsed second Time:%.6f\n", (cv::getTickCount() - t22) * 1.0 / cv::getTickFrequency());
-        bool cond = (status > 0 || cv::sum(inliers)[0] <= 3);
+        bool cond = (status > 0 || cv::sum(inliersIner)[0] <= 3);
         if (cond) {
             rigidTformType = 2;
             m_relTform = m_preRelTform;
@@ -343,7 +355,7 @@ buildMapping::HDMapping::buildMapStatus buildMapping::HDMapping::constructWorldM
         fuseOptimizeHDMap(imageFilesList, updateNodeVehiclePtPoses);
         cv::Mat drawImage;
         drawRoutePath(drawImage);
-        cv::imwrite("bigImgCopy_fuseOptimize.png", drawImage);
+        cv::imwrite("bigImgCopy_fuseOptimize.jpg", drawImage);
 #endif
 
         // 保存特征和状态相关数据
@@ -353,6 +365,8 @@ buildMapping::HDMapping::buildMapStatus buildMapping::HDMapping::constructWorldM
         // writeStructBin(inputOutputStruct, options.hdMapConfigFile, options.hdMapDataFile);
         return buildMapStatus::BUILD_MAP_OVER;
     }
+    printf("calcuate dist and add pose:%.6f\n", (cv::getTickCount() - t1) * 1.0 / cv::getTickFrequency());
+    t1 = cv::getTickCount();
 
 #if DEBUG_SHOW_REALTIME_IMAGE
     cv::Mat currCorner = (cv::Mat_<double>(3, 4) << 0, currImg.cols - 1, currImg.cols - 1, 0,
@@ -421,7 +435,7 @@ buildMapping::HDMapping::buildMapStatus buildMapping::HDMapping::constructWorldM
     // srcImage.copyTo(dstMat, orbDetectMask);
     cv::Mat drawImage;
     drawRoutePath(drawImage);
-    cv::imwrite("bigImgCopy.png", drawImage);
+    cv::imwrite("bigImgCopy.jpg", drawImage);
 #endif
 
     // update previous state variables
