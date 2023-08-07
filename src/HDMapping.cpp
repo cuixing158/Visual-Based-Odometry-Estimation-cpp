@@ -2,7 +2,7 @@
 #include <algorithm>
 #include "HDMapping.h"
 
-#define DEBUG_SHOW_REALTIME_IMAGE 1
+#define DEBUG_SHOW_REALTIME_IMAGE 0
 #define DEBUG_SHOW_FUSE_OPTIMIZE_IMAGE 1
 
 // #define USE_SSC_UNIFORM

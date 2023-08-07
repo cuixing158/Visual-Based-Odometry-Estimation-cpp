@@ -22,7 +22,15 @@ add_executable(rigidTform2d ThirdParty/rigidTform2d/examples/main.cpp)
 target_include_directories(rigidTform2d PRIVATE  ThirdParty/rigidTform2d ThirdParty/rigidTform2d/examples/main.h)
 target_link_libraries(rigidTform2d PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/rigidTform2d/build/estimateAffineRigid2D.so m)
 
-add_executable(main main.cpp src/HDMapping.cpp)
+add_executable(main main.cpp src/HDMapping.cpp
+${PROJECT_SOURCE_DIR}/DBOW3/src/BowVector.cpp
+${PROJECT_SOURCE_DIR}/DBOW3/src/Database.cpp
+${PROJECT_SOURCE_DIR}/DBOW3/src/DescManip.cpp
+${PROJECT_SOURCE_DIR}/DBOW3/src/FeatureVector.cpp
+${PROJECT_SOURCE_DIR}/DBOW3/src/QueryResults.cpp
+${PROJECT_SOURCE_DIR}/DBOW3/src/quicklz.c
+${PROJECT_SOURCE_DIR}/DBOW3/src/ScoringObject.cpp
+${PROJECT_SOURCE_DIR}/DBOW3/src/Vocabulary.cpp)
 target_compile_features(main INTERFACE cxx_std_11)
 target_include_directories(main PRIVATE ${OpenCV_INCLUDE_DIRS}
 ${CMAKE_CURRENT_SOURCE_DIR}
@@ -33,18 +41,26 @@ DBOW3/src)
 target_link_libraries(main PRIVATE ${OpenCV_LIBS}  
 ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/selectUniform2/build/selectUniform2.so 
 ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/slamMapGraph2D/build/slamMapGraph2D.so
-${CMAKE_CURRENT_SOURCE_DIR}/DBOW3/build/src/libDBoW3.so 
 ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/rigidTform2d/build/estimateAffineRigid2D.so m profiler)
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR:${CMAKE_CURRENT_SOURCE_DIR}")
 
-add_executable(selectUniform2 ThirdParty/selectUniform2/examples/main.cpp)
-target_include_directories(selectUniform2 PRIVATE  ThirdParty/selectUniform2)
-target_link_libraries(selectUniform2 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/selectUniform2/build/selectUniform2.so m)
+# add_executable(selectUniform2 ThirdParty/selectUniform2/examples/main.cpp)
+# target_include_directories(selectUniform2 PRIVATE  ThirdParty/selectUniform2)
+# target_link_libraries(selectUniform2 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/selectUniform2/build/selectUniform2.so m)
 
-add_executable(test test.cpp)
-target_compile_features(test INTERFACE cxx_std_11)
-target_include_directories(test PRIVATE ${OpenCV_INCLUDE_DIRS} src c_cpp_utils)
-target_link_libraries(test PRIVATE ${OpenCV_LIBS})
+# add_executable(test test.cpp
+# ${PROJECT_SOURCE_DIR}/DBOW3/src/BowVector.cpp
+# ${PROJECT_SOURCE_DIR}/DBOW3/src/Database.cpp
+# ${PROJECT_SOURCE_DIR}/DBOW3/src/DescManip.cpp
+# ${PROJECT_SOURCE_DIR}/DBOW3/src/FeatureVector.cpp
+# ${PROJECT_SOURCE_DIR}/DBOW3/src/QueryResults.cpp
+# ${PROJECT_SOURCE_DIR}/DBOW3/src/quicklz.c
+# ${PROJECT_SOURCE_DIR}/DBOW3/src/ScoringObject.cpp
+# ${PROJECT_SOURCE_DIR}/DBOW3/src/Vocabulary.cpp)
+# target_compile_features(test INTERFACE cxx_std_11)
+# target_include_directories(test PRIVATE ${OpenCV_INCLUDE_DIRS} src c_cpp_utils DBOW3/src)
+# target_link_libraries(test PRIVATE 
+# ${OpenCV_LIBS})
 
 # install
 set(CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR}/install)
