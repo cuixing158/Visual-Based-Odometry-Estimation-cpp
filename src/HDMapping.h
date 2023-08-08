@@ -28,7 +28,7 @@ typedef struct imageKptsAndFeatures {
 } imageKptsAndFeatures;
 
 template <typename T>
-std::vector<int> findItems(std::vector<T> const& v, int greatThanTarget) {
+std::vector<int> findItems(std::vector<T> const& v, double greatThanTarget) {
     std::vector<int> indexs;
     auto it = v.begin();
     while ((it = std::find_if(it, v.end(), [&](T const& e) { return e >= greatThanTarget; })) != v.end()) {
@@ -74,6 +74,27 @@ std::vector<std::vector<T>> nchoosek(std::vector<T> V, int K) {
     } while (std::prev_permutation(bitmask.begin(), bitmask.end()));
     return arr;
 }
+
+template <typename T>
+void generateUniformPts(int nums, cv::Mat& mask, std::vector<T>& outPts) {
+    outPts.clear();
+    cv::Scalar s = cv::sum(mask);
+    if (s[0] == 0) {
+        return;
+    }
+    cv::RNG rng(0);
+    int times = 0;
+    while (times < nums) {
+        int x = rng.uniform(0, mask.cols);
+        int y = rng.uniform(0, mask.rows);
+        T currPt(x, y);
+        uchar* pixel = mask.ptr<uchar>(y);
+        if (pixel[x]) {
+            outPts.push_back(currPt);
+            times++;
+        }
+    }
+}
 class HDMapping {
    public:
     typedef enum { ORB_FEATURES,
@@ -109,6 +130,7 @@ class HDMapping {
     cv::Mat m_prevImg;
     cv::Mat m_preRelTform, m_relTform, m_previousImgPose;  // 2*3转换矩阵
     cv::Vec3d m_initViclePtPose, m_preViclePtPose;         // [x,y,theta]位姿
+    std::vector<cv::Point2f> m_p0;
 
     //
     cv::Ptr<cv::Feature2D> m_orbDetector;

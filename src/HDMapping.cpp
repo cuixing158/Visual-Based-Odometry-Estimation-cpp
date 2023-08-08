@@ -27,6 +27,7 @@ buildMapping::HDMapping::HDMapping() {
     m_BW = m_BW &= m_orbDetectMask;
     m_initViclePtPose = cv::Vec3f((285 + 358) / 2.0, (156, 326) / 2.0, 0);
     m_method = matchFeatureMethod::LK_TRACK_FEATURES;
+    // generateUniformPts(2000, m_orbDetectMask, m_p0);
 
     //第一副图像的像素坐标系为世界坐标系
     m_preRelTform = (cv::Mat_<double>(2, 3) << 1, 0, 0,
@@ -109,9 +110,10 @@ buildMapping::HDMapping::buildMapStatus buildMapping::HDMapping::constructWorldM
     if (m_preDescriptors.empty()) {
         m_preDescriptors = m_currDescriptors;
     }
-    m_points_features.push_back({m_currKeypts, m_currDescriptors});
+    m_points_features.push_back({m_currKeypts, m_currDescriptors.clone()});
 
     printf("compute Elapsed second Time:%.6f\n", (cv::getTickCount() - t1) * 1.0 / cv::getTickFrequency());
+
     t1 = cv::getTickCount();
     if (m_method == buildMapping::HDMapping::matchFeatureMethod::HYBRID_FEATURES) {
         double t2 = cv::getTickCount();
@@ -343,7 +345,7 @@ buildMapping::HDMapping::buildMapStatus buildMapping::HDMapping::constructWorldM
         coder::array<double, 2U> updateNodePoses;
         m_pg.nodeEstimates2D(updateNodePoses);  // default start from (0,0,0)
         std::vector<cv::Vec3d> updateNodeVehiclePtPoses;
-        for (size_t node_idx = 0; node_idx < num; node_idx++) {
+        for (size_t node_idx = 0; node_idx < updateNodePoses.size(0); node_idx++) {
             updateNodeVehiclePtPoses.push_back(cv::Vec3d(updateNodePoses.at(node_idx, 0), updateNodePoses.at(node_idx, 1), updateNodePoses.at(node_idx, 2)) +
                                                m_initViclePtPose);
         }
@@ -575,7 +577,7 @@ void buildMapping::HDMapping::detectLoopAndAddGraph() {
     int buildMapStopFrame = m_points_features.size();
     int startDetectLoopIndex = std::max(buildMapStopFrame - 500, 0);
     int endDetectLoopIndex = buildMapStopFrame;
-    int topK = 10;
+    int topK = 20;
 
     for (int idx = startDetectLoopIndex; idx < endDetectLoopIndex; idx = idx + 10) {
         DBoW3::QueryResults result;
@@ -593,7 +595,7 @@ void buildMapping::HDMapping::detectLoopAndAddGraph() {
 
         std::vector<int> loopKeyFrameIds, validKeyFrameIds;
         std::vector<double> keyFrameScores, validKeyFrameScores;
-        int nearestIDsStartIdx = std::max(0, idx - 100);  // 至少建图100帧后才开始回环检测
+        int nearestIDsStartIdx = std::max(0, idx - 100);  // 建图模式，位于当前帧至少100帧前才开始回环检测
         for (int iq = 0; iq < topK; iq++) {
             if (imageIDs[iq] < nearestIDsStartIdx) {
                 loopKeyFrameIds.push_back(imageIDs[iq]);
@@ -614,7 +616,7 @@ void buildMapping::HDMapping::detectLoopAndAddGraph() {
                 validKeyFrameIds.push_back(loopKeyFrameIds[validId]);
             }
             if (validKeyFrameIds.size() > 2) {
-                std::vector<std::vector<int>> groups = nchoosek(validKeyFrameIds, 2);
+                std::vector<std::vector<int>> groups = nchoosek(validKeyFrameIds, 3);
                 cv::Mat matGroups(groups.size(), groups.at(0).size(), CV_64FC1);
                 for (int iRow = 0; iRow < matGroups.rows; ++iRow) {
                     for (int jCol = 0; jCol < matGroups.cols; ++jCol) {
@@ -639,8 +641,21 @@ void buildMapping::HDMapping::detectLoopAndAddGraph() {
 
         if (isDetectedLoop) {
             std::vector<cv::Point2f> preP, nextP;
-            cv::KeyPoint::convert(m_points_features[loopCandidate].keyPoints, preP);
-            cv::KeyPoint::convert(m_points_features[idx].keyPoints, nextP);
+            std::vector<cv::DMatch> matches;
+            cv::BFMatcher matcher(cv::NORM_HAMMING);
+            std::vector<std::vector<cv::DMatch>> matchePoints;
+            matcher.knnMatch(m_points_features[loopCandidate].features, m_points_features[idx].features, matchePoints, 2);
+            for (int i = 0; i < matchePoints.size(); i++) {
+                if (matchePoints[i][0].distance < 0.5 * matchePoints[i][1].distance) {
+                    matches.push_back(matchePoints[i][0]);
+                }
+            }
+            preP.resize(matches.size());
+            nextP.resize(matches.size());
+            for (size_t i = 0; i < matches.size(); i++) {
+                preP[i] = m_points_features[loopCandidate].keyPoints[matches[i].queryIdx].pt;
+                nextP[i] = m_points_features[idx].keyPoints[matches[i].trainIdx].pt;
+            }
             cv::Mat loopTform, inliers;
             int status = 0;
             estiTform(preP, nextP, loopTform, inliers, status);
@@ -681,7 +696,7 @@ void buildMapping::HDMapping::fuseOptimizeHDMap(std::string imageFilesList, std:
                                           std::sin(theta), std::cos(theta), updateNodeVehiclePtPoses[idx][1],
                                           0, 0, 1);
         cv::Mat imageTargetPoseA = currNodeVehiclePtPoseA * relTformA;
-        cv::Mat tform = imageTargetPoseA;
+        cv::Mat tform = imageTargetPoseA.rowRange(0, 2);
         cv::Mat currCorner = (cv::Mat_<double>(3, 4) << 0, currImg.cols - 1, currImg.cols - 1, 0,
                               0, 0, currImg.rows - 1, currImg.rows - 1,
                               1, 1, 1, 1);
@@ -736,7 +751,12 @@ void buildMapping::HDMapping::fuseOptimizeHDMap(std::string imageFilesList, std:
 
 void buildMapping::HDMapping::drawRoutePath(cv::Mat& drawImage) const {
     drawImage.release();
-    cv::cvtColor(m_HDmapOutput.bigImg, drawImage, cv::COLOR_GRAY2BGR);
+    if (m_HDmapOutput.bigImg.channels() == 3) {
+        drawImage = m_HDmapOutput.bigImg;
+    } else {
+        cv::cvtColor(m_HDmapOutput.bigImg, drawImage, cv::COLOR_GRAY2BGR);
+    }
+
     int lenPoses = m_vehiclePoses.size();
     if (lenPoses > 1) {
         for (size_t i = 0; i < lenPoses - 1; i++) {
