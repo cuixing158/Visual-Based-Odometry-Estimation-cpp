@@ -15,10 +15,13 @@
 #include "DBoW3.h"
 #include "DescManip.h"
 
-//loop
+// origin loop
 #include "slamPoseGraph.h"
 #include "myGraph.h"
 #include "poseGraph.h"
+
+// current loop
+#include "poseGraphOptimize.h"
 
 namespace buildMapping {
 
@@ -145,8 +148,9 @@ class HDMapping {
     // loop
     std::vector<imageKptsAndFeatures> m_points_features;
     DBoW3::Database m_db;
-    SlamGraph2D::slamPoseGraph m_pg;  // 索引从1开始
+    // SlamGraph2D::slamPoseGraph m_pg;  // 索引从1开始
     void detectLoopAndAddGraph();
+    void optimizePoseGraph(cv::Mat& loopIDpairs, std::vector<cv::Vec3d>& relPoses);
     void loopDatabaseAddFeaturesAndSave(std::string saveDataBaseYmlGz = "./database.yml.gz");
     DBoW3::QueryResults retrieveImages(cv::Mat queryImage);
 

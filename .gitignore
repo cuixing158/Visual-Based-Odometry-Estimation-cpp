@@ -56,6 +56,7 @@
 /ThirdParty/rigidTform2d/build
 /ThirdParty/selectUniform2/build
 /ThirdParty/slamMapGraph2D/build
+/ThirdParty/poseGraphOptimize/build
 
 imageFilesList.txt
 

@@ -17,9 +17,13 @@ endif()
 
 #  add_subdirectory(ThirdParty/rigidTform2d)
 # add_subdirectory(ThirdParty/selectUniform2)
+add_subdirectory(ThirdParty/slamMapGraph2D)
+add_subdirectory(ThirdParty/poseGraphOptimize)
 
 add_executable(rigidTform2d ThirdParty/rigidTform2d/examples/main.cpp)
-target_include_directories(rigidTform2d PRIVATE  ThirdParty/rigidTform2d ThirdParty/rigidTform2d/examples/main.h)
+target_include_directories(rigidTform2d PRIVATE  
+ThirdParty/rigidTform2d 
+ThirdParty/rigidTform2d/examples/main.h)
 target_link_libraries(rigidTform2d PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/rigidTform2d/build/estimateAffineRigid2D.so m)
 
 add_executable(main main.cpp src/HDMapping.cpp
@@ -37,10 +41,12 @@ ${CMAKE_CURRENT_SOURCE_DIR}
 ThirdParty/rigidTform2d
 ThirdParty/selectUniform2
 ThirdParty/slamMapGraph2D
+ThirdParty/poseGraphOptimize
 DBOW3/src)
 target_link_libraries(main PRIVATE ${OpenCV_LIBS}  
 ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/selectUniform2/build/selectUniform2.so 
-${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/slamMapGraph2D/build/slamMapGraph2D.so
+slamMapGraph2D
+poseGraphOptimize
 ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/rigidTform2d/build/estimateAffineRigid2D.so m profiler)
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR:${CMAKE_CURRENT_SOURCE_DIR}")
 

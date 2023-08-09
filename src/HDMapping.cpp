@@ -40,7 +40,7 @@ buildMapping::HDMapping::HDMapping() {
     m_preViclePtPose = m_initViclePtPose;
 
     // loop
-    m_pg.init(10000, 5000);
+    // m_pg.init(10000, 5000);
 };
 buildMapping::HDMapping::~HDMapping() {}
 
@@ -331,30 +331,16 @@ buildMapping::HDMapping::buildMapStatus buildMapping::HDMapping::constructWorldM
     double measurement[3] = {meas[0], meas[1], meas[2]};
     double fromNodeID = num + 1;
     double toNodeID = num + 2;
-    m_pg.addRelativePose2D(measurement, fromNodeID, toNodeID);
+    // m_pg.addRelativePose2D(measurement, fromNodeID, toNodeID);
 
     // 开始poseGraph优化建图
     if (isStopConstructWorldMap) {
         detectLoopAndAddGraph();
-        //optimize pose
-        SlamGraph2D::myGraph instance;
-        SlamGraph2D::coder::poseGraph lobj_2;
-        SlamGraph2D::coder::robotics::core::internal::BlockMatrix lobj_1[3];
-        m_pg.optimizePoseGraph2D(&instance, lobj_1[1], lobj_2);
-
-        coder::array<double, 2U> updateNodePoses;
-        m_pg.nodeEstimates2D(updateNodePoses);  // default start from (0,0,0)
-        std::vector<cv::Vec3d> updateNodeVehiclePtPoses;
-        for (size_t node_idx = 0; node_idx < updateNodePoses.size(0); node_idx++) {
-            updateNodeVehiclePtPoses.push_back(cv::Vec3d(updateNodePoses.at(node_idx, 0), updateNodePoses.at(node_idx, 1), updateNodePoses.at(node_idx, 2)) +
-                                               m_initViclePtPose);
-        }
-        m_vehiclePoses = updateNodeVehiclePtPoses;
 
 // 融合姿态图输出
 #if DEBUG_SHOW_FUSE_OPTIMIZE_IMAGE
         std::string imageFilesList = "imageFilesList.txt";
-        fuseOptimizeHDMap(imageFilesList, updateNodeVehiclePtPoses);
+        fuseOptimizeHDMap(imageFilesList, m_vehiclePoses);
         cv::Mat drawImage;
         drawRoutePath(drawImage);
         cv::imwrite("bigImgCopy_fuseOptimize.jpg", drawImage);
@@ -589,7 +575,7 @@ void buildMapping::HDMapping::detectLoopAndAddGraph() {
         double scores[topK] = {0.0};
         for (qit = result.begin(); qit != result.end(); ++qit) {
             imageIDs[rowIdx] = (double)qit->Id;   // 注意C++索引从0开始
-            scores[rowIdx] = (double)qit->Score;  // 注意前面程序用的是top10
+            scores[rowIdx] = (double)qit->Score;  // 注意前面程序用的是topK
             rowIdx++;
         }
 
@@ -669,7 +655,12 @@ void buildMapping::HDMapping::detectLoopAndAddGraph() {
             std::vector<double> angRadius;
             cv::Rodrigues(tempR, angRadius);
             double measurement[3] = {loopTform.at<double>(0, 2), loopTform.at<double>(1, 2), angRadius[2]};  // 注意角度，是相对值, 单位为弧度
-            m_pg.addRelativePose2D(measurement, idx, loopCandidate);
+
+            // optimize loop
+            cv::Mat loopIDpairs = (cv::Mat_<double>(1, 2) << idx, loopCandidate);
+            std::vector<cv::Vec3d> relPoses{cv::Vec3d(measurement)};
+            optimizePoseGraph(loopIDpairs, relPoses);
+            break;  // 仅使用一次闭环即可
         }
     }
 }
@@ -769,4 +760,37 @@ void buildMapping::HDMapping::drawRoutePath(cv::Mat& drawImage) const {
             cv::line(drawImage, pt1, pt2, cv::Scalar(0, 0, 255), 4);
         }
     }
+}
+
+void buildMapping::HDMapping::optimizePoseGraph(cv::Mat& loopIDpairs, std::vector<cv::Vec3d>& relPoses) {
+    coder::array<double, 2U> absposes_tmp, rel_poses;
+    coder::array<double, 2U> loopNodePairs;
+    coder::array<double, 2U> updatedPoses;
+
+    absposes_tmp.set_size(m_vehiclePoses.size(), 3);
+    for (size_t i = 0; i < m_vehiclePoses.size(); i++) {
+        absposes_tmp[i] = m_vehiclePoses[i][0];
+        absposes_tmp[i + m_vehiclePoses.size()] = m_vehiclePoses[i][1];
+        absposes_tmp[i + 2 * m_vehiclePoses.size()] = m_vehiclePoses[i][2];
+    }
+    rel_poses.set_size(relPoses.size(), 3);
+    for (size_t i = 0; i < relPoses.size(); i++) {
+        rel_poses[i] = relPoses[i][0];
+        rel_poses[i + relPoses.size()] = relPoses[i][1];
+        rel_poses[i + 2 * relPoses.size()] = relPoses[i][2];
+    }
+    loopNodePairs.set_size(loopIDpairs.rows, 2);
+    for (size_t i = 0; i < loopIDpairs.rows; i++) {
+        double* numel = loopIDpairs.ptr<double>(i);
+        loopNodePairs[i] = numel[0];
+        loopNodePairs[i + loopIDpairs.rows] = numel[1];
+    }
+    poseGraphOptimize::poseGraphOptimize(absposes_tmp, loopNodePairs,
+                                         rel_poses, updatedPoses);
+    m_vehiclePoses.clear();
+    for (size_t i = 0; i < updatedPoses.size(0); i++) {
+        m_vehiclePoses.push_back(cv::Vec3d(updatedPoses[i], updatedPoses[i + updatedPoses.size(0)], updatedPoses[i + 2 * updatedPoses.size(0)]) +
+                                 m_initViclePtPose);
+    }
+    poseGraphOptimize::poseGraphOptimize_terminate();
 }
