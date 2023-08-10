@@ -649,12 +649,15 @@ void buildMapping::HDMapping::detectLoopAndAddGraph() {
                 continue;
             }
 
-            cv::Mat tempR = (cv::Mat_<double>(3, 3) << loopTform.at<double>(0, 0), loopTform.at<double>(0, 1), 0,
-                             loopTform.at<double>(1, 0), loopTform.at<double>(1, 1), 0,
+            cv::Mat invertR = loopTform.rowRange(0, 2).colRange(0, 2).t();
+            cv::Mat invertLoopTform;
+            cv::hconcat(invertR, -invertR * loopTform.col(2), invertLoopTform);
+            cv::Mat tempR = (cv::Mat_<double>(3, 3) << invertLoopTform.at<double>(0, 0), invertLoopTform.at<double>(0, 1), 0,
+                             invertLoopTform.at<double>(1, 0), invertLoopTform.at<double>(1, 1), 0,
                              0, 0, 1);
             std::vector<double> angRadius;
             cv::Rodrigues(tempR, angRadius);
-            double measurement[3] = {loopTform.at<double>(0, 2), loopTform.at<double>(1, 2), angRadius[2]};  // 注意角度，是相对值, 单位为弧度
+            double measurement[3] = {invertLoopTform.at<double>(0, 2), invertLoopTform.at<double>(1, 2), angRadius[2]};  // 注意角度，是相对值, 单位为弧度
 
             // optimize loop
             cv::Mat loopIDpairs = (cv::Mat_<double>(1, 2) << idx, loopCandidate);
@@ -785,8 +788,30 @@ void buildMapping::HDMapping::optimizePoseGraph(cv::Mat& loopIDpairs, std::vecto
         loopNodePairs[i] = numel[0];
         loopNodePairs[i + loopIDpairs.rows] = numel[1];
     }
+
+    std::ofstream fid1("absposes_tmp.txt");
+
+    for (size_t i = 0; i < absposes_tmp.size(0); i++) {
+        fid1 << absposes_tmp[i] << "," << absposes_tmp[i + absposes_tmp.size(0)] << "," << absposes_tmp[i + 2 * absposes_tmp.size(0)] << std::endl;
+    }
+    fid1.close();
+    std::ofstream fid3("loopRel.txt");
+    for (size_t i = 0; i < loopNodePairs.size(0); i++) {
+        fid3 << loopNodePairs[i] << "," << loopNodePairs[i + loopNodePairs.size(0)] << std::endl;
+        fid3 << rel_poses[i] << "," << rel_poses[i + rel_poses.size(0)] << "," << rel_poses[i + 2 * rel_poses.size(0)] << std::endl;
+        fid3 << std::endl;
+    }
+    fid3.close();
+
     poseGraphOptimize::poseGraphOptimize(absposes_tmp, loopNodePairs,
                                          rel_poses, updatedPoses);
+
+    std::ofstream fid2("updatedPoses.txt");
+    for (size_t i = 0; i < updatedPoses.size(0); i++) {
+        fid2 << updatedPoses[i] << "," << updatedPoses[i + updatedPoses.size(0)] << "," << updatedPoses[i + 2 * updatedPoses.size(0)] << std::endl;
+    }
+    fid2.close();
+
     m_vehiclePoses.clear();
     for (size_t i = 0; i < updatedPoses.size(0); i++) {
         m_vehiclePoses.push_back(cv::Vec3d(updatedPoses[i], updatedPoses[i + updatedPoses.size(0)], updatedPoses[i + 2 * updatedPoses.size(0)]) +

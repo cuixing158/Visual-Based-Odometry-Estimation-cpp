@@ -5549,7 +5549,7 @@ void poseGraphOptimize(const ::coder::array<double, 2U> &absposes,
   ::coder::array<double, 2U> T;
   ::coder::array<double, 2U> b_y1;
   ::coder::array<double, 2U> nodeIds;
-  double c_y1[3];
+  double relPose[3];
   double colStart;
   double d;
   double rowStart;
@@ -5688,18 +5688,23 @@ void poseGraphOptimize(const ::coder::array<double, 2U> &absposes,
   }
   r = b_y1.size(0);
   for (loop_ub = 0; loop_ub < r; loop_ub++) {
-    c_y1[0] = b_y1[loop_ub];
-    c_y1[1] = b_y1[loop_ub + b_y1.size(0)];
-    c_y1[2] = b_y1[loop_ub + b_y1.size(0) * 2];
-    pg.addRelativePose(c_y1, static_cast<double>(loop_ub) + 1.0,
+    relPose[2] = b_y1[loop_ub + b_y1.size(0) * 2];
+    rowStart = absposes[loop_ub + absposes.size(0) * 2];
+    colStart = std::sin(rowStart);
+    rowStart = std::cos(rowStart);
+    relPose[0] =
+        rowStart * b_y1[loop_ub] + colStart * b_y1[loop_ub + b_y1.size(0)];
+    relPose[1] =
+        -colStart * b_y1[loop_ub] + rowStart * b_y1[loop_ub + b_y1.size(0)];
+    pg.addRelativePose(relPose, static_cast<double>(loop_ub) + 1.0,
                        (static_cast<double>(loop_ub) + 1.0) + 1.0);
   }
   r = loopNodePairs.size(0);
   for (loop_ub = 0; loop_ub < r; loop_ub++) {
-    c_y1[0] = loopPoses[loop_ub];
-    c_y1[1] = loopPoses[loop_ub + loopPoses.size(0)];
-    c_y1[2] = loopPoses[loop_ub + loopPoses.size(0) * 2];
-    pg.addRelativePose(c_y1, loopNodePairs[loop_ub],
+    relPose[0] = loopPoses[loop_ub];
+    relPose[1] = loopPoses[loop_ub + loopPoses.size(0)];
+    relPose[2] = loopPoses[loop_ub + loopPoses.size(0) * 2];
+    pg.addRelativePose(relPose, loopNodePairs[loop_ub],
                        loopNodePairs[loop_ub + loopNodePairs.size(0)]);
   }
   coder::optimizePoseGraph(pg, lobj_2[3], b_pg);
