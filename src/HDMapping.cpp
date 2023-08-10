@@ -351,6 +351,10 @@ buildMapping::HDMapping::buildMapStatus buildMapping::HDMapping::constructWorldM
 
         // writeStructBin(imageViewSt, options.imageViewStConfigFile, options.imageViewStDataFile);
         // writeStructBin(inputOutputStruct, options.hdMapConfigFile, options.hdMapDataFile);
+        std::ofstream os("pointsFeatures.cereal", std::ios::binary);  // 打开标准输出流
+        cereal::PortableBinaryOutputArchive archive(os);              // 构建cereal对象，并用os初始化
+        archive(m_points_features);
+
         return buildMapStatus::BUILD_MAP_OVER;
     }
     printf("calcuate dist and add pose:%.6f\n", (cv::getTickCount() - t1) * 1.0 / cv::getTickFrequency());
@@ -788,30 +792,8 @@ void buildMapping::HDMapping::optimizePoseGraph(cv::Mat& loopIDpairs, std::vecto
         loopNodePairs[i] = numel[0];
         loopNodePairs[i + loopIDpairs.rows] = numel[1];
     }
-
-    std::ofstream fid1("absposes_tmp.txt");
-
-    for (size_t i = 0; i < absposes_tmp.size(0); i++) {
-        fid1 << absposes_tmp[i] << "," << absposes_tmp[i + absposes_tmp.size(0)] << "," << absposes_tmp[i + 2 * absposes_tmp.size(0)] << std::endl;
-    }
-    fid1.close();
-    std::ofstream fid3("loopRel.txt");
-    for (size_t i = 0; i < loopNodePairs.size(0); i++) {
-        fid3 << loopNodePairs[i] << "," << loopNodePairs[i + loopNodePairs.size(0)] << std::endl;
-        fid3 << rel_poses[i] << "," << rel_poses[i + rel_poses.size(0)] << "," << rel_poses[i + 2 * rel_poses.size(0)] << std::endl;
-        fid3 << std::endl;
-    }
-    fid3.close();
-
     poseGraphOptimize::poseGraphOptimize(absposes_tmp, loopNodePairs,
                                          rel_poses, updatedPoses);
-
-    std::ofstream fid2("updatedPoses.txt");
-    for (size_t i = 0; i < updatedPoses.size(0); i++) {
-        fid2 << updatedPoses[i] << "," << updatedPoses[i + updatedPoses.size(0)] << "," << updatedPoses[i + 2 * updatedPoses.size(0)] << std::endl;
-    }
-    fid2.close();
-
     m_vehiclePoses.clear();
     for (size_t i = 0; i < updatedPoses.size(0); i++) {
         m_vehiclePoses.push_back(cv::Vec3d(updatedPoses[i], updatedPoses[i + updatedPoses.size(0)], updatedPoses[i + 2 * updatedPoses.size(0)]) +

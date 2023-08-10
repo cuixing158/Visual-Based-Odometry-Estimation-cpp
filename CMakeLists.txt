@@ -20,6 +20,7 @@ endif()
 add_subdirectory(ThirdParty/slamMapGraph2D)
 add_subdirectory(ThirdParty/poseGraphOptimize)
 
+
 add_executable(rigidTform2d ThirdParty/rigidTform2d/examples/main.cpp)
 target_include_directories(rigidTform2d PRIVATE  
 ThirdParty/rigidTform2d 
@@ -42,7 +43,8 @@ ThirdParty/rigidTform2d
 ThirdParty/selectUniform2
 ThirdParty/slamMapGraph2D
 ThirdParty/poseGraphOptimize
-DBOW3/src)
+DBOW3/src
+DBOW3)
 target_link_libraries(main PRIVATE ${OpenCV_LIBS}  
 ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/selectUniform2/build/selectUniform2.so 
 slamMapGraph2D

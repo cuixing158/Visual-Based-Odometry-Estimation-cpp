@@ -23,11 +23,83 @@
 // current loop
 #include "poseGraphOptimize.h"
 
+// cereal header files
+#include "cereal/archives/portable_binary.hpp"
+#include "cereal/types/memory.hpp"
+#include "cereal/types/vector.hpp"
+#include <fstream>
+
 namespace buildMapping {
 
+// reference: DBOW3/utils/demo_cereal_bench.cpp
+template <typename _Tp>
+std::vector<_Tp> convertMat2Vector(const cv::Mat& mat) {
+    return (std::vector<_Tp>)(mat.reshape(1, 1));  //通道数不变，按行转为一行
+}
+
+template <typename _Tp>
+cv::Mat convertVector2Mat(std::vector<_Tp> v, int channels, int rows) {
+    cv::Mat mat = cv::Mat(v);                            //将vector变成单列的mat
+    cv::Mat dest = mat.reshape(channels, rows).clone();  //PS：必须clone()一份，否则返回出错
+    return dest;
+}
+
+template <class Archive>
+void serialize(Archive& ar, cv::Mat& feats) {
+    std::vector<uchar> vecFeats = convertMat2Vector<uchar>(feats);
+    ar(feats.rows, feats.cols, feats.channels(), vecFeats);
+}
+
+typedef struct keypt {
+    float x;
+    float y;
+    float size;
+
+    template <class Archive>
+    void serialize(Archive& ar) {
+        ar(x, y, size);
+    }
+} keypt;
+
+template <class T>
+struct imgInfo {
+    int rows;
+    int cols;
+    int channels;
+    std::vector<T> datas;
+
+    template <class Archive>
+    void serialize(Archive& ar) {
+        ar(rows, cols, channels, datas);
+    }
+};
 typedef struct imageKptsAndFeatures {
     std::vector<cv::KeyPoint> keyPoints;
     cv::Mat features;
+
+    template <class Archive>
+    void save(Archive& ar) const {
+        std::vector<keypt> kpts;
+        for (size_t i = 0; i < keyPoints.size(); i++) {
+            kpts.push_back(keypt{keyPoints[i].pt.x, keyPoints[i].pt.y, keyPoints[i].size});
+        }
+        std::vector<uint8_t> data_temp = convertMat2Vector<uint8_t>(features);
+        struct imgInfo<uint8_t> feats {
+            features.rows, features.cols, features.channels(), data_temp
+        };
+        ar(kpts, feats);
+    }
+
+    template <class Archive>
+    void load(Archive& ar) {
+        std::vector<keypt> kpts;
+        struct imgInfo<uint8_t> feats;
+        ar(kpts, feats);
+        for (size_t i = 0; i < kpts.size(); i++) {
+            keyPoints.push_back(cv::KeyPoint(kpts[i].x, kpts[i].y, kpts[i].size));
+        }
+        features = convertVector2Mat(feats.datas, feats.channels, feats.rows);
+    }
 } imageKptsAndFeatures;
 
 template <typename T>
@@ -41,22 +113,6 @@ std::vector<int> findItems(std::vector<T> const& v, double greatThanTarget) {
     return indexs;
 }
 
-/**
-* @brief       组合
-* @details     从全排列推算组合情况. 功能等同于MATLAB的nchoosek函数
-* @param[in]   V  V is a vector of length N, produces a matrix
-    with N!/K!(N-K)! rows and K columns. Each row of the result has K of
-    the elements in the vector V.
-* @param[out]  outArgName output argument description.
-* @return      返回值
-* @retval      返回值类型
-* @par 标识符
-*     保留
-* @par 其它
-*
-* @par 修改日志
-*      cuixingxing于2023/07/28创建
-*/
 template <typename T>
 std::vector<std::vector<T>> nchoosek(std::vector<T> V, int K) {
     int N = V.size();
