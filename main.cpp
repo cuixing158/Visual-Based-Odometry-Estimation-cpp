@@ -45,7 +45,7 @@ int main(int, char **) {
         double elapseTime = (double)(cv::getTickCount() - t1) / cv::getTickFrequency();
         cumTime += elapseTime;
         printf("%zd,Elapsed second Time:%.5f,avg time:%.6f\n", i, elapseTime, cumTime / (i + 1));
-        if (status == buildMapping::HDMapping::buildMapStatus::BUILD_MAP_OVER) {
+        if (status == buildMapping::HDMapping::buildMapStatus::BUILD_MAP_SUCCESSFUL) {
             break;
         }
     }

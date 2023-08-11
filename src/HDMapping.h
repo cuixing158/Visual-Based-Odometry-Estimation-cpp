@@ -25,8 +25,10 @@
 
 // cereal header files
 #include "cereal/archives/portable_binary.hpp"
+#include "cereal/archives/json.hpp"
 #include "cereal/types/memory.hpp"
 #include "cereal/types/vector.hpp"
+#include <cereal/types/string.hpp>
 #include <fstream>
 
 namespace buildMapping {
@@ -49,6 +51,7 @@ void serialize(Archive& ar, cv::Mat& feats) {
     std::vector<uchar> vecFeats = convertMat2Vector<uchar>(feats);
     ar(feats.rows, feats.cols, feats.channels(), vecFeats);
 }
+
 
 typedef struct keypt {
     float x;
@@ -160,15 +163,20 @@ class HDMapping {
                    LK_TRACK_FEATURES,
                    HYBRID_FEATURES } matchFeatureMethod;
 
-    typedef enum { BUILD_MAP_OVER,
+    typedef enum { BUILD_MAP_SUCCESSFUL,
+                   BUILD_MAP_FAILED,
                    BUILD_MAP_PROCESSING } buildMapStatus;
+
+    typedef enum { LOCALIZE_MAP_SUCCESSFUL,
+                   LOCALIZE_MAP_FAILED,
+                   LOCALIZE_MAP_PROCESSING } localizeMapStatus;
 
    public:
     HDMapping();
     ~HDMapping();
     buildMapping::HDMapping::buildMapStatus constructWorldMap(const cv::Mat& srcImage, bool isStopConstructWorldMap = false);
 
-    void localizeWorldMap();
+    buildMapping::HDMapping::localizeMapStatus localizeWorldMap(const cv::Mat& srcImage, const char* vocFile = "database.yml.gz", const char* pointsFeatsFile = "pointsFeatures.bin", const char* mapFile = "hdMapCfg.json");
 
    public:
     HDmap m_HDmapOutput;
@@ -208,7 +216,7 @@ class HDMapping {
     void detectLoopAndAddGraph();
     void optimizePoseGraph(cv::Mat& loopIDpairs, std::vector<cv::Vec3d>& relPoses);
     void loopDatabaseAddFeaturesAndSave(std::string saveDataBaseYmlGz = "./database.yml.gz");
-    DBoW3::QueryResults retrieveImages(cv::Mat queryImage);
+    DBoW3::QueryResults retrieveImage(cv::Mat queryImage, int topK);
 
     void reset();
     void saveMapData();

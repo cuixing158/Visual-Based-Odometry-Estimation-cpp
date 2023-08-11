@@ -5,8 +5,6 @@
 #define DEBUG_SHOW_REALTIME_IMAGE 0
 #define DEBUG_SHOW_FUSE_OPTIMIZE_IMAGE 1
 
-// #define USE_SSC_UNIFORM
-
 namespace buildMapping {
 class HDMapping;
 }
@@ -15,7 +13,7 @@ buildMapping::HDMapping::HDMapping() {
     m_cumDist = 0.0;
     m_pixelExtentInWorldXY = 0.015 / 0.51227;
     m_isBuildMap = true;
-    m_buildMapStopFrame = 1200;
+    m_buildMapStopFrame = 0;
     m_isBuildMapOver = false;
     m_isLocSuccess = false;
     m_locVehiclePose[3] = {0};
@@ -27,7 +25,6 @@ buildMapping::HDMapping::HDMapping() {
     m_BW = m_BW &= m_orbDetectMask;
     m_initViclePtPose = cv::Vec3f((285 + 358) / 2.0, (156, 326) / 2.0, 0);
     m_method = matchFeatureMethod::LK_TRACK_FEATURES;
-    // generateUniformPts(2000, m_orbDetectMask, m_p0);
 
     //第一副图像的像素坐标系为世界坐标系
     m_preRelTform = (cv::Mat_<double>(2, 3) << 1, 0, 0,
@@ -59,6 +56,11 @@ void buildMapping::HDMapping::reset() {
     m_HDmapOutput.ref.YWorldLimits[0] = 0;
     m_HDmapOutput.ref.YWorldLimits[1] = 1;
 
+    m_isBuildMap = true;
+    m_isBuildMapOver = false;
+    m_isLocSuccess = false;
+    m_locVehiclePose[3] = {0};
+
     m_preRelTform = (cv::Mat_<double>(2, 3) << 1, 0, 0,
                      0, 1, 0);
     m_relTform = (cv::Mat_<double>(2, 3) << 1, 0, 0,
@@ -75,13 +77,14 @@ void buildMapping::HDMapping::loadMapData() {
 }
 
 buildMapping::HDMapping::buildMapStatus buildMapping::HDMapping::constructWorldMap(const cv::Mat& srcImage, bool isStopConstructWorldMap) {
+    if (srcImage.empty()) {
+        return buildMapping::HDMapping::buildMapStatus::BUILD_MAP_FAILED;
+    }
     static size_t num = 0;
 
     cv::Mat currImg = srcImage;
     if (currImg.channels() == 3)
         cv::cvtColor(currImg, currImg, cv::COLOR_BGR2GRAY);
-
-    if (currImg.empty()) throw std::runtime_error("currImg is empty!");
 
     double t1 = cv::getTickCount();
     std::vector<cv::KeyPoint> keyPts;
@@ -177,7 +180,9 @@ buildMapping::HDMapping::buildMapStatus buildMapping::HDMapping::constructWorldM
             rigidTformType = 1;
             std::vector<uchar> statusOK;
             std::vector<float> err;
-            cv::TermCriteria criteria = cv::TermCriteria((cv::TermCriteria::COUNT) + (cv::TermCriteria::EPS), 10, 0.03);
+            cv::TermCriteria criteria = cv::TermCriteria((cv::TermCriteria::COUNT) +
+                                                             (cv::TermCriteria::EPS),
+                                                         10, 0.03);
             std::vector<cv::Point2f> p0, p1;
             cv::KeyPoint::convert(m_preKeypts, p0);
             cv::calcOpticalFlowPyrLK(m_prevImg, currImg, p0, p1, statusOK, err, cv::Size(15, 15), 2, criteria);
@@ -294,7 +299,8 @@ buildMapping::HDMapping::buildMapStatus buildMapping::HDMapping::constructWorldM
         }
         estiTform(preP, nextP, m_relTform, inliers, status);
     }
-    printf("  (match+esti+cond)Track_Features Elapsed second Time:%.6f\n", (cv::getTickCount() - t1) * 1.0 / cv::getTickFrequency());
+    printf("  (match+esti+cond)Track_Features Elapsed second Time:%.6f\n",
+           (cv::getTickCount() - t1) * 1.0 / cv::getTickFrequency());
 
     t1 = cv::getTickCount();
     // build map mode
@@ -335,6 +341,9 @@ buildMapping::HDMapping::buildMapStatus buildMapping::HDMapping::constructWorldM
 
     // 开始poseGraph优化建图
     if (isStopConstructWorldMap) {
+        m_isBuildMap = false;
+        m_isBuildMapOver = true;
+        m_buildMapStopFrame = num;
         detectLoopAndAddGraph();
 
 // 融合姿态图输出
@@ -347,15 +356,17 @@ buildMapping::HDMapping::buildMapStatus buildMapping::HDMapping::constructWorldM
 #endif
 
         // 保存特征和状态相关数据
-        // inputOutputStruct.isBuildMapOver = true;% 建图完毕
+        std::ofstream os("pointsFeatures.bin", std::ios::binary);  // 打开标准输出流
+        cereal::PortableBinaryOutputArchive archiveBin(os);        // 构建cereal对象，并用os初始化
+        archiveBin(m_points_features);
 
-        // writeStructBin(imageViewSt, options.imageViewStConfigFile, options.imageViewStDataFile);
-        // writeStructBin(inputOutputStruct, options.hdMapConfigFile, options.hdMapDataFile);
-        std::ofstream os("pointsFeatures.cereal", std::ios::binary);  // 打开标准输出流
-        cereal::PortableBinaryOutputArchive archive(os);              // 构建cereal对象，并用os初始化
-        archive(m_points_features);
+        std::ofstream file("hdMapCfg.json");
+        cereal::JSONOutputArchive archiveJson(file);
+        archiveJson(CEREAL_NVP(m_cumDist), CEREAL_NVP(m_pixelExtentInWorldXY), CEREAL_NVP(m_isBuildMap),
+                    CEREAL_NVP(m_isBuildMapOver), CEREAL_NVP(m_buildMapStopFrame), CEREAL_NVP(m_isLocSuccess),
+                    CEREAL_NVP(m_locVehiclePose), CEREAL_NVP(m_vehiclePoses));  //, CEREAL_NVP(m_vehiclePoses)
 
-        return buildMapStatus::BUILD_MAP_OVER;
+        return buildMapStatus::BUILD_MAP_SUCCESSFUL;
     }
     printf("calcuate dist and add pose:%.6f\n", (cv::getTickCount() - t1) * 1.0 / cv::getTickFrequency());
     t1 = cv::getTickCount();
@@ -443,7 +454,141 @@ buildMapping::HDMapping::buildMapStatus buildMapping::HDMapping::constructWorldM
     return buildMapStatus::BUILD_MAP_PROCESSING;
 }
 
-void buildMapping::HDMapping::estiTform(std::vector<cv::Point2f>& prePoints, std::vector<cv::Point2f>& currPoints, cv::Mat& tform2x3, cv::Mat& inliers, int& status) {
+buildMapping::HDMapping::localizeMapStatus buildMapping::HDMapping::localizeWorldMap(const cv::Mat& srcImage, const char* vocFile, const char* pointsFeatsFile, const char* mapFile) {
+    if (srcImage.empty() || !filesystem::path(vocFile).exists() || !filesystem::path(pointsFeatsFile).exists() || !filesystem::path(mapFile).exists()) {
+        return buildMapping::HDMapping::localizeMapStatus::LOCALIZE_MAP_FAILED;
+    }
+    m_db.load(std::string(vocFile));
+
+    std::ifstream is(std::string(pointsFeatsFile), std::ios::binary);
+    cereal::PortableBinaryInputArchive iarchive(is);
+    iarchive(m_points_features);
+
+    std::ifstream file(mapFile);
+    cereal::JSONInputArchive archive1(file);
+    archive1(CEREAL_NVP(m_cumDist), CEREAL_NVP(m_pixelExtentInWorldXY), CEREAL_NVP(m_isBuildMap),
+             CEREAL_NVP(m_isBuildMapOver), CEREAL_NVP(m_buildMapStopFrame), CEREAL_NVP(m_isLocSuccess),
+             CEREAL_NVP(m_locVehiclePose));  //, CEREAL_NVP(m_vehiclePoses)
+
+    //debug
+    std::ofstream fid("m_vehiclePoses.txt");
+    for (size_t i = 0; i < m_vehiclePoses.size(); i++) {
+        std::cout << m_vehiclePoses[i][0] << "," << m_vehiclePoses[i][1] << "," << m_vehiclePoses[i][2] << std::endl;
+    }
+    fid.close();
+
+    cv::Mat currImg = srcImage;
+    int topK = 20;
+    DBoW3::QueryResults result = retrieveImage(currImg, topK);
+    DBoW3::QueryResults::const_iterator qit;
+    size_t rowIdx = 0;
+    int imageIDs[topK] = {0};
+    double scores[topK] = {0.0};
+    for (qit = result.begin(); qit != result.end(); ++qit) {
+        imageIDs[rowIdx] = (double)qit->Id;   // 注意C++索引从0开始
+        scores[rowIdx] = (double)qit->Score;  // 注意前面程序用的是topK
+        rowIdx++;
+    }
+
+    bool isDetectedLoop = false;
+    int loopCandidate = 0;
+    double minScore = *std::min_element(scores, scores + topK);
+    double bestScore = scores[0];
+    double ratio = 0.6;                                               // 根据实际图像调整此值
+    double threshold = std::max({bestScore * ratio, minScore, 0.2});  // 0.2根据数据集经验取得, 见doc/loopClosureDetect.md
+    std::vector<int> validIdxs = findItems(std::vector<double>(scores, scores + topK), threshold);
+    std::vector<int> validKeyFrameIds;
+    for (size_t validId = 0; validId < validIdxs.size(); validId++) {
+        validKeyFrameIds.push_back(imageIDs[validId]);
+    }
+    if (validKeyFrameIds.size() > 2) {
+        std::vector<std::vector<int>> groups = nchoosek(validKeyFrameIds, 3);
+        cv::Mat matGroups(groups.size(), groups.at(0).size(), CV_64FC1);
+        for (int iRow = 0; iRow < matGroups.rows; ++iRow) {
+            double* ele = matGroups.ptr<double>(iRow);
+            for (int jCol = 0; jCol < matGroups.cols; ++jCol) {
+                ele[jCol] = groups[iRow][jCol];
+            }
+        }
+
+        for (size_t i_r = 0; i_r < matGroups.rows; i_r++) {
+            double minV, maxV;
+            cv::minMaxLoc(matGroups.row(i_r), &minV, &maxV, NULL, NULL);
+            if (maxV - minV <= 3) {
+                cv::Mat consecutiveGroups = matGroups.row(i_r);
+                loopCandidate = (int)consecutiveGroups.at<double>(0, 0);
+                isDetectedLoop = true;
+                break;
+            } else {
+                isDetectedLoop = false;
+            }
+        }
+    }
+
+    if (isDetectedLoop) {
+        std::vector<cv::DMatch> matches;
+        std::vector<cv::Point2f> preP, nextP;
+        cv::Mat inliers;
+        int status = 0;
+        cv::BFMatcher matcher(cv::NORM_HAMMING);
+        cv::Mat feature1 = m_points_features[loopCandidate].features;
+        cv::Mat feature2 = m_currDescriptors;
+        std::vector<std::vector<cv::DMatch>> matchePoints;
+        matcher.knnMatch(feature1, feature2, matchePoints, 2);
+        for (int i = 0; i < matchePoints.size(); i++) {
+            if (matchePoints[i][0].distance < 0.6 * matchePoints[i][1].distance) {
+                matches.push_back(matchePoints[i][0]);
+            }
+        }
+
+        preP.resize(matches.size());
+        nextP.resize(matches.size());
+        for (size_t i = 0; i < matches.size(); i++) {
+            preP[i] = m_points_features[loopCandidate].keyPoints[matches[i].queryIdx].pt;
+            nextP[i] = m_currKeypts[matches[i].trainIdx].pt;
+        }
+        estiTform(preP, nextP, m_relTform, inliers, status);
+        bool cond = (status > 0 || cv::sum(inliers)[0] <= 3);
+        if (cond) {
+            return buildMapping::HDMapping::localizeMapStatus::LOCALIZE_MAP_PROCESSING;
+        }
+
+        // calcuate localize vehicle absolute pose
+        m_isLocSuccess = true;
+        cv::Vec3d localizeBasePose = m_vehiclePoses[loopCandidate];
+        cv::Mat localizeBasePoseA = (cv::Mat_<double>(3, 3) << std::cos(localizeBasePose[2]), -std::sin(localizeBasePose[2]), localizeBasePose[0],
+                                     std::sin(localizeBasePose[2]), std::cos(localizeBasePose[2]), localizeBasePose[1],
+                                     0, 0, 1);
+        cv::Mat tform1 = (cv::Mat_<double>(3, 3) << 1, 0, -m_initViclePtPose[0],
+                          0, 1, -m_initViclePtPose[1],
+                          0, 0, 1);
+        cv::Mat localizeBaseImagePoseA = tform1 * localizeBasePoseA;
+        cv::Mat relTformA = m_relTform;
+        cv::Mat temp = (cv::Mat_<double>(1, 3) << 0, 0, 1);
+        relTformA.push_back(temp);
+        cv::Mat currImagePoseA = relTformA * localizeBaseImagePoseA;
+        cv::Mat tform2 = (cv::Mat_<double>(3, 3) << 1, 0, m_initViclePtPose[0],
+                          0, 1, m_initViclePtPose[1],
+                          0, 0, 1);
+        cv::Mat currLocalizeVehiclePoseA = tform2 * currImagePoseA;
+
+        cv::Mat tempR = (cv::Mat_<double>(3, 3) << currLocalizeVehiclePoseA.at<double>(0, 0), currLocalizeVehiclePoseA.at<double>(0, 1), 0,
+                         currLocalizeVehiclePoseA.at<double>(1, 0), currLocalizeVehiclePoseA.at<double>(1, 1), 0,
+                         0, 0, 1);
+        std::vector<double> angRadius;
+        cv::Rodrigues(tempR, angRadius);
+
+        m_locVehiclePose[0] = currLocalizeVehiclePoseA.at<double>(0, 2);
+        m_locVehiclePose[1] = currLocalizeVehiclePoseA.at<double>(1, 2);
+        m_locVehiclePose[2] = angRadius[2];
+        return buildMapping::HDMapping::localizeMapStatus::LOCALIZE_MAP_SUCCESSFUL;
+    } else {
+        return buildMapping::HDMapping::localizeMapStatus::LOCALIZE_MAP_PROCESSING;
+    }
+}
+
+void buildMapping::HDMapping::estiTform(std::vector<cv::Point2f>& prePoints, std::vector<cv::Point2f>& currPoints,
+                                        cv::Mat& tform2x3, cv::Mat& inliers, int& status) {
     coder::array<double, 2U> pts1_tmp, pts2_tmp;
     coder::array<boolean_T, 2U> inlierIndex;
     double tform2x3_[6];
@@ -531,7 +676,7 @@ void buildMapping::HDMapping::loopDatabaseAddFeaturesAndSave(std::string saveDat
     m_db.save(databaseFile);
 }
 
-DBoW3::QueryResults buildMapping::HDMapping::retrieveImages(cv::Mat queryImage) {
+DBoW3::QueryResults buildMapping::HDMapping::retrieveImage(cv::Mat queryImage, int topK) {
     // add images to the database
     cv::Ptr<cv::Feature2D> fdetector = cv::ORB::create(480 * 640);
     std::vector<cv::KeyPoint> keypoints, outkeypoints;
@@ -545,10 +690,12 @@ DBoW3::QueryResults buildMapping::HDMapping::retrieveImages(cv::Mat queryImage) 
     std::vector<int> indexs;
     selectUniformPoints(keypoints, 2000, cv::Size(queryImage.cols, queryImage.rows), outkeypoints, indexs);
     fdetector->compute(queryImage, outkeypoints, descriptors);
-    // std::cout << "Database information: " << std::endl
-    //           << db << std::endl;
+
+    m_currDescriptors = descriptors;
+    m_currKeypts = outkeypoints;
+
     DBoW3::QueryResults ret;
-    m_db.query(descriptors, ret, 10);  // m_db是已经加入了每幅图像的特征的database，此处选取的是top 10
+    m_db.query(descriptors, ret, topK);  // m_db是已经加入了每幅图像的特征的database，此处选取的是top 20
 
     return ret;
 }
@@ -598,8 +745,7 @@ void buildMapping::HDMapping::detectLoopAndAddGraph() {
         if (!loopKeyFrameIds.empty()) {
             double minScore = *std::min_element(scores, scores + topK);
             double bestScore = keyFrameScores[0];
-            double ratio = 0.6;
-            // 根据实际图像调整此值
+            double ratio = 0.6;                                               // 根据实际图像调整此值
             double threshold = std::max({bestScore * ratio, minScore, 0.2});  // 0.2根据数据集经验取得, 见doc/loopClosureDetect.md
             std::vector<int> validIdxs = findItems(keyFrameScores, threshold);
             for (size_t validId = 0; validId < validIdxs.size(); validId++) {
@@ -661,7 +807,8 @@ void buildMapping::HDMapping::detectLoopAndAddGraph() {
                              0, 0, 1);
             std::vector<double> angRadius;
             cv::Rodrigues(tempR, angRadius);
-            double measurement[3] = {invertLoopTform.at<double>(0, 2), invertLoopTform.at<double>(1, 2), angRadius[2]};  // 注意角度，是相对值, 单位为弧度
+            double measurement[3] =
+                {invertLoopTform.at<double>(0, 2), invertLoopTform.at<double>(1, 2), angRadius[2]};  // 注意角度，是相对值, 单位为弧度
 
             // optimize loop
             cv::Mat loopIDpairs = (cv::Mat_<double>(1, 2) << idx, loopCandidate);
@@ -738,7 +885,8 @@ void buildMapping::HDMapping::fuseOptimizeHDMap(std::string imageFilesList, std:
         } else {
             cv::warpAffine(m_BW, bwMask, tform, cv::Size(m_HDmapOutput.ref.ImageSize[1], m_HDmapOutput.ref.ImageSize[0]));
         }
-        cv::copyMakeBorder(m_HDmapOutput.bigImg, m_HDmapOutput.bigImg, std::round(pad_top), std::round(pad_down), std::round(pad_left), std::round(pad_right), cv::BORDER_CONSTANT, cv::Scalar::all(0));
+        cv::copyMakeBorder(m_HDmapOutput.bigImg, m_HDmapOutput.bigImg, std::round(pad_top), std::round(pad_down),
+                           std::round(pad_left), std::round(pad_right), cv::BORDER_CONSTANT, cv::Scalar::all(0));
         cv::resize(m_HDmapOutput.bigImg, m_HDmapOutput.bigImg, cv::Size(topImg.cols, topImg.rows));
         topImg.copyTo(m_HDmapOutput.bigImg, bwMask);
 
