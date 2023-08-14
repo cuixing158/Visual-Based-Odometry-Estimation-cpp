@@ -36,6 +36,11 @@ struct HDmap {
     imref2d ref;
 };
 
+struct cerealPoses {
+    double x;
+    double y;
+    double theta;
+};
 struct struct1_T {
     HDmap HDmapData;
     std::vector<cv::Vec3f> vehiclePoses;

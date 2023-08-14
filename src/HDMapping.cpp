@@ -16,7 +16,9 @@ buildMapping::HDMapping::HDMapping() {
     m_buildMapStopFrame = 0;
     m_isBuildMapOver = false;
     m_isLocSuccess = false;
-    m_locVehiclePose[3] = {0};
+    m_locVehiclePose[0] = 0;
+    m_locVehiclePose[1] = 0;
+    m_locVehiclePose[2] = 0;
 
     m_orbDetectMask = 255 * cv::Mat::ones(480, 640, CV_8UC1);
     m_orbDetectMask.rowRange(156, 326).colRange(285, 358) = 0;
@@ -59,7 +61,9 @@ void buildMapping::HDMapping::reset() {
     m_isBuildMap = true;
     m_isBuildMapOver = false;
     m_isLocSuccess = false;
-    m_locVehiclePose[3] = {0};
+    m_locVehiclePose[0] = 0;
+    m_locVehiclePose[1] = 0;
+    m_locVehiclePose[2] = 0;
 
     m_preRelTform = (cv::Mat_<double>(2, 3) << 1, 0, 0,
                      0, 1, 0);
@@ -76,7 +80,8 @@ void buildMapping::HDMapping::saveMapData() {
 void buildMapping::HDMapping::loadMapData() {
 }
 
-buildMapping::HDMapping::buildMapStatus buildMapping::HDMapping::constructWorldMap(const cv::Mat& srcImage, bool isStopConstructWorldMap) {
+buildMapping::HDMapping::buildMapStatus buildMapping::HDMapping::constructWorldMap(const cv::Mat& srcImage,
+                                                                                   bool isStopConstructWorldMap, const char* vocFile, const char* pointsFeatsFile, const char* mapFile) {
     if (srcImage.empty()) {
         return buildMapping::HDMapping::buildMapStatus::BUILD_MAP_FAILED;
     }
@@ -344,7 +349,7 @@ buildMapping::HDMapping::buildMapStatus buildMapping::HDMapping::constructWorldM
         m_isBuildMap = false;
         m_isBuildMapOver = true;
         m_buildMapStopFrame = num;
-        detectLoopAndAddGraph();
+        detectLoopAndAddGraph(std::string(vocFile));
 
 // 融合姿态图输出
 #if DEBUG_SHOW_FUSE_OPTIMIZE_IMAGE
@@ -356,15 +361,19 @@ buildMapping::HDMapping::buildMapStatus buildMapping::HDMapping::constructWorldM
 #endif
 
         // 保存特征和状态相关数据
-        std::ofstream os("pointsFeatures.bin", std::ios::binary);  // 打开标准输出流
-        cereal::PortableBinaryOutputArchive archiveBin(os);        // 构建cereal对象，并用os初始化
+        std::ofstream os(pointsFeatsFile, std::ios::binary);  // 打开标准输出流
+        cereal::PortableBinaryOutputArchive archiveBin(os);   // 构建cereal对象，并用os初始化
         archiveBin(m_points_features);
 
-        std::ofstream file("hdMapCfg.json");
+        std::ofstream file(mapFile);
         cereal::JSONOutputArchive archiveJson(file);
+        std::vector<cerealPoses> vehiclePoses;
+        for (size_t i = 0; i < m_vehiclePoses.size(); i++) {
+            vehiclePoses.push_back(cerealPoses{m_vehiclePoses[i][0], m_vehiclePoses[i][1], m_vehiclePoses[i][2]});
+        }
         archiveJson(CEREAL_NVP(m_cumDist), CEREAL_NVP(m_pixelExtentInWorldXY), CEREAL_NVP(m_isBuildMap),
                     CEREAL_NVP(m_isBuildMapOver), CEREAL_NVP(m_buildMapStopFrame), CEREAL_NVP(m_isLocSuccess),
-                    CEREAL_NVP(m_locVehiclePose), CEREAL_NVP(m_vehiclePoses));  //, CEREAL_NVP(m_vehiclePoses)
+                    CEREAL_NVP(m_locVehiclePose), CEREAL_NVP(vehiclePoses));
 
         return buildMapStatus::BUILD_MAP_SUCCESSFUL;
     }
@@ -455,27 +464,30 @@ buildMapping::HDMapping::buildMapStatus buildMapping::HDMapping::constructWorldM
 }
 
 buildMapping::HDMapping::localizeMapStatus buildMapping::HDMapping::localizeWorldMap(const cv::Mat& srcImage, const char* vocFile, const char* pointsFeatsFile, const char* mapFile) {
+    static bool isLoadMapData = false;
     if (srcImage.empty() || !filesystem::path(vocFile).exists() || !filesystem::path(pointsFeatsFile).exists() || !filesystem::path(mapFile).exists()) {
+        std::cout << "current path:" << filesystem::path(".").make_absolute() << std::endl;
         return buildMapping::HDMapping::localizeMapStatus::LOCALIZE_MAP_FAILED;
     }
-    m_db.load(std::string(vocFile));
 
-    std::ifstream is(std::string(pointsFeatsFile), std::ios::binary);
-    cereal::PortableBinaryInputArchive iarchive(is);
-    iarchive(m_points_features);
+    if (!isLoadMapData) {
+        m_db.load(std::string(vocFile));
 
-    std::ifstream file(mapFile);
-    cereal::JSONInputArchive archive1(file);
-    archive1(CEREAL_NVP(m_cumDist), CEREAL_NVP(m_pixelExtentInWorldXY), CEREAL_NVP(m_isBuildMap),
-             CEREAL_NVP(m_isBuildMapOver), CEREAL_NVP(m_buildMapStopFrame), CEREAL_NVP(m_isLocSuccess),
-             CEREAL_NVP(m_locVehiclePose));  //, CEREAL_NVP(m_vehiclePoses)
+        std::ifstream is(std::string(pointsFeatsFile), std::ios::binary);
+        cereal::PortableBinaryInputArchive iarchive(is);
+        iarchive(m_points_features);
 
-    //debug
-    std::ofstream fid("m_vehiclePoses.txt");
-    for (size_t i = 0; i < m_vehiclePoses.size(); i++) {
-        std::cout << m_vehiclePoses[i][0] << "," << m_vehiclePoses[i][1] << "," << m_vehiclePoses[i][2] << std::endl;
+        std::ifstream file(mapFile);
+        cereal::JSONInputArchive archive1(file);
+        std::vector<cerealPoses> vehiclePoses;
+        archive1(CEREAL_NVP(m_cumDist), CEREAL_NVP(m_pixelExtentInWorldXY), CEREAL_NVP(m_isBuildMap),
+                 CEREAL_NVP(m_isBuildMapOver), CEREAL_NVP(m_buildMapStopFrame), CEREAL_NVP(m_isLocSuccess),
+                 CEREAL_NVP(vehiclePoses));  //, CEREAL_NVP(m_vehiclePoses)
+        for (size_t i = 0; i < vehiclePoses.size(); i++) {
+            m_vehiclePoses.push_back(cv::Vec3d(vehiclePoses[i].x, vehiclePoses[i].y, vehiclePoses[i].theta));
+        }
+        isLoadMapData = true;
     }
-    fid.close();
 
     cv::Mat currImg = srcImage;
     int topK = 20;
@@ -493,9 +505,11 @@ buildMapping::HDMapping::localizeMapStatus buildMapping::HDMapping::localizeWorl
     bool isDetectedLoop = false;
     int loopCandidate = 0;
     double minScore = *std::min_element(scores, scores + topK);
-    double bestScore = scores[0];
-    double ratio = 0.6;                                               // 根据实际图像调整此值
-    double threshold = std::max({bestScore * ratio, minScore, 0.2});  // 0.2根据数据集经验取得, 见doc/loopClosureDetect.md
+    double bestScore = scores[1];
+    double ratio = 0.6;           // 根据实际图像调整此值
+    double expeThreshold = 0.18;  // 0.2根据数据集经验取得, 见doc/loopClosureDetect.md
+    double threshold = std::max({bestScore * ratio, minScore, expeThreshold});
+
     std::vector<int> validIdxs = findItems(std::vector<double>(scores, scores + topK), threshold);
     std::vector<int> validKeyFrameIds;
     for (size_t validId = 0; validId < validIdxs.size(); validId++) {
@@ -554,7 +568,6 @@ buildMapping::HDMapping::localizeMapStatus buildMapping::HDMapping::localizeWorl
         }
 
         // calcuate localize vehicle absolute pose
-        m_isLocSuccess = true;
         cv::Vec3d localizeBasePose = m_vehiclePoses[loopCandidate];
         cv::Mat localizeBasePoseA = (cv::Mat_<double>(3, 3) << std::cos(localizeBasePose[2]), -std::sin(localizeBasePose[2]), localizeBasePose[0],
                                      std::sin(localizeBasePose[2]), std::cos(localizeBasePose[2]), localizeBasePose[1],
@@ -581,8 +594,12 @@ buildMapping::HDMapping::localizeMapStatus buildMapping::HDMapping::localizeWorl
         m_locVehiclePose[0] = currLocalizeVehiclePoseA.at<double>(0, 2);
         m_locVehiclePose[1] = currLocalizeVehiclePoseA.at<double>(1, 2);
         m_locVehiclePose[2] = angRadius[2];
+
+        m_isBuildMap = false;
+        m_isLocSuccess = true;
         return buildMapping::HDMapping::localizeMapStatus::LOCALIZE_MAP_SUCCESSFUL;
     } else {
+        m_isLocSuccess = false;
         return buildMapping::HDMapping::localizeMapStatus::LOCALIZE_MAP_PROCESSING;
     }
 }
@@ -700,8 +717,8 @@ DBoW3::QueryResults buildMapping::HDMapping::retrieveImage(cv::Mat queryImage, i
     return ret;
 }
 
-void buildMapping::HDMapping::detectLoopAndAddGraph() {
-    std::string saveDataBaseYmlGz = "./database.yml.gz";
+void buildMapping::HDMapping::detectLoopAndAddGraph(std::string vocabularyFile) {
+    std::string saveDataBaseYmlGz = vocabularyFile;
     if (filesystem::path(saveDataBaseYmlGz).exists()) {
         std::cout << "loading database,please wait... ,name:" << saveDataBaseYmlGz << std::endl;
         m_db.load(saveDataBaseYmlGz);

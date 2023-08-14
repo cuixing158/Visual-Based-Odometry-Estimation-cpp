@@ -52,6 +52,10 @@ void serialize(Archive& ar, cv::Mat& feats) {
     ar(feats.rows, feats.cols, feats.channels(), vecFeats);
 }
 
+template <class Archive>
+void serialize(Archive& ar, cerealPoses& pose) {
+    ar(pose.x, pose.y, pose.theta);
+}
 
 typedef struct keypt {
     float x;
@@ -119,8 +123,8 @@ std::vector<int> findItems(std::vector<T> const& v, double greatThanTarget) {
 template <typename T>
 std::vector<std::vector<T>> nchoosek(std::vector<T> V, int K) {
     int N = V.size();
-    std::string bitmask(K, 1);  // K leading 1's
-    bitmask.resize(N, 0);       // N-K trailing 0's
+    std::string bitmask(K, 1);
+    bitmask.resize(N, 0);
 
     std::vector<std::vector<T>> arr;
     do {
@@ -174,7 +178,7 @@ class HDMapping {
    public:
     HDMapping();
     ~HDMapping();
-    buildMapping::HDMapping::buildMapStatus constructWorldMap(const cv::Mat& srcImage, bool isStopConstructWorldMap = false);
+    buildMapping::HDMapping::buildMapStatus constructWorldMap(const cv::Mat& srcImage, bool isStopConstructWorldMap = false, const char* vocFile = "database.yml.gz", const char* pointsFeatsFile = "pointsFeatures.bin", const char* mapFile = "hdMapCfg.json");
 
     buildMapping::HDMapping::localizeMapStatus localizeWorldMap(const cv::Mat& srcImage, const char* vocFile = "database.yml.gz", const char* pointsFeatsFile = "pointsFeatures.bin", const char* mapFile = "hdMapCfg.json");
 
@@ -213,9 +217,9 @@ class HDMapping {
     std::vector<imageKptsAndFeatures> m_points_features;
     DBoW3::Database m_db;
     // SlamGraph2D::slamPoseGraph m_pg;  // 索引从1开始
-    void detectLoopAndAddGraph();
+    void detectLoopAndAddGraph(std::string vocabularyFile = "./database.yml.gz");
     void optimizePoseGraph(cv::Mat& loopIDpairs, std::vector<cv::Vec3d>& relPoses);
-    void loopDatabaseAddFeaturesAndSave(std::string saveDataBaseYmlGz = "./database.yml.gz");
+    void loopDatabaseAddFeaturesAndSave(std::string saveVocabularyFile);
     DBoW3::QueryResults retrieveImage(cv::Mat queryImage, int topK);
 
     void reset();

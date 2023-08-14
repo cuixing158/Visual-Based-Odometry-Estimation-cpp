@@ -59,6 +59,7 @@
 /ThirdParty/poseGraphOptimize/build
 
 imageFilesList.txt
+hdMapCfg.json
 
 /codegen_custom_cpp/codegen/
 /yourSpecify.cpp
