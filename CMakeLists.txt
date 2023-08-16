@@ -49,7 +49,7 @@ target_link_libraries(main PRIVATE ${OpenCV_LIBS}
 ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/selectUniform2/build/selectUniform2.so 
 slamMapGraph2D
 poseGraphOptimize
-${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/rigidTform2d/build/estimateAffineRigid2D.so m profiler)
+${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/rigidTform2d/build/estimateAffineRigid2D.so m)
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR:${CMAKE_CURRENT_SOURCE_DIR}")
 
 # add_executable(selectUniform2 ThirdParty/selectUniform2/examples/main.cpp)
@@ -69,6 +69,7 @@ message(STATUS "CMAKE_CURRENT_SOURCE_DIR:${CMAKE_CURRENT_SOURCE_DIR}")
 # target_include_directories(test PRIVATE ${OpenCV_INCLUDE_DIRS} src c_cpp_utils DBOW3/src)
 # target_link_libraries(test PRIVATE 
 # ${OpenCV_LIBS})
+
 
 # install
 set(CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR}/install)

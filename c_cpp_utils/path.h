@@ -546,7 +546,10 @@ inline size_t getFullNames(const path &p,
     bool gIgnoreHidden = true;  // 忽略隐藏文件
     size_t numsFiles = 0;
     saveFileNames.clear();
-    path fullpath = p.make_absolute();
+    path fullpath;
+    if (!p.is_absolute()) {
+        fullpath = p.make_absolute();
+    }
     std::string curr_path = p.str();
 
     // std::stringstream stream;
