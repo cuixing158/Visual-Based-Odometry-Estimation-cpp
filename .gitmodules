@@ -1,3 +1,3 @@
 [submodule "DBOW3"]
 	path = DBOW3
-	url = git@github.com:cuixing158/DBOW3.git
+	url = http://autogit.long-horn.com:3000/algorithm_Dev/DBOW3.git
