@@ -981,39 +981,74 @@ void buildMapping::HDMapping::detectLanes(cv::Mat& grayImage, std::vector<cv::li
     if (grayImage.channels() == 3) {
         cv::cvtColor(grayImage, grayImage, cv::COLOR_BGR2GRAY);
     }
-
-    coder::array<detectLaneMarkerRidge::struct0_T, 2U> mat_lines_struct;
-    coder::array<unsigned char, 2U> bevImage_tmp, mask_tmp;
-    double approxLaneWidthPixels_tmp = 4;
+    // custom params
+    int approxLaneWidthPixels = 4;
     double sensitive = 0.25;
-
-    bevImage_tmp.set_size(grayImage.rows, grayImage.cols);
-    convertCVToMatrix(grayImage, grayImage.rows, grayImage.cols, grayImage.channels(), bevImage_tmp.data());
-
     cv::Mat mask = cv::Mat::ones(grayImage.rows, grayImage.cols, CV_8UC1);
-    mask_tmp.set_size(grayImage.rows, grayImage.cols);
-    convertCVToMatrix(mask, mask.rows, mask.cols, mask.channels(), mask_tmp.data());
 
-    detectLaneMarkerRidge::detectLaneMarkerRidge(
-        bevImage_tmp, approxLaneWidthPixels_tmp, mask_tmp,
-        sensitive, mat_lines_struct);
+    // lane marker ridge algorithm
+    cv::Mat Ipad, oriImageF;
+    grayImage.convertTo(oriImageF, CV_32FC1, 1.0 / 255.0);
+    cv::copyMakeBorder(oriImageF, Ipad, 0, 0, approxLaneWidthPixels + 1, approxLaneWidthPixels + 1, cv::BORDER_REPLICATE);
 
+    int oriCols = oriImageF.cols;
+    int oriRows = oriImageF.rows;
+    cv::Mat Ileft = Ipad.colRange(0, oriCols);
+    cv::Mat Iright = Ipad.colRange(2 * (approxLaneWidthPixels + 1), Ipad.cols);
+    cv::Mat L = 2 * oriImageF - (Ileft + Iright) - cv::abs(Ileft - Iright);
+    cv::normalize(L, L, 1.0, 0.0, cv::NormTypes::NORM_MINMAX);
+    double thresh = 1 - sensitive;
+    double T = thresh / 10 + 0.9;  // map range [0.9,1]
+    double cutoff = T * L.rows * L.cols;
+    const int channels[] = {0};
+    cv::Mat hist;
+    int dims = 1;
+    const int histSize[] = {256};
+    float pranges[] = {0, 1};
+    const float* ranges[] = {pranges};
+    calcHist(&L, 1, channels, cv::Mat(), hist, dims, histSize, ranges, true, true);
+    size_t idx;
+    float minThre = L.rows * L.cols;
+    for (size_t i = 0; i < hist.rows; i++) {
+        float* ele = hist.ptr<float>(i);
+        float diff = std::abs(ele[0] - cutoff);
+        if (diff < minThre) {
+            minThre = diff;
+            idx = i;
+        }
+    }
+    double threshT = double(idx) / 256.0;
+    cv::Mat BW = L > threshT;
+    BW = BW & mask;
+    int numPix = std::round((1e-4) * BW.rows * BW.cols);
+    numPix = std::max(numPix, 30);
+    std::vector<std::vector<cv::Point>> contours;
+    std::vector<cv::Vec4i> hierarchy;
+    cv::findContours(BW, contours, hierarchy, cv::RETR_LIST, cv::CHAIN_APPROX_NONE);
+    contours.erase(remove_if(contours.begin(), contours.end(),
+                             [&](const std::vector<cv::Point>& c) { return cv::contourArea(c) < (double)numPix; }),
+                   contours.end());
+    BW.setTo(0);
+    drawContours(BW, contours, -1, cv::Scalar(255), cv::FILLED);
+    // straight line. i.e, lane
+    std::vector<cv::Vec4f> plines;
+    cv::HoughLinesP(BW, plines, 1, CV_PI / 180, 10, 10, 60);
     lines.clear();
-    for (size_t i = 0; i < mat_lines_struct.size(1); i++) {
-        detectLaneMarkerRidge::struct0_T currLine = mat_lines_struct[i];
+    for (size_t i = 0; i < plines.size(); i++) {
+        cv::Vec4f currLine = plines[i];
         cv::line_descriptor::KeyLine kl;
-        kl.startPointX = currLine.point1[0];
-        kl.startPointY = currLine.point1[1];
-        kl.endPointX = currLine.point2[0];
-        kl.endPointY = currLine.point2[1];
-        kl.sPointInOctaveX = currLine.point1[0];
-        kl.sPointInOctaveY = currLine.point1[1];
-        kl.ePointInOctaveX = currLine.point2[0];
-        kl.ePointInOctaveY = currLine.point2[1];
-        kl.lineLength = (float)sqrt(pow(currLine.point1[0] - currLine.point2[0], 2) +
-                                    pow(currLine.point1[1] - currLine.point2[1], 2));
-        cv::LineIterator li(grayImage, cv::Point2f(currLine.point1[0], currLine.point1[1]),
-                            cv::Point2f(currLine.point2[0], currLine.point2[1]));
+        kl.startPointX = currLine[0];
+        kl.startPointY = currLine[1];
+        kl.endPointX = currLine[2];
+        kl.endPointY = currLine[3];
+        kl.sPointInOctaveX = currLine[0];
+        kl.sPointInOctaveY = currLine[1];
+        kl.ePointInOctaveX = currLine[2];
+        kl.ePointInOctaveY = currLine[3];
+        kl.lineLength = (float)sqrt(pow(currLine[0] - currLine[2], 2) +
+                                    pow(currLine[1] - currLine[3], 2));
+        cv::LineIterator li(grayImage, cv::Point2f(currLine[0], currLine[1]),
+                            cv::Point2f(currLine[2], currLine[3]));
         kl.numOfPixels = li.count;
 
         kl.angle = atan2((kl.endPointY - kl.startPointY), (kl.endPointX - kl.startPointX));
@@ -1024,5 +1059,4 @@ void buildMapping::HDMapping::detectLanes(cv::Mat& grayImage, std::vector<cv::li
         kl.pt = cv::Point2f((kl.endPointX + kl.startPointX) / 2, (kl.endPointY + kl.startPointY) / 2);
         lines.push_back(kl);
     }
-    detectLaneMarkerRidge::detectLaneMarkerRidge_terminate();
 }

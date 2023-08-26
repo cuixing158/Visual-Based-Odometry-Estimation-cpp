@@ -24,9 +24,6 @@
 // current loop
 #include "poseGraphOptimize.h"
 
-// lanes
-#include "detectLaneMarkerRidge.h"
-
 // cereal header files
 #include "cereal/archives/portable_binary.hpp"
 #include "cereal/archives/json.hpp"

@@ -19,7 +19,6 @@ add_subdirectory(ThirdParty/rigidTform2d)
 add_subdirectory(ThirdParty/selectUniform2)
 add_subdirectory(ThirdParty/slamMapGraph2D)
 add_subdirectory(ThirdParty/poseGraphOptimize)
-add_subdirectory(ThirdParty/detectLanes)
 
 
 add_executable(rigidTform2d ThirdParty/rigidTform2d/examples/main.cpp)
@@ -44,14 +43,12 @@ ThirdParty/rigidTform2d
 ThirdParty/selectUniform2
 ThirdParty/slamMapGraph2D
 ThirdParty/poseGraphOptimize
-ThirdParty/detectLanes
 DBOW3/src
 DBOW3)
 target_link_libraries(main PRIVATE ${OpenCV_LIBS}  
 selectUniform2
 slamMapGraph2D
 poseGraphOptimize
-detectLaneMarkerRidge
 estimateAffineRigid2D
 m)
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR:${CMAKE_CURRENT_SOURCE_DIR}")
