@@ -22,10 +22,10 @@ int main(int, char **) {
     std::string imagePath = "/opt_disk2/rd22946/AllDataAndModels/from_tongwenchao/116_new_undistort/116";  // /opt_disk2/rd22946/AllDataAndModels/from_tongwenchao/116_new_undistort/116";  //"/opt_disk2/rd22946/AllDataAndModels/from_tongwenchao/map_R_new_undistort/map_R";
     std::vector<std::string> imagePaths;
     size_t numImgs = getFullNames(filesystem::path(imagePath), imagePaths, ".jpg");
-    std::sort(imagePaths.begin(), imagePaths.end(),
-              [](std::string p1, std::string p2) { return atoi(filesystem::path(p1).filenameNoExt().substr(6).c_str()) < atoi(filesystem::path(p2).filenameNoExt().substr(6).c_str()); });
     // std::sort(imagePaths.begin(), imagePaths.end(),
-    //           [](std::string p1, std::string p2) { return atoi(filesystem::path(p1).filenameNoExt().c_str()) < atoi(filesystem::path(p2).filenameNoExt().c_str()); });
+    //           [](std::string p1, std::string p2) { return atoi(filesystem::path(p1).filenameNoExt().substr(6).c_str()) < atoi(filesystem::path(p2).filenameNoExt().substr(6).c_str()); });
+    std::sort(imagePaths.begin(), imagePaths.end(),
+              [](std::string p1, std::string p2) { return atoi(filesystem::path(p1).filenameNoExt().c_str()) < atoi(filesystem::path(p2).filenameNoExt().c_str()); });
     std::ofstream fid("imageFilesList.txt");
 
     buildMapping::HDMapping obj;

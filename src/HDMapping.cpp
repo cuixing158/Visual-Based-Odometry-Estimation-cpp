@@ -122,6 +122,16 @@ buildMapping::HDMapping::buildMapStatus buildMapping::HDMapping::constructWorldM
 
     printf("compute Elapsed second Time:%.6f\n", (cv::getTickCount() - t1) * 1.0 / cv::getTickFrequency());
 
+    // detect lanes
+    t1 = cv::getTickCount();
+    std::vector<cv::line_descriptor::KeyLine> lines;
+    detectLanes(currImg, lines);
+    printf("detectLanes Elapsed second Time:%.6f\n",
+           (cv::getTickCount() - t1) * 1.0 / cv::getTickFrequency());
+    cv::Mat outImg1;
+    cv::line_descriptor::drawKeylines(currImg, lines, outImg1, cv::Scalar(0, 0, 255));
+    cv::imwrite("keyline.jpg", outImg1);
+
     t1 = cv::getTickCount();
     if (m_method == buildMapping::HDMapping::matchFeatureMethod::HYBRID_FEATURES) {
         double t2 = cv::getTickCount();
@@ -965,4 +975,54 @@ void buildMapping::HDMapping::optimizePoseGraph(cv::Mat& loopIDpairs, std::vecto
                                  m_initViclePtPose);
     }
     poseGraphOptimize::poseGraphOptimize_terminate();
+}
+
+void buildMapping::HDMapping::detectLanes(cv::Mat& grayImage, std::vector<cv::line_descriptor::KeyLine>& lines) {
+    if (grayImage.channels() == 3) {
+        cv::cvtColor(grayImage, grayImage, cv::COLOR_BGR2GRAY);
+    }
+
+    coder::array<detectLaneMarkerRidge::struct0_T, 2U> mat_lines_struct;
+    coder::array<unsigned char, 2U> bevImage_tmp, mask_tmp;
+    double approxLaneWidthPixels_tmp = 4;
+    double sensitive = 0.25;
+
+    bevImage_tmp.set_size(grayImage.rows, grayImage.cols);
+    convertCVToMatrix(grayImage, grayImage.rows, grayImage.cols, grayImage.channels(), bevImage_tmp.data());
+
+    cv::Mat mask = cv::Mat::ones(grayImage.rows, grayImage.cols, CV_8UC1);
+    mask_tmp.set_size(grayImage.rows, grayImage.cols);
+    convertCVToMatrix(mask, mask.rows, mask.cols, mask.channels(), mask_tmp.data());
+
+    detectLaneMarkerRidge::detectLaneMarkerRidge(
+        bevImage_tmp, approxLaneWidthPixels_tmp, mask_tmp,
+        sensitive, mat_lines_struct);
+
+    lines.clear();
+    for (size_t i = 0; i < mat_lines_struct.size(1); i++) {
+        detectLaneMarkerRidge::struct0_T currLine = mat_lines_struct[i];
+        cv::line_descriptor::KeyLine kl;
+        kl.startPointX = currLine.point1[0];
+        kl.startPointY = currLine.point1[1];
+        kl.endPointX = currLine.point2[0];
+        kl.endPointY = currLine.point2[1];
+        kl.sPointInOctaveX = currLine.point1[0];
+        kl.sPointInOctaveY = currLine.point1[1];
+        kl.ePointInOctaveX = currLine.point2[0];
+        kl.ePointInOctaveY = currLine.point2[1];
+        kl.lineLength = (float)sqrt(pow(currLine.point1[0] - currLine.point2[0], 2) +
+                                    pow(currLine.point1[1] - currLine.point2[1], 2));
+        cv::LineIterator li(grayImage, cv::Point2f(currLine.point1[0], currLine.point1[1]),
+                            cv::Point2f(currLine.point2[0], currLine.point2[1]));
+        kl.numOfPixels = li.count;
+
+        kl.angle = atan2((kl.endPointY - kl.startPointY), (kl.endPointX - kl.startPointX));
+        kl.class_id = i;  // or zero ?
+        kl.octave = 0;
+        kl.size = (kl.endPointX - kl.startPointX) * (kl.endPointY - kl.startPointY);
+        kl.response = kl.lineLength / std::max(grayImage.cols, grayImage.rows);
+        kl.pt = cv::Point2f((kl.endPointX + kl.startPointX) / 2, (kl.endPointY + kl.startPointY) / 2);
+        lines.push_back(kl);
+    }
+    detectLaneMarkerRidge::detectLaneMarkerRidge_terminate();
 }

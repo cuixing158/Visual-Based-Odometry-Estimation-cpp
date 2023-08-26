@@ -15,10 +15,11 @@ if(NOT OpenCV_FOUND)
     message(FATAL_ERROR "Opencv3.x not found...nothing will be built.")
 endif()
 
-#  add_subdirectory(ThirdParty/rigidTform2d)
-# add_subdirectory(ThirdParty/selectUniform2)
+add_subdirectory(ThirdParty/rigidTform2d)
+add_subdirectory(ThirdParty/selectUniform2)
 add_subdirectory(ThirdParty/slamMapGraph2D)
 add_subdirectory(ThirdParty/poseGraphOptimize)
+add_subdirectory(ThirdParty/detectLanes)
 
 
 add_executable(rigidTform2d ThirdParty/rigidTform2d/examples/main.cpp)
@@ -43,13 +44,16 @@ ThirdParty/rigidTform2d
 ThirdParty/selectUniform2
 ThirdParty/slamMapGraph2D
 ThirdParty/poseGraphOptimize
+ThirdParty/detectLanes
 DBOW3/src
 DBOW3)
 target_link_libraries(main PRIVATE ${OpenCV_LIBS}  
-${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/selectUniform2/build/selectUniform2.so 
+selectUniform2
 slamMapGraph2D
 poseGraphOptimize
-${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/rigidTform2d/build/estimateAffineRigid2D.so m)
+detectLaneMarkerRidge
+estimateAffineRigid2D
+m)
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR:${CMAKE_CURRENT_SOURCE_DIR}")
 
 # add_executable(selectUniform2 ThirdParty/selectUniform2/examples/main.cpp)

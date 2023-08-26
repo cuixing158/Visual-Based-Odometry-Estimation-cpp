@@ -3,7 +3,7 @@
 # Product type: static library
 ######################################################################
 cmake_minimum_required(VERSION 3.12)
-project(selectUniform2)
+# project(selectUniform2)
 if(DEFINED ENV{CMAKE_EXPORT_COMPILE_COMMANDS} AND NOT DEFINED CMAKE_EXPORT_COMPILE_COMMANDS)
     set(CMAKE_EXPORT_COMPILE_COMMANDS $ENV{CMAKE_EXPORT_COMPILE_COMMANDS})
 endif()

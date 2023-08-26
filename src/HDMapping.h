@@ -3,6 +3,7 @@
 #include <vector>
 #include <random>
 #include "opencv2/opencv.hpp"
+#include <opencv2/line_descriptor.hpp>
 #include "constructWorldMap_types.h"
 
 #include "estimateAffineRigid2D.h"
@@ -22,6 +23,9 @@
 
 // current loop
 #include "poseGraphOptimize.h"
+
+// lanes
+#include "detectLaneMarkerRidge.h"
 
 // cereal header files
 #include "cereal/archives/portable_binary.hpp"
@@ -161,6 +165,41 @@ void generateUniformPts(int nums, cv::Mat& mask, std::vector<T>& outPts) {
         }
     }
 }
+
+// 对应OpenCV的cv::Mat转MATLAB uint8类型或logical或者double图像
+template <typename T>
+void convertCVToMatrix(const cv::Mat& srcImg, int rows, int cols, int channels, T* dst) {
+    size_t elems = rows * cols;
+    if (channels == 3) {
+        cv::Mat channels[3];
+        cv::split(srcImg.t(), channels);
+
+        memcpy(dst, channels[2].data, elems * sizeof(T));              //copy channel[2] to the red channel
+        memcpy(dst + elems, channels[1].data, elems * sizeof(T));      // green
+        memcpy(dst + 2 * elems, channels[0].data, elems * sizeof(T));  // blue
+    } else {
+        cv::Mat dstImg = srcImg.t();
+        memcpy(dst, dstImg.data, elems * sizeof(T));
+    }
+}
+
+// 对应MATLAB uint8类型或者logical图像转cv::Mat，图像在内存中连续
+template <typename T>
+void convertToMatContinues(const T* inImg, int rows, int cols, int channels, cv::Mat& matBigImg) {
+    size_t elems = (size_t)rows * cols;
+    T* array = (T*)inImg;
+    if (channels == 3) {
+        cv::Mat matR = cv::Mat(cols, rows, CV_8UC1, array);  //inImg在内存中必须连续
+        cv::Mat matG = cv::Mat(cols, rows, CV_8UC1, array + elems);
+        cv::Mat matB = cv::Mat(cols, rows, CV_8UC1, array + 2 * elems);
+        std::vector<cv::Mat> matBGR = {matB.t(), matG.t(), matR.t()};
+        cv::merge(matBGR, matBigImg);
+    } else {
+        matBigImg = cv::Mat(cols, rows, CV_8UC1, (T*)inImg);
+        matBigImg = matBigImg.t();
+    }
+}
+
 class HDMapping {
    public:
     typedef enum { ORB_FEATURES,
@@ -212,6 +251,8 @@ class HDMapping {
     void estiTform(std::vector<cv::Point2f>& prePoints, std::vector<cv::Point2f>& currPoints, cv::Mat& tform2x3, cv::Mat& inliers, int& status);
 
     void fuseOptimizeHDMap(std::string imageFilesList, std::vector<cv::Vec3d>& updateNodeVehiclePtPoses);
+
+    void detectLanes(cv::Mat& grayImage, std::vector<cv::line_descriptor::KeyLine>& lines);
 
     // loop
     std::vector<imageKptsAndFeatures> m_points_features;
