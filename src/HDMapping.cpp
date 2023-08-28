@@ -129,7 +129,8 @@ buildMapping::HDMapping::buildMapStatus buildMapping::HDMapping::constructWorldM
     printf("detectLanes Elapsed second Time:%.6f\n",
            (cv::getTickCount() - t1) * 1.0 / cv::getTickFrequency());
     cv::Mat outImg1;
-    cv::line_descriptor::drawKeylines(currImg, lines, outImg1, cv::Scalar(0, 0, 255));
+    cv::cvtColor(currImg, outImg1, cv::COLOR_GRAY2BGR);
+    cv::line_descriptor::drawKeylines(outImg1, lines, outImg1, cv::Scalar(0, 255, 0));
     cv::imwrite("keyline.jpg", outImg1);
 
     t1 = cv::getTickCount();
@@ -996,7 +997,7 @@ void buildMapping::HDMapping::detectLanes(cv::Mat& grayImage, std::vector<cv::li
     cv::Mat Ileft = Ipad.colRange(0, oriCols);
     cv::Mat Iright = Ipad.colRange(2 * (approxLaneWidthPixels + 1), Ipad.cols);
     cv::Mat L = 2 * oriImageF - (Ileft + Iright) - cv::abs(Ileft - Iright);
-    cv::normalize(L, L, 1.0, 0.0, cv::NormTypes::NORM_MINMAX);
+    cv::normalize(L, L, 0.0, 1.0, cv::NormTypes::NORM_MINMAX);
     double thresh = 1 - sensitive;
     double T = thresh / 10 + 0.9;  // map range [0.9,1]
     double cutoff = T * L.rows * L.cols;
@@ -1006,33 +1007,32 @@ void buildMapping::HDMapping::detectLanes(cv::Mat& grayImage, std::vector<cv::li
     const int histSize[] = {256};
     float pranges[] = {0, 1};
     const float* ranges[] = {pranges};
-    calcHist(&L, 1, channels, cv::Mat(), hist, dims, histSize, ranges, true, true);
-    size_t idx;
-    float minThre = L.rows * L.cols;
-    for (size_t i = 0; i < hist.rows; i++) {
-        float* ele = hist.ptr<float>(i);
-        float diff = std::abs(ele[0] - cutoff);
-        if (diff < minThre) {
-            minThre = diff;
-            idx = i;
-        }
+    calcHist(&L, 1, channels, cv::Mat(), hist, dims, histSize, ranges, true, false);
+    cv::Mat accumulatedHist = hist.clone();
+    for (int i = 1; i < histSize[0]; i++) {
+        float* pre = accumulatedHist.ptr<float>(i - 1);
+        float* curr = accumulatedHist.ptr<float>(i);
+        curr[0] += pre[0];
     }
+    std::vector<float> vecAc = convertMat2Vector<float>(accumulatedHist);
+    auto idx = std::upper_bound(vecAc.begin(), vecAc.end(), cutoff) - vecAc.begin();
+
     double threshT = double(idx) / 256.0;
     cv::Mat BW = L > threshT;
     BW = BW & mask;
+
     int numPix = std::round((1e-4) * BW.rows * BW.cols);
     numPix = std::max(numPix, 30);
     std::vector<std::vector<cv::Point>> contours;
     std::vector<cv::Vec4i> hierarchy;
-    cv::findContours(BW, contours, hierarchy, cv::RETR_LIST, cv::CHAIN_APPROX_NONE);
+    cv::findContours(BW, contours, hierarchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_NONE);
     contours.erase(remove_if(contours.begin(), contours.end(),
                              [&](const std::vector<cv::Point>& c) { return cv::contourArea(c) < (double)numPix; }),
                    contours.end());
     BW.setTo(0);
-    drawContours(BW, contours, -1, cv::Scalar(255), cv::FILLED);
-    // straight line. i.e, lane
+    cv::drawContours(BW, contours, -1, cv::Scalar(255), cv::FILLED);
     std::vector<cv::Vec4f> plines;
-    cv::HoughLinesP(BW, plines, 1, CV_PI / 180, 10, 10, 60);
+    cv::HoughLinesP(BW, plines, 1, CV_PI / 180, 150, 10, 60);
     lines.clear();
     for (size_t i = 0; i < plines.size(); i++) {
         cv::Vec4f currLine = plines[i];
