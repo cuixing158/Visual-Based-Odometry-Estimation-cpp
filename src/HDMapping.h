@@ -4,6 +4,7 @@
 #include <random>
 #include "opencv2/opencv.hpp"
 #include <opencv2/line_descriptor.hpp>
+#include <opencv2/features2d.hpp>
 #include "constructWorldMap_types.h"
 
 #include "estimateAffineRigid2D.h"
@@ -242,6 +243,10 @@ class HDMapping {
     //
     cv::Ptr<cv::Feature2D> m_orbDetector;
     matchFeatureMethod m_method;
+    cv::Ptr<cv::line_descriptor::BinaryDescriptor> m_bd;
+    std::vector<cv::line_descriptor::KeyLine> m_preLines, m_currLines;
+    cv::Mat m_preLineDescriptors, m_currLineDescriptors;
+
     void selectUniformPoints(std::vector<cv::KeyPoint>& keyPoints, int numRetPoints,
                              cv::Size size, std::vector<cv::KeyPoint>& outputPts, std::vector<int>& indexs);
 

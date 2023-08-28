@@ -38,6 +38,9 @@ buildMapping::HDMapping::HDMapping() {
     m_orbDetector = cv::ORB::create(307200);
     m_preViclePtPose = m_initViclePtPose;
 
+    // lane track
+    m_bd = cv::line_descriptor::BinaryDescriptor::createBinaryDescriptor();
+
     // loop
     // m_pg.init(10000, 5000);
 };
@@ -124,14 +127,39 @@ buildMapping::HDMapping::buildMapStatus buildMapping::HDMapping::constructWorldM
 
     // detect lanes
     t1 = cv::getTickCount();
-    std::vector<cv::line_descriptor::KeyLine> lines;
-    detectLanes(currImg, lines);
+    detectLanes(currImg, m_currLines);
+    m_bd->compute(currImg, m_currLines, m_currLineDescriptors);
+    if (m_preLineDescriptors.empty()) {
+        m_preLines = m_currLines;
+        m_preLineDescriptors = m_currLineDescriptors;
+    }
+    cv::Ptr<cv::line_descriptor::BinaryDescriptorMatcher> bdm = cv::line_descriptor::BinaryDescriptorMatcher::createBinaryDescriptorMatcher();
+    // std::vector<std::vector<cv::DMatch>> line_matches;
+    // bdm->radiusMatch(m_currLineDescriptors, m_preLineDescriptors, line_matches, 30);
+    std::vector<cv::DMatch> line_matches;
+    bdm->match(m_currLineDescriptors, m_preLineDescriptors, line_matches);
+
+    /* 筛选高精度匹配点对 */
+    std::vector<cv::DMatch> good_matches;
+    for (int i = 0; i < (int)line_matches.size(); i++) {
+        if (line_matches[i].distance < 20)
+            good_matches.push_back(line_matches[i]);
+    }
+
+    /* plot matches */
+    cv::Mat lsd_outImg, img1, img2;
+    std::vector<char> lsd_mask(good_matches.size(), 1);
+    cv::cvtColor(m_prevImg, img1, cv::COLOR_GRAY2BGR);
+    cv::cvtColor(currImg, img2, cv::COLOR_GRAY2BGR);
+    cv::line_descriptor::drawLineMatches(img1, m_preLines, img2, m_currLines, good_matches,
+                                         lsd_outImg, cv::Scalar::all(-1), cv::Scalar::all(-1), lsd_mask, cv::line_descriptor::DrawLinesMatchesFlags::DEFAULT);
     printf("detectLanes Elapsed second Time:%.6f\n",
            (cv::getTickCount() - t1) * 1.0 / cv::getTickFrequency());
-    cv::Mat outImg1;
-    cv::cvtColor(currImg, outImg1, cv::COLOR_GRAY2BGR);
-    cv::line_descriptor::drawKeylines(outImg1, lines, outImg1, cv::Scalar(0, 255, 0));
-    cv::imwrite("keyline.jpg", outImg1);
+    cv::imwrite("Lane_track.jpg", lsd_outImg);
+    // cv::Mat outImg1;
+    // cv::cvtColor(currImg, outImg1, cv::COLOR_GRAY2BGR);
+    // cv::line_descriptor::drawKeylines(outImg1, m_currLines, outImg1, cv::Scalar(0, 255, 0));
+    // cv::imwrite("keyline.jpg", outImg1);
 
     t1 = cv::getTickCount();
     if (m_method == buildMapping::HDMapping::matchFeatureMethod::HYBRID_FEATURES) {
@@ -468,6 +496,8 @@ buildMapping::HDMapping::buildMapStatus buildMapping::HDMapping::constructWorldM
     m_previousImgPose = currImgPose;
     m_preRelTform = m_relTform;
     m_preViclePtPose = currVehiclePtPose;
+    m_preLines = m_currLines;
+    m_preLineDescriptors = m_currLineDescriptors.clone();
 
     num++;
     printf("BUILDMAP Elapsed second Time:%.6f\n\n", (cv::getTickCount() - t1) * 1.0 / cv::getTickFrequency());
