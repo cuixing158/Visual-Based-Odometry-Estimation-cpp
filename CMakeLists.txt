@@ -27,7 +27,7 @@ ThirdParty/rigidTform2d
 ThirdParty/rigidTform2d/examples/main.h)
 target_link_libraries(rigidTform2d PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/rigidTform2d/build/estimateAffineRigid2D.so m)
 
-add_executable(main main.c
+add_executable(main main.cpp
 external.cpp
 src/HDMapping.cpp
 ${PROJECT_SOURCE_DIR}/DBOW3/src/BowVector.cpp

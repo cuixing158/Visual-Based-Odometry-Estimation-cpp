@@ -22,7 +22,7 @@ void matConvertToYUV() {}
 
 void YUVConvertToMat(const char* yuvImageFile, unsigned char* image_data) {
     FILE* fp = fopen(yuvImageFile, "rb");
-    unsigned char image_data[480 * 640];
+    // unsigned char image_data[480 * 640];
     fread(image_data, sizeof(unsigned char), 480 * 640, fp);
     fclose(fp);
 }
@@ -46,7 +46,8 @@ int main(int, char**) {
         fid << imagePaths[i] << std::endl;
         // cv::Mat srcImage = cv::imread(imagePaths[i]);
         cv::Mat srcImage = cv::Mat::zeros(480, 640, CV_8UC1);
-        YUVConvertToMat(char(imagePaths[i]), srcImage.data);
+        const char* imgYUVpath = imagePaths[i].c_str();
+        YUVConvertToMat(imgYUVpath, srcImage.data);
         if (i == 1159) {
             flag = true;
         }
