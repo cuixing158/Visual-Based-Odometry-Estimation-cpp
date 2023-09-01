@@ -87,7 +87,7 @@ buildMapping::HDMapping::buildMapStatus buildMapping::HDMapping::constructWorldM
     }
     static size_t num = 0;
 
-    cv::Mat currImg = srcImage;
+    cv::Mat currImg = srcImage.clone();
     if (currImg.channels() == 3)
         cv::cvtColor(currImg, currImg, cv::COLOR_BGR2GRAY);
 
