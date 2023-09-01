@@ -90,7 +90,7 @@ buildMapping::HDMapping::buildMapStatus buildMapping::HDMapping::constructWorldM
     }
     static size_t num = 0;
 
-    cv::Mat currImg = srcImage;
+    cv::Mat currImg = srcImage.clone();
     if (currImg.channels() == 3)
         cv::cvtColor(currImg, currImg, cv::COLOR_BGR2GRAY);
 
@@ -139,6 +139,7 @@ buildMapping::HDMapping::buildMapStatus buildMapping::HDMapping::constructWorldM
     std::vector<cv::DMatch> line_matches;
     bdm->match(m_currLineDescriptors, m_preLineDescriptors, line_matches);
 
+待参考https:  //blog.csdn.net/weixin_43821376/article/details/104990667 换个匹配器看看？
     /* 筛选高精度匹配点对 */
     std::vector<cv::DMatch> good_matches;
     for (int i = 0; i < (int)line_matches.size(); i++) {
