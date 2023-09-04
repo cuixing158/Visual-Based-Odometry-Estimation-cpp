@@ -1,10 +1,8 @@
 #include "external.h"
 #include "stdio.h"
+#include <stdlib.h>
 
-#define SRC_PATH "/opt_disk2/rd22946/vscode_work/python_works/mytest/test"
-
-extern void maping_world(int width, int height, unsigned char *image_data, char flag);
-extern void init_map_src();
+#define SRC_PATH "/home/linzhiqiang/D/buildMapping_CPP/map_R_new_undistort/yuvImage/test"
 
 void main() {
     unsigned char *image_data = (unsigned char *)malloc((640 * 480));

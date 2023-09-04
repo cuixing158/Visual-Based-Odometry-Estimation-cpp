@@ -6,7 +6,7 @@ extern "C" {
 #endif
 
 extern void maping_world(int width, int height, unsigned char* image_data, char flag);
-extern void init_map_src();
+void init_map_src();
 
 #ifdef __cplusplus
 };

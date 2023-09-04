@@ -14,24 +14,15 @@ extern "C" {
 static buildMapping::HDMapping obj;
 
 void maping_world(int width, int height, unsigned char* image_data, char flag) {
-    static int num = 0;
-    num++;
     cv::Mat srcImage(width, height, CV_8UC1, image_data);
-    if (num == 100) {
-        cv::imwrite("test.jpg", srcImage);
-    }
-    if (num == 200) {
-        cv::imwrite("test1.jpg", srcImage);
-    }
-    if (num == 300) {
-        cv::imwrite("test2.jpg", srcImage);
-    }
+    cv::imshow("show", srcImage);
+    cv::waitKey(1);
     buildMapping::HDMapping::buildMapStatus statusB = buildMapping::HDMapping::buildMapStatus::BUILD_MAP_PROCESSING;
     statusB = obj.constructWorldMap(srcImage, flag);
 }
 
 void init_map_src() {
-    std::string imagePath = "/opt_disk2/rd22946/AllDataAndModels/from_tongwenchao/map_R_new_undistort/map_R";  // /opt_disk2/rd22946/AllDataAndModels/from_tongwenchao/116_new_undistort/116";  //"/opt_disk2/rd22946/AllDataAndModels/from_tongwenchao/map_R_new_undistort/map_R";
+    std::string imagePath = "/home/linzhiqiang/D/buildMapping_CPP/map_R_new_undistort/map_R";  // /opt_disk2/rd22946/AllDataAndModels/from_tongwenchao/116_new_undistort/116";  //"/opt_disk2/rd22946/AllDataAndModels/from_tongwenchao/map_R_new_undistort/map_R";
     std::vector<std::string> imagePaths;
     size_t numImgs = getFullNames(filesystem::path(imagePath), imagePaths, ".jpg");
     std::sort(imagePaths.begin(), imagePaths.end(),
