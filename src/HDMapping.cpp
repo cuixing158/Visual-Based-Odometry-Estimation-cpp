@@ -131,32 +131,43 @@ buildMapping::HDMapping::buildMapStatus buildMapping::HDMapping::constructWorldM
     m_bd->compute(currImg, m_currLines, m_currLineDescriptors);
     if (m_preLineDescriptors.empty()) {
         m_preLines = m_currLines;
-        m_preLineDescriptors = m_currLineDescriptors;
+        m_preLineDescriptors = m_currLineDescriptors.clone();
     }
+    // 匹配器匹配策略，筛选高精度匹配线
+    std::vector<cv::DMatch> good_matches;
+#if 0
     cv::Ptr<cv::line_descriptor::BinaryDescriptorMatcher> bdm = cv::line_descriptor::BinaryDescriptorMatcher::createBinaryDescriptorMatcher();
-    // std::vector<std::vector<cv::DMatch>> line_matches;
     // bdm->radiusMatch(m_currLineDescriptors, m_preLineDescriptors, line_matches, 30);
     std::vector<cv::DMatch> line_matches;
-    bdm->match(m_currLineDescriptors, m_preLineDescriptors, line_matches);
-
-    //待参考https:  //blog.csdn.net/weixin_43821376/article/details/104990667 换个匹配器看看？
-    /* 筛选高精度匹配点对 */
-    std::vector<cv::DMatch> good_matches;
+    bdm->match(m_preLineDescriptors, m_currLineDescriptors, line_matches);
     for (int i = 0; i < (int)line_matches.size(); i++) {
         if (line_matches[i].distance < 20)
             good_matches.push_back(line_matches[i]);
     }
+#else
+    std::vector<std::vector<cv::DMatch>> lmatches;
+    cv::BFMatcher bfm = cv::BFMatcher(cv::NORM_HAMMING, false);
+    bfm.knnMatch(m_preLineDescriptors, m_currLineDescriptors, lmatches, 2);
+    for (size_t i = 0; i < lmatches.size(); i++) {
+        const cv::DMatch& bestMatch = lmatches[i][0];
+        const cv::DMatch& betterMatch = lmatches[i][1];
+        float distanceRatio = bestMatch.distance / betterMatch.distance;
+        if ((distanceRatio < 0.7) || (bestMatch.distance < 20))
+            good_matches.push_back(bestMatch);
+    }
+#endif
+    printf("Detect And match lanes Elapsed second Time:%.6f\n",
+           (cv::getTickCount() - t1) * 1.0 / cv::getTickFrequency());
 
     /* plot matches */
-    cv::Mat lsd_outImg, img1, img2;
-    std::vector<char> lsd_mask(good_matches.size(), 1);
-    cv::cvtColor(m_prevImg, img1, cv::COLOR_GRAY2BGR);
-    cv::cvtColor(currImg, img2, cv::COLOR_GRAY2BGR);
-    cv::line_descriptor::drawLineMatches(img1, m_preLines, img2, m_currLines, good_matches,
-                                         lsd_outImg, cv::Scalar::all(-1), cv::Scalar::all(-1), lsd_mask, cv::line_descriptor::DrawLinesMatchesFlags::DEFAULT);
-    printf("detectLanes Elapsed second Time:%.6f\n",
-           (cv::getTickCount() - t1) * 1.0 / cv::getTickFrequency());
-    cv::imwrite("Lane_track.jpg", lsd_outImg);
+    // cv::Mat lsd_outImg, img1, img2;
+    // std::vector<char> lsd_mask(good_matches.size(), 1);
+    // cv::cvtColor(m_prevImg, img1, cv::COLOR_GRAY2BGR);
+    // cv::cvtColor(currImg, img2, cv::COLOR_GRAY2BGR);
+    // cv::line_descriptor::drawLineMatches(img1, m_preLines, img2, m_currLines, good_matches,
+    //                                      lsd_outImg, cv::Scalar::all(-1), cv::Scalar::all(-1), lsd_mask, cv::line_descriptor::DrawLinesMatchesFlags::DEFAULT);
+
+    // cv::imwrite("Lane_track" + std::to_string(num) + ".jpg", lsd_outImg);
     // cv::Mat outImg1;
     // cv::cvtColor(currImg, outImg1, cv::COLOR_GRAY2BGR);
     // cv::line_descriptor::drawKeylines(outImg1, m_currLines, outImg1, cv::Scalar(0, 255, 0));
