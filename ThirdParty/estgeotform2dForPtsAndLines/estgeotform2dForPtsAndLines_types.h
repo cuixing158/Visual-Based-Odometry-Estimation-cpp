@@ -1,0 +1,6 @@
+#ifndef ESTGEOTFORM2DFORPTSANDLINES_TYPES_H
+#define ESTGEOTFORM2DFORPTSANDLINES_TYPES_H
+
+#include "rtwtypes.h"
+
+#endif

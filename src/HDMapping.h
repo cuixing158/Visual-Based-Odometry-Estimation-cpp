@@ -8,6 +8,7 @@
 #include "constructWorldMap_types.h"
 
 #include "estimateAffineRigid2D.h"
+#include "estgeotform2dForPtsAndLines.h"
 #include "selectUniform2.h"
 #include "coder_array.h"
 

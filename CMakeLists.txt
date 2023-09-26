@@ -19,7 +19,7 @@ add_subdirectory(ThirdParty/rigidTform2d)
 add_subdirectory(ThirdParty/selectUniform2)
 add_subdirectory(ThirdParty/slamMapGraph2D)
 add_subdirectory(ThirdParty/poseGraphOptimize)
-
+add_subdirectory(ThirdParty/estgeotform2dForPtsAndLines)
 
 add_executable(rigidTform2d ThirdParty/rigidTform2d/examples/main.cpp)
 target_include_directories(rigidTform2d PRIVATE  
@@ -52,6 +52,7 @@ selectUniform2
 slamMapGraph2D
 poseGraphOptimize
 estimateAffineRigid2D
+estgeotform2dForPtsAndLines
 m)
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR:${CMAKE_CURRENT_SOURCE_DIR}")
 
