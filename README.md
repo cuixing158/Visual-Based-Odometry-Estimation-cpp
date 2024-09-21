@@ -15,6 +15,17 @@ Complier
 
 - C++ Compiler (e.g., GCC, Clang, or MSVC)
 
+## How to use
+
+```bash
+git clone --recurse-submodules https://github.com/cuixing158/Visual-Based-Odometry-Estimation-cpp.git
+cd Visual-Based-Odometry-Estimation-cpp
+mkdir build  
+cd build
+cmake ..
+make
+```
+
 ## Demonstration
 
 Loop closure detection and optimization result：

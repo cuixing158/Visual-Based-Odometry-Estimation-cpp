@@ -14,7 +14,7 @@ void myfun(cv::Mat& out) {
 }
 
 int main(int argc, char** argv) {
-    std::string imagePath = "/opt_disk2/rd22946/AllDataAndModels/from_tongwenchao/map_R_new_undistort/map_R";  // opt_disk2/rd22946/AllDataAndModels/from_tongwenchao/116_new_undistort/116";  //"/opt_disk2/rd22946/AllDataAndModels/from_tongwenchao/map_R_new_undistort/map_R";
+    std::string imagePath = "your_real_world_bev_images";  // download url, https://github.com/cuixing158/Visual-Based-Odometry-Estimation-cpp/releases/tag/v1.0.0
     std::vector<std::string> imagePaths;
     size_t numImgs = getFullNames(filesystem::path(imagePath), imagePaths, ".jpg");
     // std::sort(imagePaths.begin(), imagePaths.end(),
