@@ -1,56 +1,22 @@
 
-# 2D SLAM C++程序
+# Visual-Based-Odometry-Estimation-cpp
 
-[2023-07-11](date:"ymd") 崔星星首次记录
+Used to reproduce the project [matlab_repo](https://github.com/cuixing158/Visual-Based-Odometry-Estimation2) into C++ code. The input and output results can ensure consistent execution results. Supported on platforms such as TI/Windows/Linux.
 
-最新修改于[2023-08-16](date:"ymd")
-
->用于复现此项目分支[matlab_branch](http://autogit.long-horn.com:3000/algorithm_Dev/buildMapping)的C++工程代码,输入输出结果可以保证达到一致的运行结果。支持在Ti/win/linux等平台运行。
+用于复现仓库[matlab_repo](https://github.com/cuixing158/Visual-Based-Odometry-Estimation2)的C++工程代码,输入输出结果可以保证达到一致的运行结果。支持在Ti/win/linux等平台运行。
 
 ## Requirements
 
-- OpenCV 3.x
+Open C++ Library:
 
-- C++ 11 support compiler
+- OpenCV 3/4.x（Open Source Computer Vision Library）
 
-无特定平台和编译器要求。
+Complier
 
-## 部署更新记录
+- C++ Compiler (e.g., GCC, Clang, or MSVC)
 
-- 2023.7.21 初始建图版本，速度较5月份快2倍，效果明显较好！
+## Demonstration
 
-对于新的地下停车场数据集的一段约长217m建图对比如下：
+Loop closure detection and optimization result：
 
-<table style="border:0px">
-   <tr>
-       <td><img src="images/ori_sum_inliers_3_exportGraphic.jpg" frame=void rules=none><br>
-        <div style="color:orange; border-bottom: 1px solid #d9d9d9;
-        display: inline-block;
-        color: #999;
-        padding: 2px;">以前仅建图无闭环</div></td>
-       <td><img src="images/bigImgCopy_KLT.jpg" frame=void rules=none><br>
-        <div style="color:orange; border-bottom: 1px solid #d9d9d9;
-        display: inline-block;
-        color: #999;
-        padding: 2px;">目前仅建图无闭环</div></td>
-   </tr>
-</table>
-
-对于我司园区地图没有回环优化的情况下，建图结果也近似“完美”(之前没有回环情况下偏差非常大，呈五边形)：
-<table style="border:0px">
-   <tr>
-       <td><img src="images/bigImgCopy1.jpg" frame=void rules=none><br>
-        <div style="color:orange; border-bottom: 1px solid #d9d9d9;
-        display: inline-block;
-        color: #999;
-        padding: 2px;">目前单次闭环优化前</div></td>
-       <td><img src="images/bigImgCopyFuseOptimize.jpg" frame=void rules=none><br>
-        <div style="color:orange; border-bottom: 1px solid #d9d9d9;
-        display: inline-block;
-        color: #999;
-        padding: 2px;">目前单次闭环优化后</div></td>
-   </tr>
-</table>
-
-另外即使“建图”步骤良好的情况下，地面结构太相似(分数达到0.24)，容易造成错误的闭环检测，从而干扰姿态图优化，比如下面这对图像太相似造成闭环检测错误，**后果是严重影响后续HDmap构建**。
-![loop wrong](images/wrongLoop.jpg)
+![Result](images/bigImgCopy1.jpg)

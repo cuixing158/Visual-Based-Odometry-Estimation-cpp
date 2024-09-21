@@ -3,10 +3,10 @@
 /// @target         : Texas Instruments->C6000
 /// @details        : pose graph algorithms
 /// @author         : cuixingxing
-/// @email          : xingxing.cui@long-horn.com
+/// @email          : cuixingxing150@gmail.com
 /// @date           : 26-Jul-2023 07:45:22
 /// @version        : V0.1.0
-/// @copyright      : Copyright (C) 2023 Long-Horn Inc.All rights reserved.
+/// @copyright      : Copyright (C) 2023 TheMatrix Inc.All rights reserved.
 ///
 
 #ifndef SVD_H
@@ -24,8 +24,8 @@ namespace internal {
 void svd(const double A[9], double U[9], double s[3], double V[9]);
 
 }
-} // namespace coder
-} // namespace SlamGraph2D
+}  // namespace coder
+}  // namespace SlamGraph2D
 
 #endif
 ///

@@ -3,10 +3,10 @@
 /// @target         : Texas Instruments->C6000
 /// @details        : pose graph algorithms
 /// @author         : cuixingxing
-/// @email          : xingxing.cui@long-horn.com
+/// @email          : cuixingxing150@gmail.com
 /// @date           : 26-Jul-2023 07:45:22
 /// @version        : V0.1.0
-/// @copyright      : Copyright (C) 2023 Long-Horn Inc.All rights reserved.
+/// @copyright      : Copyright (C) 2023 TheMatrix Inc.All rights reserved.
 ///
 
 // Abstract:
@@ -20,9 +20,8 @@
 //  Abstract:
 // Initialize rtNaN needed by the generated code.
 //  NaN is initialized as non-signaling. Assumes IEEE.
-real_T rtGetNaN(void)
-{
-  return rtNaN;
+real_T rtGetNaN(void) {
+    return rtNaN;
 }
 
 // Function: rtGetNaNF
@@ -30,9 +29,8 @@ real_T rtGetNaN(void)
 //  Abstract:
 //  Initialize rtNaNF needed by the generated code.
 //  NaN is initialized as non-signaling. Assumes IEEE
-real32_T rtGetNaNF(void)
-{
-  return rtNaNF;
+real32_T rtGetNaNF(void) {
+    return rtNaNF;
 }
 
 ///

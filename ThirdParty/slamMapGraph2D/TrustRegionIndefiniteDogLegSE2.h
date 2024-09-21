@@ -3,10 +3,10 @@
 /// @target         : Texas Instruments->C6000
 /// @details        : pose graph algorithms
 /// @author         : cuixingxing
-/// @email          : xingxing.cui@long-horn.com
+/// @email          : cuixingxing150@gmail.com
 /// @date           : 26-Jul-2023 07:45:22
 /// @version        : V0.1.0
-/// @copyright      : Copyright (C) 2023 Long-Horn Inc.All rights reserved.
+/// @copyright      : Copyright (C) 2023 TheMatrix Inc.All rights reserved.
 ///
 
 #ifndef TRUSTREGIONINDEFINITEDOGLEGSE2_H
@@ -31,12 +31,12 @@ namespace internal {
 class BlockMatrix;
 
 }
-} // namespace core
-} // namespace robotics
+}  // namespace core
+}  // namespace robotics
 class sparse;
 
-} // namespace coder
-} // namespace SlamGraph2D
+}  // namespace coder
+}  // namespace SlamGraph2D
 
 /// Type Definitions
 namespace SlamGraph2D {
@@ -45,39 +45,39 @@ namespace robotics {
 namespace core {
 namespace internal {
 class TrustRegionIndefiniteDogLegSE2 {
-public:
-  double solve(myGraph *aInstancePtr, const ::coder::array<double, 2U> &seed,
-               BlockMatrix &iobj_0, BlockMatrix **xSol, sparse &hess,
-               double &solutionInfo_Error, double &solutionInfo_ExitFlag);
-  bool computeBasicSteps(const ::coder::array<double, 1U> &grad,
-                         const sparse &B, ::coder::array<double, 1U> &stepSD,
-                         ::coder::array<double, 1U> &stepGN) const;
+   public:
+    double solve(myGraph *aInstancePtr, const ::coder::array<double, 2U> &seed,
+                 BlockMatrix &iobj_0, BlockMatrix **xSol, sparse &hess,
+                 double &solutionInfo_Error, double &solutionInfo_ExitFlag);
+    bool computeBasicSteps(const ::coder::array<double, 1U> &grad,
+                           const sparse &B, ::coder::array<double, 1U> &stepSD,
+                           ::coder::array<double, 1U> &stepGN) const;
 
-protected:
-  void incrementX(const ::coder::array<double, 2U> &x,
-                  const ::coder::array<double, 1U> &epsilons,
-                  ::coder::array<double, 2U> &xNew) const;
+   protected:
+    void incrementX(const ::coder::array<double, 2U> &x,
+                    const ::coder::array<double, 1U> &epsilons,
+                    ::coder::array<double, 2U> &xNew) const;
 
-public:
-  b_struct_T ExtraArgs;
-  double MaxNumIteration;
-  double MaxTime;
-  ::coder::array<double, 2U> SeedInternal;
-  double MaxTimeInternal;
-  double MaxNumIterationInternal;
-  double StepTolerance;
-  SystemTimeProvider TimeObj;
-  double GradientTolerance;
-  double FunctionTolerance;
-  double InitialTrustRegionRadius;
-  double TrustRegionRadiusTolerance;
+   public:
+    b_struct_T ExtraArgs;
+    double MaxNumIteration;
+    double MaxTime;
+    ::coder::array<double, 2U> SeedInternal;
+    double MaxTimeInternal;
+    double MaxNumIterationInternal;
+    double StepTolerance;
+    SystemTimeProvider TimeObj;
+    double GradientTolerance;
+    double FunctionTolerance;
+    double InitialTrustRegionRadius;
+    double TrustRegionRadiusTolerance;
 };
 
-} // namespace internal
-} // namespace core
-} // namespace robotics
-} // namespace coder
-} // namespace SlamGraph2D
+}  // namespace internal
+}  // namespace core
+}  // namespace robotics
+}  // namespace coder
+}  // namespace SlamGraph2D
 
 #endif
 ///

@@ -3,10 +3,10 @@
 /// @target         : Texas Instruments->C6000
 /// @details        : pose graph algorithms
 /// @author         : cuixingxing
-/// @email          : xingxing.cui@long-horn.com
+/// @email          : cuixingxing150@gmail.com
 /// @date           : 26-Jul-2023 07:45:22
 /// @version        : V0.1.0
-/// @copyright      : Copyright (C) 2023 Long-Horn Inc.All rights reserved.
+/// @copyright      : Copyright (C) 2023 TheMatrix Inc.All rights reserved.
 ///
 
 /*************************************************************************/
@@ -55,14 +55,13 @@ static SlamGraph2D::struct0_T argInit_struct0_T();
 /// @param          : double result[3]
 /// @return         : void
 ///
-static void argInit_1x3_real_T(double result[3])
-{
-  // Loop over the array to initialize each element.
-  for (int idx1{0}; idx1 < 3; idx1++) {
-    // Set the value of the array element.
-    // Change this value to the value that the application requires.
-    result[idx1] = argInit_real_T();
-  }
+static void argInit_1x3_real_T(double result[3]) {
+    // Loop over the array to initialize each element.
+    for (int idx1{0}; idx1 < 3; idx1++) {
+        // Set the value of the array element.
+        // Change this value to the value that the application requires.
+        result[idx1] = argInit_real_T();
+    }
 }
 
 ///
@@ -71,9 +70,8 @@ static void argInit_1x3_real_T(double result[3])
 /// @param          : void
 /// @return         : double
 ///
-static double argInit_real_T()
-{
-  return 0.0;
+static double argInit_real_T() {
+    return 0.0;
 }
 
 ///
@@ -82,16 +80,15 @@ static double argInit_real_T()
 /// @param          : void
 /// @return         : SlamGraph2D::struct0_T
 ///
-static SlamGraph2D::struct0_T argInit_struct0_T()
-{
-  SlamGraph2D::struct0_T result;
-  double result_tmp;
-  // Set the value of each structure field.
-  // Change this value to the value that the application requires.
-  result_tmp = argInit_real_T();
-  result.MaxNumNodes = result_tmp;
-  result.MaxNumEdges = result_tmp;
-  return result;
+static SlamGraph2D::struct0_T argInit_struct0_T() {
+    SlamGraph2D::struct0_T result;
+    double result_tmp;
+    // Set the value of each structure field.
+    // Change this value to the value that the application requires.
+    result_tmp = argInit_real_T();
+    result.MaxNumNodes = result_tmp;
+    result.MaxNumEdges = result_tmp;
+    return result;
 }
 
 ///
@@ -101,15 +98,14 @@ static SlamGraph2D::struct0_T argInit_struct0_T()
 ///                   char **argv
 /// @return         : int
 ///
-int main(int, char **)
-{
-  SlamGraph2D::myGraph *classInstance;
-  classInstance = new SlamGraph2D::myGraph;
-  // Invoke the entry-point functions.
-  // You can call entry-point functions multiple times.
-  main_slamMapGraph2D(classInstance);
-  delete classInstance;
-  return 0;
+int main(int, char **) {
+    SlamGraph2D::myGraph *classInstance;
+    classInstance = new SlamGraph2D::myGraph;
+    // Invoke the entry-point functions.
+    // You can call entry-point functions multiple times.
+    main_slamMapGraph2D(classInstance);
+    delete classInstance;
+    return 0;
 }
 
 ///
@@ -118,22 +114,21 @@ int main(int, char **)
 /// @param          : SlamGraph2D::myGraph *instancePtr
 /// @return         : void
 ///
-void main_slamMapGraph2D(SlamGraph2D::myGraph *instancePtr)
-{
-  coder::array<double, 2U> poses1;
-  SlamGraph2D::struct0_T r;
-  double measurement_tmp[3];
-  double fromID_tmp;
-  // Initialize function 'slamMapGraph2D' input arguments.
-  // Initialize function input argument 'poseParams'.
-  // Initialize function input argument 'measurement'.
-  argInit_1x3_real_T(measurement_tmp);
-  fromID_tmp = argInit_real_T();
-  // Initialize function input argument 'guesspose'.
-  // Call the entry-point 'slamMapGraph2D'.
-  r = argInit_struct0_T();
-  instancePtr->slamMapGraph2D(&r, measurement_tmp, fromID_tmp, fromID_tmp,
-                              measurement_tmp, poses1);
+void main_slamMapGraph2D(SlamGraph2D::myGraph *instancePtr) {
+    coder::array<double, 2U> poses1;
+    SlamGraph2D::struct0_T r;
+    double measurement_tmp[3];
+    double fromID_tmp;
+    // Initialize function 'slamMapGraph2D' input arguments.
+    // Initialize function input argument 'poseParams'.
+    // Initialize function input argument 'measurement'.
+    argInit_1x3_real_T(measurement_tmp);
+    fromID_tmp = argInit_real_T();
+    // Initialize function input argument 'guesspose'.
+    // Call the entry-point 'slamMapGraph2D'.
+    r = argInit_struct0_T();
+    instancePtr->slamMapGraph2D(&r, measurement_tmp, fromID_tmp, fromID_tmp,
+                                measurement_tmp, poses1);
 }
 
 ///

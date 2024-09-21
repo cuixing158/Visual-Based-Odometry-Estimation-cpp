@@ -3,7 +3,7 @@
  * @target         : windows or linux or mac os
  * @details        : get current timestamp string inux,Windows,MacOS
  * @author         : cuixingxing
- * @email          : xingxing.cui@long-horn.com
+ * @email          : cuixingxing150@gmail.com
  * @date           : 17-Mar-2022 12:02:52
  * @version        : V1.0.0
  * @copyright      : Copyright (C) 2022 cuixingxing.All rights reserved.

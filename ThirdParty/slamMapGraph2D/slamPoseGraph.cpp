@@ -3,10 +3,10 @@
 /// @target         : Texas Instruments->C6000
 /// @details        : pose graph algorithms
 /// @author         : cuixingxing
-/// @email          : xingxing.cui@long-horn.com
+/// @email          : cuixingxing150@gmail.com
 /// @date           : 26-Jul-2023 07:45:22
 /// @version        : V0.1.0
-/// @copyright      : Copyright (C) 2023 Long-Horn Inc.All rights reserved.
+/// @copyright      : Copyright (C) 2023 TheMatrix Inc.All rights reserved.
 ///
 
 /// @include file    : Include Files
@@ -29,9 +29,8 @@
 ///
 namespace SlamGraph2D {
 void slamPoseGraph::addRelativePose2D(const double measurement[3],
-                                      double fromNodeID, double toNodeID)
-{
-  graph->addRelativePose(measurement, fromNodeID, toNodeID);
+                                      double fromNodeID, double toNodeID) {
+    graph->addRelativePose(measurement, fromNodeID, toNodeID);
 }
 
 ///
@@ -41,16 +40,15 @@ void slamPoseGraph::addRelativePose2D(const double measurement[3],
 ///                   double MaxNumNodes
 /// @return         : slamPoseGraph *
 ///
-slamPoseGraph *slamPoseGraph::init(double MaxNumEdges, double MaxNumNodes)
-{
-  slamPoseGraph *obj;
-  ::coder::array<double, 2U> b_obj;
-  ::coder::array<double, 2U> c_obj;
-  obj = this;
-  obj->graph = obj->_pobj0.init(MaxNumEdges, MaxNumNodes);
-  obj->graph->get_LoopClosureEdgeIDs(b_obj);
-  obj->graph->get_LandmarkNodeIDs(c_obj);
-  return obj;
+slamPoseGraph *slamPoseGraph::init(double MaxNumEdges, double MaxNumNodes) {
+    slamPoseGraph *obj;
+    ::coder::array<double, 2U> b_obj;
+    ::coder::array<double, 2U> c_obj;
+    obj = this;
+    obj->graph = obj->_pobj0.init(MaxNumEdges, MaxNumNodes);
+    obj->graph->get_LoopClosureEdgeIDs(b_obj);
+    obj->graph->get_LandmarkNodeIDs(c_obj);
+    return obj;
 }
 
 ///
@@ -60,9 +58,8 @@ slamPoseGraph *slamPoseGraph::init(double MaxNumEdges, double MaxNumNodes)
 /// @return         : void
 ///
 void slamPoseGraph::nodeEstimates2D(
-    ::coder::array<double, 2U> &measurements) const
-{
-  graph->nodeEstimates(measurements);
+    ::coder::array<double, 2U> &measurements) const {
+    graph->nodeEstimates(measurements);
 }
 
 ///
@@ -75,16 +72,15 @@ void slamPoseGraph::nodeEstimates2D(
 ///
 void slamPoseGraph::optimizePoseGraph2D(
     myGraph *aInstancePtr, coder::robotics::core::internal::BlockMatrix &iobj_0,
-    coder::poseGraph &iobj_1)
-{
-  ::coder::array<double, 2U> b_obj;
-  ::coder::array<double, 2U> obj;
-  graph = coder::optimizePoseGraph(aInstancePtr, graph, (&iobj_0)[0], iobj_1);
-  graph->get_LoopClosureEdgeIDs(obj);
-  graph->get_LandmarkNodeIDs(b_obj);
+    coder::poseGraph &iobj_1) {
+    ::coder::array<double, 2U> b_obj;
+    ::coder::array<double, 2U> obj;
+    graph = coder::optimizePoseGraph(aInstancePtr, graph, (&iobj_0)[0], iobj_1);
+    graph->get_LoopClosureEdgeIDs(obj);
+    graph->get_LandmarkNodeIDs(b_obj);
 }
 
-} // namespace SlamGraph2D
+}  // namespace SlamGraph2D
 
 ///
 /// File trailer for slamPoseGraph.cpp

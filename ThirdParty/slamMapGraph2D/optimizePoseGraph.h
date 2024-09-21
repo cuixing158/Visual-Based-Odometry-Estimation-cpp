@@ -3,10 +3,10 @@
 /// @target         : Texas Instruments->C6000
 /// @details        : pose graph algorithms
 /// @author         : cuixingxing
-/// @email          : xingxing.cui@long-horn.com
+/// @email          : cuixingxing150@gmail.com
 /// @date           : 26-Jul-2023 07:45:22
 /// @version        : V0.1.0
-/// @copyright      : Copyright (C) 2023 Long-Horn Inc.All rights reserved.
+/// @copyright      : Copyright (C) 2023 TheMatrix Inc.All rights reserved.
 ///
 
 #ifndef OPTIMIZEPOSEGRAPH_H
@@ -30,10 +30,10 @@ namespace internal {
 class BlockMatrix;
 
 }
-} // namespace core
-} // namespace robotics
-} // namespace coder
-} // namespace SlamGraph2D
+}  // namespace core
+}  // namespace robotics
+}  // namespace coder
+}  // namespace SlamGraph2D
 
 /// Function Declarations
 namespace SlamGraph2D {
@@ -43,7 +43,7 @@ poseGraph *optimizePoseGraph(myGraph *aInstancePtr, poseGraph *b_poseGraph,
                              poseGraph &iobj_1);
 
 }
-} // namespace SlamGraph2D
+}  // namespace SlamGraph2D
 
 #endif
 ///

@@ -3,10 +3,10 @@
 /// @target         : Texas Instruments->C6000
 /// @details        : pose graph algorithms
 /// @author         : cuixingxing
-/// @email          : xingxing.cui@long-horn.com
+/// @email          : cuixingxing150@gmail.com
 /// @date           : 26-Jul-2023 07:45:22
 /// @version        : V0.1.0
-/// @copyright      : Copyright (C) 2023 Long-Horn Inc.All rights reserved.
+/// @copyright      : Copyright (C) 2023 TheMatrix Inc.All rights reserved.
 ///
 
 #ifndef TRUSTREGIONINDEFINITEDOGLEGINTERFACE_H
@@ -32,7 +32,7 @@ void minus(::coder::array<double, 1U> &in1,
            const ::coder::array<double, 1U> &in2,
            const ::coder::array<double, 1U> &in3);
 
-} // namespace SlamGraph2D
+}  // namespace SlamGraph2D
 
 #endif
 ///

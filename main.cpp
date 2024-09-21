@@ -3,10 +3,10 @@
 /// @target         : Texas Instruments->C6000
 /// @details        : for path build map algorithms(loop+pose)
 /// @author         : cuixingxing
-/// @email          : xingxing.cui@long-horn.com
+/// @email          : cuixingxing150@gmail.com
 /// @date           : 02-Mar-2023 10:06:28
 /// @version        : V0.1.2
-/// @copyright      : Copyright (C) 2023 Long-Horn Inc.All rights reserved.
+/// @copyright      : Copyright (C) 2023 TheMatrix Inc.All rights reserved.
 ///
 
 #include <algorithm>
