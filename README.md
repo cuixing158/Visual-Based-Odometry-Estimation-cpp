@@ -1,6 +1,8 @@
 
 # Visual-Based-Odometry-Estimation-cpp
 
+[![Sponsor](https://img.shields.io/badge/-Sponsor-red?style=for-the-badge&logo=GitHub-Sponsors&logoColor=white)](https://raw.githubusercontent.com/cuixing158/OpticalFlow-Visualization/refs/heads/main/README_media/sponsors.jpg)
+
 Used to reproduce the project [matlab_repo](https://github.com/cuixing158/Visual-Based-Odometry-Estimation2) into C++ code. The input and output results can ensure consistent execution results. Supported on platforms such as TI/Windows/Linux.
 
 用于复现仓库[matlab_repo](https://github.com/cuixing158/Visual-Based-Odometry-Estimation2)的C++工程代码,输入输出结果可以保证达到一致的运行结果。支持在Ti/win/linux等平台运行。
